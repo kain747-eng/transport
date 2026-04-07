@@ -6,6 +6,7 @@
 <title>TransPort — zarządzanie zleceniami</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -148,6 +149,9 @@ tr:hover td{background:var(--bg2);cursor:pointer}
     <div class="nav-sec">Analizy</div>
     <div class="nav" onclick="showView('raporty')">
       <svg viewBox="0 0 16 16"><path d="M2 12l4-4 3 3 5-7"/></svg>Raporty
+    </div>
+    <div class="nav" onclick="showView('rozliczenia')">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Prowizja spedytora
     </div>
     <div style="flex:1"></div>
     <div style="padding:14px 16px;border-top:1px solid var(--border)">
@@ -320,7 +324,7 @@ function showView(v) {
   document.querySelectorAll('.nav').forEach(n => {
     if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + v + "'")) n.classList.add('active');
   });
-  const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne' };
+  const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne', rozliczenia:'Prowizja spedytora' };
   document.getElementById('view-title').textContent = titles[v] || v;
   const acts = document.getElementById('topbar-actions');
   const btns = {
@@ -344,6 +348,7 @@ function renderView(v) {
   else if (v === 'dokumenty') c.innerHTML = renderDokumenty();
   else if (v === 'raporty')   c.innerHTML = renderRaporty();
   else if (v === 'podwykonawcy') c.innerHTML = renderPodwykonawcy();
+  else if (v === 'rozliczenia') c.innerHTML = renderRozliczenia();
 }
 
 // ── VIEWS ─────────────────────────────────────────────────
@@ -479,13 +484,21 @@ function renderDokumenty() {
 }
 
 function renderRaporty() {
-  const prz = orders.filter(o=>o.status!=='Anulowane').reduce((s,o)=>s+(+o.fracht||0),0);
+  const przychodyWgR = {};
+  orders.filter(o=>o.status!=='Anulowane').forEach(o => {
+    const w = o.waluta || 'PLN';
+    przychodyWgR[w] = (przychodyWgR[w]||0) + (+o.fracht||0);
+  });
+  const prz = Object.values(przychodyWgR).reduce((s,v)=>s+v,0);
+  const przHtmlR = Object.entries(przychodyWgR).length
+    ? Object.entries(przychodyWgR).map(([w,v])=>`<span style="margin-right:12px"><span style="font-size:18px;font-weight:600;color:var(--green-text)">${v.toLocaleString('pl-PL')}</span> <span style="font-size:11px;color:var(--text3)">${w}</span></span>`).join('')
+    : '<span style="font-size:22px;font-weight:600">0</span>';
   const dst = orders.filter(o=>o.status==='Dostarczone').length;
   const sr  = orders.length ? Math.round(prz/orders.length) : 0;
   const eff = orders.length ? Math.round(dst/orders.length*100) : 0;
   return `
   <div class="metrics">
-    <div class="metric"><div class="metric-label">Łączny przychód</div><div class="metric-val green">${prz.toLocaleString('pl-PL')} zł</div></div>
+    <div class="metric" style="grid-column:1/-1"><div class="metric-label">Łączny przychód</div><div style="margin-top:4px">${przHtmlR}</div></div>
     <div class="metric"><div class="metric-label">Liczba zleceń</div><div class="metric-val">${orders.length}</div></div>
     <div class="metric"><div class="metric-label">Śr. fracht / zlecenie</div><div class="metric-val blue">${sr.toLocaleString('pl-PL')} zł</div></div>
     <div class="metric"><div class="metric-label">Skuteczność dostaw</div><div class="metric-val amber">${eff}%</div></div>
@@ -534,6 +547,7 @@ function openOrderModal(id=null) {
     <div class="field"><label>Data załadunku</label><input type="date" id="f-zaladunek" value="${o.data_zaladunek||''}"></div>
     <div class="field"><label>Data dostawy</label><input type="date" id="f-dostawa" value="${o.data_dostawa||''}"></div>
     <div class="field"><label>Fracht</label><input type="number" id="f-fracht" value="${o.fracht||''}" placeholder="0"></div>
+    <div class="field"><label>Kilometry (km)</label><input type="number" id="f-km" value="${o.kilometry||''}" placeholder="0"></div>
     <div class="field"><label>Waluta</label><select id="f-waluta">${'PLN,EUR,USD,GBP,CZK,HUF,RON,NOK,SEK,DKK,CHF'.split(',').map(w=>`<option ${(o.waluta||'PLN')===w?'selected':''}>${w}</option>`).join('')}</select></div>
     <div class="field"><label>Nr ref. klienta</label><input id="f-ref" value="${o.ref||''}" placeholder="opcjonalnie"></div>
     <div class="field full"><label>Uwagi</label><textarea id="f-uwagi">${o.uwagi||''}</textarea></div>
@@ -569,6 +583,7 @@ async function saveOrder() {
     data_zaladunek: document.getElementById('f-zaladunek').value || null,
     data_dostawa:   document.getElementById('f-dostawa').value || null,
     fracht:         parseFloat(document.getElementById('f-fracht').value) || 0,
+    kilometry:      parseFloat(document.getElementById('f-km').value) || 0,
     waluta:         (document.getElementById('f-waluta')||{value:'PLN'}).value,
     ref:            document.getElementById('f-ref').value.trim(),
     uwagi:          document.getElementById('f-uwagi').value.trim(),
@@ -1015,7 +1030,7 @@ function renderPodwykonawcy() {
       <td>${p.skad_data||'-'}</td>
       <td>${(+p.fracht||0).toLocaleString('pl-PL')} ${p.waluta||'EUR'}</td>
       <td><span class="badge ${STATUS_MAP[p.status]||'b-gray'}">${p.status}</span></td>
-      <td><button class="btn btn-sm" onclick="event.stopPropagation();exportPodwPDF('${p.id}')">PDF</button></td>
+      <td><button class="btn btn-sm" onclick="event.stopPropagation();printPodwHTML('${p.id}')">PDF</button></td>
     </tr>`).join('')}</tbody>
   </table></div></div>`;
 }
@@ -1047,6 +1062,7 @@ function openPodwModal(id=null) {
     <div class="field"><label>Godziny rozładunku</label><input id="pw-dokad-godz" value="${p.dokad_godz||''}" placeholder="ASAP do 16:00"></div>
     <div class="field full" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px"><label style="font-size:12px;font-weight:600;color:var(--text)">Wynagrodzenie</label></div>
     <div class="field"><label>Fracht netto</label><input type="number" id="pw-fracht" value="${p.fracht||''}" placeholder="0"></div>
+    <div class="field"><label>Kilometry (km)</label><input type="number" id="pw-km" value="${p.kilometry||''}" placeholder="0"></div>
     <div class="field"><label>Waluta</label><select id="pw-waluta">${'PLN,EUR,USD,GBP'.split(',').map(w=>`<option ${(p.waluta||'EUR')===w?'selected':''}>${w}</option>`).join('')}</select></div>
     <div class="field"><label>Termin płatności (dni)</label><input type="number" id="pw-platnosc" value="${p.platnosc_dni||30}"></div>
     <div class="field"><label>Referencje</label><input id="pw-ref" value="${p.referencje||''}" placeholder="opcjonalnie"></div>
@@ -1082,6 +1098,7 @@ async function savePodw() {
     dokad_data:          document.getElementById('pw-dokad-data').value||null,
     dokad_godz:          document.getElementById('pw-dokad-godz').value.trim(),
     fracht:              parseFloat(document.getElementById('pw-fracht').value)||0,
+    kilometry:           parseFloat(document.getElementById('pw-km').value)||0,
     waluta:              document.getElementById('pw-waluta').value,
     platnosc_dni:        parseInt(document.getElementById('pw-platnosc').value)||30,
     referencje:          document.getElementById('pw-ref').value.trim(),
@@ -1110,7 +1127,6 @@ function exportPodwPDF(id) {
   const doc = new jsPDF({ unit:'mm', format:'a4' });
   const W=210, L=20, R=190, TW=170;
 
-  // Polish characters transliteration map
   function pl(s){
     return (s||'').toString()
       .replace(/ą/g,'a').replace(/Ą/g,'A')
@@ -1314,6 +1330,206 @@ function exportPodwPDF(id) {
 
   doc.save('zlecenie-'+(p.numer||'').replace(/\//g,'-')+'.pdf');
   showToast('PDF wygenerowany');
+}
+
+// ── PROWIZJA SPEDYTORA ──────────────────────────────────────
+function calcProwizja(fracht, km, waluta) {
+  if (!km || km <= 0) return null;
+  const stawka = fracht / km;
+  const prog = 1.3;
+  let prowizja = 0;
+  let opis = '';
+
+  if (stawka <= prog) {
+    prowizja = fracht * 0.04;
+    opis = `${fracht.toFixed(2)} ${waluta} × 4% = ${prowizja.toFixed(2)} ${waluta}`;
+  } else {
+    const bazowa = km * prog;
+    const nadwyzka = fracht - bazowa;
+    const pBazowa = bazowa * 0.04;
+    const pNadwyzka = nadwyzka / 2;
+    prowizja = pBazowa + pNadwyzka;
+    opis = `${km} km × 1.3 = ${bazowa.toFixed(2)} ${waluta} (4% = ${pBazowa.toFixed(2)}) + nadwyżka ${nadwyzka.toFixed(2)} ${waluta} ÷ 2 = ${pNadwyzka.toFixed(2)} ${waluta}`;
+  }
+  return { stawka, prowizja, opis };
+}
+
+function renderRozliczenia() {
+  const zlWithKm = [...orders, ...podw].filter(o => o.kilometry > 0 && o.fracht > 0 && o.status !== 'Anulowane');
+
+  if (!zlWithKm.length) return `
+    <div class="card">
+      <div class="card-title">Prowizja spedytora</div>
+      <div class="empty">Brak zleceń z podanymi kilometrami. Dodaj kilometry do zleceń aby wyliczyć prowizję.</div>
+    </div>`;
+
+  // Summary
+  let totalProwizja = {};
+  zlWithKm.forEach(o => {
+    const w = o.waluta || 'EUR';
+    const r = calcProwizja(+o.fracht, +o.kilometry, w);
+    if (r) totalProwizja[w] = (totalProwizja[w]||0) + r.prowizja;
+  });
+
+  const summaryHtml = Object.entries(totalProwizja).map(([w,v]) =>
+    `<div class="metric">
+      <div class="metric-label">Prowizja łączna (${w})</div>
+      <div class="metric-val amber">${v.toFixed(2)} ${w}</div>
+    </div>`
+  ).join('');
+
+  const rowsHtml = zlWithKm.map(o => {
+    const w = o.waluta || 'EUR';
+    const r = calcProwizja(+o.fracht, +o.kilometry, w);
+    if (!r) return '';
+    const prog = r.stawka <= 1.3;
+    return `<tr>
+      <td style="font-family:monospace;font-size:11px;color:var(--text3)">${o.numer||o.id?.slice(0,8)||'-'}</td>
+      <td>${(o.skad||'')} → ${(o.dokad||'')}</td>
+      <td style="text-align:right">${Math.round(+o.kilometry).toLocaleString('pl-PL')} km</td>
+      <td style="text-align:right">${(+o.fracht).toLocaleString('pl-PL')} ${w}</td>
+      <td style="text-align:right">
+        <span class="badge ${prog?'b-green':'b-amber'}">${r.stawka.toFixed(2)} ${w}/km</span>
+      </td>
+      <td style="text-align:right;font-weight:500">${r.prowizja.toFixed(2)} ${w}</td>
+      <td style="font-size:11px;color:var(--text2);max-width:200px;white-space:normal">${r.opis}</td>
+    </tr>`;
+  }).join('');
+
+  return `
+  <div style="margin-bottom:16px">
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px;padding:10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)">
+      <strong>Zasady prowizji:</strong> do 1.3 ${' '}/km → 4% całego frachtu &nbsp;|&nbsp; powyżej 1.3/km → (km × 1.3) × 4% + nadwyżka ÷ 2
+    </div>
+  </div>
+  <div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-bottom:16px">
+    ${summaryHtml}
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto"><table>
+      <thead><tr>
+        <th style="width:100px">Nr zlecenia</th>
+        <th>Trasa</th>
+        <th style="width:80px;text-align:right">km</th>
+        <th style="width:90px;text-align:right">Fracht</th>
+        <th style="width:90px;text-align:right">Stawka/km</th>
+        <th style="width:90px;text-align:right">Prowizja</th>
+        <th style="width:220px">Obliczenie</th>
+      </tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table></div>
+  </div>`;
+}
+
+function printPodwHTML(id) {
+  const p = id ? podw.find(x=>x.id===id) : null;
+  if (!p) return;
+  const f = (+p.fracht||0).toLocaleString('pl-PL');
+  const w = p.waluta||'EUR';
+  const win = window.open('','_blank','width=900,height=700');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Zlecenie ${p.numer||''}</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:15mm 20mm}
+    .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5mm}
+    .logo{font-size:24pt;font-weight:bold;line-height:1}
+    .logo small{font-size:8pt;font-weight:normal;display:block;color:#666}
+    .title{text-align:center;margin:5mm 0}
+    .title h1{font-size:14pt}
+    .title h2{font-size:12pt}
+    hr{border:1px solid #111;margin:3mm 0}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin:4mm 0}
+    .box{border:1px solid #aaa;padding:3mm}
+    .box-header{font-weight:bold;font-size:8pt;border-bottom:1px solid #aaa;margin-bottom:2mm;padding-bottom:1mm}
+    .trasa-header{background:#f0f0f0;text-align:center;font-weight:bold;padding:2mm;border:1px solid #aaa;font-size:10pt}
+    .section-title{font-weight:bold;font-size:10pt;margin:4mm 0 2mm}
+    .podpisy{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-top:10mm}
+    .podpis{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#666}
+    p{margin:1mm 0;line-height:1.4}
+    @media print{body{padding:0} button{display:none}}
+  </style></head><body>
+  <button onclick="window.print()" style="position:fixed;top:10px;right:10px;padding:8px 16px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Drukuj / Zapisz PDF</button>
+  <div class="header">
+    <div class="logo">LTE <small>LOGISTIC<br>Sp. z o.o.</small></div>
+    <div style="text-align:right;font-size:8pt;color:#666">Data wystawienia: ${new Date().toLocaleDateString('pl-PL')}</div>
+  </div>
+  <div class="title">
+    <h1>ZLECENIE TRANSPORTOWE</h1>
+    <h2>${p.numer||''}</h2>
+  </div>
+  <hr>
+  <div class="two-col">
+    <div class="box">
+      <div class="box-header">ZLECENIODAWCA :</div>
+      <p><strong>LTE LOGISTIC SP. Z O.O.</strong></p>
+      <p>KIELECKA 41A/8</p>
+      <p>PL 02-530 WARSZAWA</p>
+      <p>VAT ID 5213966752</p>
+    </div>
+    <div class="box">
+      <div class="box-header">ZLECENIOBIORCA :</div>
+      <p><strong>${p.zleceniobiorca_nazwa||''}</strong></p>
+      <p>${p.zleceniobiorca_adres||''}</p>
+      <p>${p.zleceniobiorca_nip?'Nip:'+p.zleceniobiorca_nip:''}</p>
+    </div>
+  </div>
+  ${p.auto?`<p><strong>NUMERY AUTA :</strong> ${p.auto}</p>`:''}
+  ${p.kierowca?`<p><strong>KIEROWCA:</strong> ${p.kierowca}${p.kierowca_tel?' tel: '+p.kierowca_tel:''}</p>`:''}
+  <div style="margin:4mm 0">
+    <div class="trasa-header">DANE DOTYCZĄCE ZAŁADUNKU/ROZŁADUNKU:</div>
+    <div class="two-col" style="margin:0">
+      <div class="box" style="border-top:none">
+        <p><strong>ZAŁADUNEK ${p.skad_data||''} ${p.skad_godz||''}</strong></p>
+        <p>${p.skad||''}</p>
+        <p>${p.skad_adres||''}</p>
+        ${p.referencje?`<p style="color:#666">Referencje: ${p.referencje}</p>`:''}
+      </div>
+      <div class="box" style="border-top:none">
+        <p><strong>ROZŁADUNEK ${p.dokad_data||''} ${p.dokad_godz||''}</strong></p>
+        <p>${p.dokad||''}</p>
+        <p>${p.dokad_adres||''}</p>
+      </div>
+    </div>
+  </div>
+  ${p.uwagi?`<p style="margin:3mm 0">${p.uwagi}</p>`:''}
+  <hr style="margin:4mm 0">
+  <p class="section-title">Warunki Finansowe</p>
+  <p>• Cena All In Netto: <strong>${f} ${w}</strong> + 23% VAT</p>
+  <p>• Termin płatności: ${p.platnosc_dni||30} dni po otrzymaniu kompletu dokumentów pocztą.</p>
+  <p class="section-title">Ogólne warunki zlecenia</p>
+  <p>Dane do korespondencji: LTE LOGISTIC, UL. SŁOWACKIEGO 11, 62-700 TUREK, NIP: PL5213966752</p>
+  <p>Dane do fakturowania: LTE LOGISTIC SPÓŁKA Z OGRANICZONĄ ODPOWIEDZIALNOŚCIĄ, Kielecka 41A/8, 02-530 Warszawa, NIP: PL5213966752</p>
+  <p style="margin-top:2mm">SKONTO - Skonto należy uwzględnić jako RABAT na fakturze. Faktura musi zawierać pierwotną wartość frachtu.<br>
+  3-5 dni od otrzymania oryginałów pocztą = 3%. SKONTO MOŻLIWE TYLKO PO WCZEŚNIEJSZYM POTWIERDZENIU DROGĄ MAILOWĄ.</p>
+  <p class="section-title">INFORMACJE NA TEMAT PŁATNOŚCI:</p>
+  <p>1. Fakturę (EUR i PLN) należy wystawić w miesiącu wykonania usługi (miesiąc rozładunku). Podatek VAT i fracht EUR przeliczyć na PLN wg kursu NBP z dnia poprzedzającego rozładunek. PROSIMY NIE WYSTAWIAĆ FAKTUR ZBIORCZYCH!!</p>
+  <p>2. Forma płatności PRZELEW w terminie ${p.platnosc_dni||30} dni od prawidłowo wystawionej faktury z kompletem dokumentów. Po rozładunku wymagane zdjęcie CMR na mail z numerem zlecenia w temacie. Brak zdjęcia = nota obciążeniowa do 50 EUR.</p>
+  <p style="margin-top:2mm"><strong>WARUNEK PŁATNOŚCI - komplet dokumentów:</strong></p>
+  <p>- oryginał faktury z numerem zlecenia, wystawionej w dwóch walutach (EUR i PLN);</p>
+  <p>- 2 egzemplarze CMR z pieczątką, podpisami i datami potwierdzającymi nadanie i odbiór ładunku;</p>
+  <p>- inne dokumenty dołączone do transportu (lieferschein, packing list itp.);</p>
+  <p>- wypełniony dokument ATTESTATION.</p>
+  <p>3. LTE Logistic zastrzega sobie prawo wstrzymania płatności w przypadku uszkodzeń lub uchybień w ilości towaru.</p>
+  <p class="section-title">Warunki wykonania zlecenia:</p>
+  <p>1. Zleceniobiorca oświadcza, że posiada aktualną polisę OC Przewoźnika/OC Spedytora, licencję transportową oraz wszystkie niezbędne zezwolenia.</p>
+  <p>2. Brak odmowy w ciągu 30 minut od zlecenia = przyjęcie do realizacji. Rezygnacja po 30 min: kara do 100% frachtu.</p>
+  <p>3. Informowanie o pozycji pojazdu na żądanie Zleceniodawcy.</p>
+  <p>4. Informacja o braku możliwości wykonania zlecenia co najmniej 12h przed załadunkiem.</p>
+  <p>5. Czas wolny: 24h kraj, 48h zagranica (bez dni wolnych). Postoje wpisać w CMR. Za granicą: 50/75/100 EUR, PL: 100/150/200 PLN.</p>
+  <p>6. Kontrola ilości i rozmieszczenia towaru; zabezpieczenie przed przemieszczaniem. Uszkodzenia odnotować w CMR polu 18.</p>
+  <p>7. Zakaz dodatkowego załadunku bez pisemnej zgody LTE Logistic (kara min. 500 EUR).</p>
+  <p>8. Zakaz kontaktowania się z załadowcą/rozładowcą bez zgody LTE Logistic (kara min. 300 EUR).</p>
+  <p>9. Zakaz umów bezpośrednio z nadawcą/odbiorcą przez 24 miesiące po zakończeniu współpracy (kara 50 000 PLN).</p>
+  <p>10. Postój wyłącznie na bezpiecznych parkingach, poza obszarami leśnymi i niedostatecznie oświetlonymi.</p>
+  <p>11. Przestrzeganie przepisów o płacy minimalnej we wszystkich krajach objętych zleceniem.</p>
+  <p>12. Zleceniobiorca wyraża zgodę na przetwarzanie danych osobowych niezbędnych do realizacji zlecenia (RODO).</p>
+  <div class="podpisy">
+    <div class="podpis">Podpis zleceniodawcy / LTE Logistic<br><br>Data: _______________</div>
+    <div class="podpis">Podpis i pieczątka zleceniobiorcy<br><br>Data: _______________</div>
+  </div>
+  </body></html>`);
+  win.document.close();
 }
 </script>
 </body>
