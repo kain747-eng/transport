@@ -2250,10 +2250,16 @@ async function callClaudeWithPDF(base64, type) {
   });
   
   var data = await response.json();
-  if (data.error) throw new Error(data.error.message);
-  var text = data.content[0].text.trim();
-  // Strip markdown code blocks if present
-  text = text.replace(/^```json\n?|^```\n?|\n?```$/g, '').trim();
+  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+  var content = data.content || [];
+  var textBlock = null;
+  for (var i = 0; i < content.length; i++) {
+    if (content[i].type === 'text') { textBlock = content[i]; break; }
+  }
+  if (!textBlock && content.length > 0) textBlock = content[0];
+  if (!textBlock) throw new Error('Brak odpowiedzi AI. Sprawdz klucz API w Supabase Secrets.');
+  var text = (textBlock.text || '').trim();
+  text = text.replace(/```json/g,'').replace(/```/g,'').trim();
   return JSON.parse(text);
 }
 
