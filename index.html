@@ -6,6 +6,7 @@
 <title>TransPort — zarządzanie zleceniami</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
 <style>
@@ -1078,14 +1079,15 @@ const NOTIFY_EMAIL = ''; // wpisz swoj email np. jan@firma.pl
 const RESEND_API_KEY = ''; // wpisz klucz z resend.com
 
 // ── PDF EXPORT ─────────────────────────────────────────────
-function exportPDF(id) {
+async function exportPDF(id) {
   var o = orders.find(function(x){return x.id===id;});
   if (!o) return;
   var { jsPDF } = window.jspdf;
   var doc = new jsPDF({ unit:'mm', format:'a4' });
+  await loadPolishFont(doc);
   var W=210, L=15, R=195, TW=180;
 
-  function tx(s){
+  function tx(s){ return (s||'').toString();
     var str = (s||'').toString()
       .replace(/ą/g,'a').replace(/Ą/g,'A')
       .replace(/ć/g,'c').replace(/Ć/g,'C')
@@ -1124,7 +1126,13 @@ function exportPDF(id) {
   doc.text('TRASA', W/2, y+5, {align:'center'});
   y+=7;
 
-  doc.setDrawColor(180); doc.rect(L,y,hw,30); doc.rect(L+hw+4,y,hw,30);
+  // Calculate dynamic height for trasa box
+  doc.setFontSize(8.5); doc.setFont('helvetica','normal');
+  var slPre = o.skad ? doc.splitTextToSize(tx(o.skad),hw-6) : ['-'];
+  var dlPre = o.dokad ? doc.splitTextToSize(tx(o.dokad),hw-6) : ['-'];
+  var trasaH = Math.max(slPre.length, dlPre.length)*4.5 + 14;
+
+  doc.setDrawColor(180); doc.rect(L,y,hw,trasaH); doc.rect(L+hw+4,y,hw,trasaH);
   doc.setFillColor(235,245,255);
   doc.rect(L,y,hw,6,'F'); doc.rect(L+hw+4,y,hw,6,'F');
   doc.setTextColor(24,95,165); doc.setFontSize(8); doc.setFont('helvetica','bold');
@@ -1132,9 +1140,9 @@ function exportPDF(id) {
   doc.text('ROZLADUNEK', L+hw+7, y+4.3);
   doc.setTextColor(20,20,20); doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
   var zy=y+11, rzy=y+11;
-  if(o.skad){ var sl=doc.splitTextToSize(tx(o.skad),hw-6); doc.text(sl,L+3,zy); zy+=sl.length*4.5; }
-  if(o.dokad){ var dl=doc.splitTextToSize(tx(o.dokad),hw-6); doc.text(dl,L+hw+7,rzy); rzy+=dl.length*4.5; }
-  y+=36;
+  doc.text(slPre,L+3,zy);
+  doc.text(dlPre,L+hw+7,rzy);
+  y+=trasaH+6;
 
   // TERMINY
   doc.setFillColor(245,245,245); doc.rect(L,y,TW,7,'F');
@@ -1719,14 +1727,15 @@ function renderRozliczenia() {
   </div>`;
 }
 
-function printPodwHTML(id) {
+async function printPodwHTML(id) {
   var p = id ? podw.find(function(x){return x.id===id;}) : null;
   if (!p) return;
   var { jsPDF } = window.jspdf;
   var doc = new jsPDF({ unit:'mm', format:'a4' });
+  await loadPolishFont(doc);
   var W=210, L=15, R=195, TW=180;
 
-  function tx(s){
+  function tx(s){ return (s||'').toString();
     var str = (s||'').toString();
     // Insert zero-width space every 35 chars in words longer than 35 chars
     return str.replace(/\S{36,}/g, function(word){
@@ -1823,22 +1832,30 @@ function printPodwHTML(id) {
   y += 7;
 
   // Trasa columns
-  doc.setDrawColor(180); doc.rect(L, y, hw, 38); doc.rect(L+hw+4, y, hw, 38);
+  // Dynamic height for podw trasa
+  doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  var slP=p.skad?doc.splitTextToSize(tx(p.skad),hw-6):[]; 
+  var salP=p.skad_adres?doc.splitTextToSize(tx(p.skad_adres),hw-6):[];
+  var dlP=p.dokad?doc.splitTextToSize(tx(p.dokad),hw-6):[];
+  var dalP=p.dokad_adres?doc.splitTextToSize(tx(p.dokad_adres),hw-6):[];
+  var linesL=slP.length+salP.length+(p.referencje?1:0);
+  var linesR=dlP.length+dalP.length;
+  var trasaHP=Math.max(linesL,linesR)*4+18;
+
+  doc.setDrawColor(180); doc.rect(L, y, hw, trasaHP); doc.rect(L+hw+4, y, hw, trasaHP);
   doc.setFillColor(235,245,255);
   doc.rect(L, y, hw, 6,'F'); doc.rect(L+hw+4, y, hw, 6,'F');
   doc.setTextColor(24,95,165); doc.setFontSize(8); doc.setFont('helvetica','bold');
   doc.text('ZALADUNEK'+(p.skad_data?' '+tx(p.skad_data):'')+(p.skad_godz?' '+tx(p.skad_godz):''), L+3, y+4.3);
   doc.text('ROZLADUNEK'+(p.dokad_data?' '+tx(p.dokad_data):'')+(p.dokad_godz?' '+tx(p.dokad_godz):''), L+hw+7, y+4.3);
   doc.setTextColor(20,20,20); doc.setFont('helvetica','normal'); doc.setFontSize(8);
-
   var zy=y+11, rzy=y+11;
-  if(p.skad){ var sl=doc.splitTextToSize(tx(p.skad),hw-6); doc.text(sl,L+3,zy); zy+=sl.length*4; }
-  if(p.skad_adres){ var sal=doc.splitTextToSize(tx(p.skad_adres),hw-6); doc.text(sal,L+3,zy); zy+=sal.length*4; }
-  if(p.referencje){ doc.setTextColor(100); var rl=doc.splitTextToSize('Ref: '+tx(p.referencje),hw-6); doc.text(rl,L+3,zy); doc.setTextColor(20,20,20); }
-
-  if(p.dokad){ var dl=doc.splitTextToSize(tx(p.dokad),hw-6); doc.text(dl,L+hw+7,rzy); rzy+=dl.length*4; }
-  if(p.dokad_adres){ var dal=doc.splitTextToSize(tx(p.dokad_adres),hw-6); doc.text(dal,L+hw+7,rzy); }
-  y += 44;
+  if(slP.length){doc.text(slP,L+3,zy);zy+=slP.length*4;}
+  if(salP.length){doc.text(salP,L+3,zy);zy+=salP.length*4;}
+  if(p.referencje){doc.setTextColor(100);var rl=doc.splitTextToSize('Ref: '+tx(p.referencje),hw-6);doc.text(rl,L+3,zy);doc.setTextColor(20,20,20);}
+  if(dlP.length){doc.text(dlP,L+hw+7,rzy);rzy+=dlP.length*4;}
+  if(dalP.length){doc.text(dalP,L+hw+7,rzy);}
+  y+=trasaHP+6;
 
   // WYNAGRODZENIE
   doc.setFillColor(235,245,255); doc.rect(L,y,TW,14,'F');
@@ -2316,6 +2333,31 @@ function fillOrderForm(d) {
         }
       }
     }
+  }
+}
+
+// Load Polish-capable font for jsPDF
+var _jspdfFontLoaded = false;
+async function loadPolishFont(doc) {
+  if (_jspdfFontLoaded) {
+    doc.setFont('Roboto', 'normal');
+    return;
+  }
+  try {
+    var resp = await fetch('https://cdn.jsdelivr.net/npm/@fontsource/roboto@5/files/roboto-latin-ext-400-normal.woff');
+    if (!resp.ok) throw new Error('font load failed');
+    var buf = await resp.arrayBuffer();
+    var bytes = new Uint8Array(buf);
+    var binary = '';
+    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+    var base64 = btoa(binary);
+    doc.addFileToVFS('Roboto-Regular.ttf', base64);
+    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
+    _jspdfFontLoaded = true;
+    doc.setFont('Roboto', 'normal');
+  } catch(e) {
+    console.warn('Polish font load failed, using helvetica:', e);
+    doc.setFont('helvetica', 'normal');
   }
 }
 </script>
