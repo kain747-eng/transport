@@ -6,6 +6,7 @@
 <title>TransPort — zarządzanie zleceniami</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -511,7 +512,7 @@ function showView(v) {
   document.getElementById('view-title').textContent = titles[v] || v;
   const acts = document.getElementById('topbar-actions');
   const btns = {
-    zlecenia:  '<button class="btn btn-primary" onclick="openOrderModal()">+ Nowe zlecenie</button>',
+    zlecenia:  '<button class="btn" onclick="exportExcel()">Export Excel</button><button class="btn btn-primary" onclick="openOrderModal()">+ Nowe zlecenie</button>',
     dashboard: '<button class="btn btn-primary" onclick="openOrderModal()">+ Nowe zlecenie</button>',
     kierowcy:  '<button class="btn btn-primary" onclick="openDriverModal()">+ Kierowca</button>',
     flota:     '<button class="btn btn-primary" onclick="openCarModal()">+ Auto</button>',
@@ -2042,6 +2043,115 @@ function kalkuluj() {
 }
 
 //
+
+function exportExcel() {
+  if (!window.XLSX) { showToast('Biblioteka XLSX nie zaladowana', true); return; }
+  var wb = XLSX.utils.book_new();
+
+  // Zlecenia sheet
+  var zlData = [['Nr zlecenia','Skad','Dokad','Klient','Kierowca 1','Kierowca 2','Auto','Data zaladunku','Data dostawy','Fracht','Waluta','Kilometry','Status','Uwagi']];
+  orders.forEach(function(o) {
+    zlData.push([
+      o.numer||'',
+      o.skad||'',
+      o.dokad||'',
+      o.klient||'',
+      o.kierowca||'',
+      o.kierowca2||'',
+      o.auto||'',
+      o.data_zaladunek||'',
+      o.data_dostawa||'',
+      +o.fracht||0,
+      o.waluta||'PLN',
+      +o.kilometry||0,
+      o.status||'',
+      o.uwagi||''
+    ]);
+  });
+  var wsZl = XLSX.utils.aoa_to_sheet(zlData);
+  wsZl['!cols'] = [10,15,15,20,15,15,15,12,12,10,6,8,12,25].map(function(w){return {wch:w};});
+  XLSX.utils.book_append_sheet(wb, wsZl, 'Zlecenia');
+
+  // Podwykonawcy sheet
+  if (podw.length) {
+    var pwData = [['Nr zlecenia','Zleceniobiorca','Skad','Dokad','Data zaladunku','Data dostawy','Fracht','Waluta','Kilometry','Status']];
+    podw.forEach(function(p) {
+      pwData.push([p.numer||'',p.zleceniobiorca_nazwa||'',p.skad||'',p.dokad||'',p.skad_data||'',p.dokad_data||'',+p.fracht||0,p.waluta||'EUR',+p.kilometry||0,p.status||'']);
+    });
+    var wsPw = XLSX.utils.aoa_to_sheet(pwData);
+    XLSX.utils.book_append_sheet(wb, wsPw, 'Zlecenia zewnetrzne');
+  }
+
+  var date = new Date().toLocaleDateString('pl-PL').replace(/\./g,'-');
+  XLSX.writeFile(wb, 'zlecenia-' + date + '.xlsx');
+  showToast('Plik Excel pobrany');
+}
+
+function exportExcelRaport() {
+  if (!window.XLSX) { showToast('Biblioteka XLSX nie zaladowana', true); return; }
+  var wb = XLSX.utils.book_new();
+  var now = new Date();
+  var miesiac = now.toLocaleString('pl-PL', {month:'long', year:'numeric'});
+
+  // Summary sheet
+  var przychodyWg = {};
+  orders.filter(function(o){return o.status!=='Anulowane';}).forEach(function(o){
+    var w = o.waluta||'PLN';
+    przychodyWg[w] = (przychodyWg[w]||0) + (+o.fracht||0);
+  });
+  var sumData = [
+    ['RAPORT MIESIĘCZNY - ' + miesiac],
+    [],
+    ['Podsumowanie',''],
+    ['Liczba zlecen', orders.length],
+    ['W trasie', orders.filter(function(o){return o.status==='W trasie';}).length],
+    ['Dostarczone', orders.filter(function(o){return o.status==='Dostarczone';}).length],
+    ['Anulowane', orders.filter(function(o){return o.status==='Anulowane';}).length],
+    [],
+    ['Przychody wg waluty',''],
+  ];
+  Object.entries(przychodyWg).forEach(function(e){ sumData.push([e[0], e[1]]); });
+
+  // Prowizja spedytora
+  var totalProw = {};
+  orders.filter(function(o){return o.kilometry>0&&o.fracht>0&&o.status!=='Anulowane';}).forEach(function(o){
+    var w=o.waluta||'EUR';
+    var r=calcProwizja(+o.fracht,+o.kilometry,w);
+    if(r) totalProw[w]=(totalProw[w]||0)+r.prowizja;
+  });
+  if(Object.keys(totalProw).length){
+    sumData.push([]);
+    sumData.push(['Prowizja spedytora','']);
+    Object.entries(totalProw).forEach(function(e){ sumData.push([e[0], +e[1].toFixed(2)]); });
+  }
+
+  var wsSum = XLSX.utils.aoa_to_sheet(sumData);
+  wsSum['!cols'] = [{wch:30},{wch:15}];
+  XLSX.utils.book_append_sheet(wb, wsSum, 'Podsumowanie');
+
+  // Wszystkie zlecenia
+  var zlData = [['Nr zlecenia','Skad','Dokad','Klient','Kierowca','Auto','Data zaladunku','Data dostawy','Fracht','Waluta','km','Stawka/km','Prowizja','Status']];
+  orders.forEach(function(o){
+    var r = o.kilometry>0 ? calcProwizja(+o.fracht,+o.kilometry,o.waluta||'EUR') : null;
+    zlData.push([
+      o.numer||'', o.skad||'', o.dokad||'', o.klient||'',
+      o.kierowca||'', o.auto||'',
+      o.data_zaladunek||'', o.data_dostawa||'',
+      +o.fracht||0, o.waluta||'PLN',
+      +o.kilometry||0,
+      r ? +r.stawka.toFixed(2) : '',
+      r ? +r.prowizja.toFixed(2) : '',
+      o.status||''
+    ]);
+  });
+  var wsZl = XLSX.utils.aoa_to_sheet(zlData);
+  wsZl['!cols'] = [10,15,15,20,15,15,12,12,10,6,8,10,10,12].map(function(w){return {wch:w};});
+  XLSX.utils.book_append_sheet(wb, wsZl, 'Zlecenia');
+
+  var date = new Date().toLocaleDateString('pl-PL').replace(/\./g,'-');
+  XLSX.writeFile(wb, 'raport-' + date + '.xlsx');
+  showToast('Raport Excel pobrany');
+}
 </script>
 </body>
 </html>
