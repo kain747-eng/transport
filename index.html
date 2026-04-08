@@ -637,15 +637,72 @@ function renderKierowcy() {
 }
 
 function renderFlota() {
-  return `<div class="card" style="padding:0;overflow:hidden"><table>
-    <thead><tr><th>Rejestracja</th><th>Marka i model</th><th style="width:100px">Rok</th><th style="width:100px">Status</th><th style="width:70px">Zlecenia</th></tr></thead>
-    <tbody>${cars.map(c => {
-      const cnt = orders.filter(o => o.auto === c.rejestracja + ' — ' + c.model).length;
-      return `<tr onclick="openCarModal('${c.id}')"><td><strong>${c.rejestracja}</strong></td><td>${c.model}</td><td style="color:var(--text2)">${c.rok||'-'}</td>
-        <td><span class="badge ${c.status==='W trasie'?'b-blue':c.status==='Serwis'?'b-amber':'b-green'}">${c.status}</span></td>
-        <td>${cnt}</td></tr>`;
+  const today = new Date();
+  const warn30 = new Date(); warn30.setDate(today.getDate() + 30);
+
+  function dateStatus(dateStr) {
+    if (!dateStr) return null;
+    const d = new Date(dateStr);
+    if (d < today) return 'expired';
+    if (d <= warn30) return 'soon';
+    return 'ok';
+  }
+
+  function dateBadge(dateStr, label) {
+    if (!dateStr) return '-';
+    const s = dateStatus(dateStr);
+    const formatted = new Date(dateStr).toLocaleDateString('pl-PL');
+    if (s === 'expired') return `<span class="badge b-red">${label}: ${formatted} ⚠ PRZETERMINOWANY</span>`;
+    if (s === 'soon') return `<span class="badge b-amber">${label}: ${formatted} ⚠ wygasa wkrótce</span>`;
+    return `<span style="font-size:12px;color:var(--text2)">${formatted}</span>`;
+  }
+
+  // Alert bar for expired/soon
+  const alerts = cars.filter(c => {
+    const p = dateStatus(c.data_przegladu);
+    const u = dateStatus(c.data_ubezpieczenia);
+    return p === 'expired' || p === 'soon' || u === 'expired' || u === 'soon';
+  });
+
+  const alertHtml = alerts.length ? `
+    <div style="background:var(--color-background-warning);border:1px solid var(--color-border-warning);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--color-text-warning)">
+      <strong>Uwaga!</strong> ${alerts.map(c => {
+        const msgs = [];
+        const p = dateStatus(c.data_przegladu);
+        const u = dateStatus(c.data_ubezpieczenia);
+        if (p === 'expired') msgs.push(c.rejestracja + ': przegląd PRZETERMINOWANY');
+        else if (p === 'soon') msgs.push(c.rejestracja + ': przegląd wygasa ' + new Date(c.data_przegladu).toLocaleDateString('pl-PL'));
+        if (u === 'expired') msgs.push(c.rejestracja + ': ubezpieczenie PRZETERMINOWANE');
+        else if (u === 'soon') msgs.push(c.rejestracja + ': ubezpieczenie wygasa ' + new Date(c.data_ubezpieczenia).toLocaleDateString('pl-PL'));
+        return msgs.join(', ');
+      }).join(' &nbsp;|&nbsp; ')}
+    </div>` : '';
+
+  return alertHtml + `<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table>
+    <thead><tr>
+      <th>Rejestracja</th><th>Marka i model</th>
+      <th style="width:60px">Rok</th>
+      <th style="width:90px">Status</th>
+      <th style="width:140px">Przegląd</th>
+      <th style="width:140px">Ubezpieczenie</th>
+      <th style="width:60px">Zlecenia</th>
+    </tr></thead>
+    <tbody>${cars.map(car => {
+      const cnt = orders.filter(o => o.auto === car.rejestracja + ' — ' + car.model).length;
+      const ps = dateStatus(car.data_przegladu);
+      const us = dateStatus(car.data_ubezpieczenia);
+      const rowBg = (ps==='expired'||us==='expired') ? 'background:var(--red-bg)' : (ps==='soon'||us==='soon') ? 'background:var(--amber-bg)' : '';
+      return \`<tr onclick="openCarModal('\${car.id}')" style="\${rowBg}">
+        <td><strong>\${car.rejestracja}</strong></td>
+        <td>\${car.model}</td>
+        <td style="color:var(--text2)">\${car.rok||'-'}</td>
+        <td><span class="badge \${car.status==='W trasie'?'b-blue':car.status==='Serwis'?'b-amber':'b-green'}">\${car.status}</span></td>
+        <td>\${dateBadge(car.data_przegladu,'')}</td>
+        <td>\${dateBadge(car.data_ubezpieczenia,'')}</td>
+        <td>\${cnt}</td>
+      </tr>\`;
     }).join('')}</tbody>
-  </table>${!cars.length?'<div class="empty">Brak aut we flocie</div>':''}</div>`;
+  </table>${!cars.length?'<div class="empty">Brak aut we flocie</div>':''}</div>\`;
 }
 
 function renderDokumenty() {
@@ -898,7 +955,9 @@ function openCarModal(id=null) {
     <div class="field"><label>Marka i model</label><input id="c-model" value="${c.model||''}" placeholder="Volvo FH 500"></div>
     <div class="field"><label>Rok produkcji</label><input id="c-rok" type="number" value="${c.rok||''}" placeholder="2020"></div>
     <div class="field"><label>Status</label><select id="c-status">${['Dostępne','W trasie','Serwis'].map(s=>`<option ${c.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
-    <div class="field full"><label>Uwagi (przegląd, ubezpieczenie)</label><textarea id="c-uwagi">${c.uwagi||''}</textarea></div>
+    <div class="field"><label>Data przeglądu</label><input type="date" id="c-przeglad" value="${c.data_przegladu||''}" ></div>
+    <div class="field"><label>Data ubezpieczenia</label><input type="date" id="c-ubezp" value="${c.data_ubezpieczenia||''}" ></div>
+    <div class="field full"><label>Uwagi</label><textarea id="c-uwagi">${c.uwagi||''}</textarea></div>
   `;
   document.getElementById('modal-foot').innerHTML = `
     ${id?`<button class="btn btn-danger" onclick="deleteCar('${id}')">Usuń</button>`:''}
@@ -912,7 +971,7 @@ async function saveCar() {
   const reg   = document.getElementById('c-reg').value.trim();
   const model = document.getElementById('c-model').value.trim();
   if (!reg || !model) { showToast('Uzupełnij rejestrację i model.', true); return; }
-  const payload = { rejestracja: reg, model, rok: parseInt(document.getElementById('c-rok').value)||null, status: document.getElementById('c-status').value, uwagi: document.getElementById('c-uwagi').value.trim() };
+  const payload = { rejestracja: reg, model, rok: parseInt(document.getElementById('c-rok').value)||null, status: document.getElementById('c-status').value, uwagi: document.getElementById('c-uwagi').value.trim(), data_przegladu: document.getElementById('c-przeglad').value||null, data_ubezpieczenia: document.getElementById('c-ubezp').value||null };
   let err2;
   if (!editingId) { const r = await sb.from('flota').insert(payload); err2 = r.error; }
   else { const r = await sb.from('flota').update(payload).eq('id', editingId); err2 = r.error; }
