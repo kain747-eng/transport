@@ -645,66 +645,52 @@ function renderKierowcy() {
 function renderFlota() {
   var today = new Date();
   var warn30 = new Date(); warn30.setDate(today.getDate() + 30);
-
-  function dateStatus(dateStr) {
-    if (!dateStr) return null;
-    var d = new Date(dateStr);
+  function dateStatus(ds) {
+    if (!ds) return null;
+    var d = new Date(ds);
     if (d < today) return 'expired';
     if (d <= warn30) return 'soon';
     return 'ok';
   }
-  function dateFmt(dateStr) {
-    if (!dateStr) return '-';
-    return new Date(dateStr).toLocaleDateString('pl-PL');
-  }
-  function dateBadge(dateStr) {
-    if (!dateStr) return '-';
-    var s = dateStatus(dateStr);
-    var f = dateFmt(dateStr);
+  function dateFmt(ds) { return ds ? new Date(ds).toLocaleDateString('pl-PL') : '-'; }
+  function dateBadge(ds) {
+    if (!ds) return '-';
+    var s = dateStatus(ds), f = dateFmt(ds);
     if (s === 'expired') return '<span class="badge b-red">' + f + ' ⚠ PRZETERMINOWANY</span>';
     if (s === 'soon') return '<span class="badge b-amber">' + f + ' ⚠ wkrótce</span>';
     return '<span style="font-size:12px;color:var(--text2)">' + f + '</span>';
   }
-
   var alertHtml = '';
-  var alertCars = cars.filter(function(car) {
-    var p = dateStatus(car.data_przegladu);
-    var u = dateStatus(car.data_ubezpieczenia);
-    return p === 'expired' || p === 'soon' || u === 'expired' || u === 'soon';
+  var alertCars = cars.filter(function(x) {
+    return dateStatus(x.data_przegladu)==='expired'||dateStatus(x.data_przegladu)==='soon'||dateStatus(x.data_ubezpieczenia)==='expired'||dateStatus(x.data_ubezpieczenia)==='soon';
   });
   if (alertCars.length) {
-    var msgs = alertCars.map(function(car) {
-      var parts = [];
-      var p = dateStatus(car.data_przegladu);
-      var u = dateStatus(car.data_ubezpieczenia);
-      if (p === 'expired') parts.push(car.rejestracja + ': przegląd PRZETERMINOWANY');
-      else if (p === 'soon') parts.push(car.rejestracja + ': przegląd wygasa ' + dateFmt(car.data_przegladu));
-      if (u === 'expired') parts.push(car.rejestracja + ': ubezpieczenie PRZETERMINOWANE');
-      else if (u === 'soon') parts.push(car.rejestracja + ': ubezpieczenie wygasa ' + dateFmt(car.data_ubezpieczenia));
+    var msgs = alertCars.map(function(x) {
+      var parts=[], p=dateStatus(x.data_przegladu), u=dateStatus(x.data_ubezpieczenia);
+      if(p==='expired') parts.push(x.rejestracja+': przegląd PRZETERMINOWANY');
+      else if(p==='soon') parts.push(x.rejestracja+': przegląd '+dateFmt(x.data_przegladu));
+      if(u==='expired') parts.push(x.rejestracja+': ubezp. PRZETERMINOWANE');
+      else if(u==='soon') parts.push(x.rejestracja+': ubezp. '+dateFmt(x.data_ubezpieczenia));
       return parts.join(', ');
     }).join(' | ');
-    alertHtml = '<div style="background:var(--color-background-warning);border:1px solid var(--color-border-warning);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--color-text-warning)"><strong>Uwaga!</strong> ' + msgs + '</div>';
+    alertHtml='<div style="background:var(--color-background-warning);border:1px solid var(--color-border-warning);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--color-text-warning)"><strong>Uwaga!</strong> '+msgs+'</div>';
   }
-
-  var rows = '';
-  cars.forEach(function(car) {
-    var cnt = orders.filter(function(o) { return o.auto === car.rejestracja + ' — ' + car.model; }).length;
-    var ps = dateStatus(car.data_przegladu);
-    var us = dateStatus(car.data_ubezpieczenia);
-    var rowBg = (ps==='expired'||us==='expired') ? 'background:var(--red-bg)' : (ps==='soon'||us==='soon') ? 'background:var(--amber-bg)' : '';
-    var sb = car.status==='W trasie' ? 'b-blue' : car.status==='Serwis' ? 'b-amber' : 'b-green';
-    rows += '<tr onclick="openCarModal(\"' + car.id + '\")" style="' + rowBg + '">';
-    rows += '<td><strong>' + car.rejestracja + '</strong></td>';
-    rows += '<td>' + car.model + '</td>';
-    rows += '<td style="color:var(--text2)">' + (car.rok||'-') + '</td>';
-    rows += '<td><span class="badge ' + sb + '">' + car.status + '</span></td>';
-    rows += '<td>' + dateBadge(car.data_przegladu) + '</td>';
-    rows += '<td>' + dateBadge(car.data_ubezpieczenia) + '</td>';
-    rows += '<td>' + cnt + '</td></tr>';
-  });
-
-  var empty = !cars.length ? '<div class="empty">Brak aut we flocie</div>' : '';
-  return alertHtml + '<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Rejestracja</th><th>Marka i model</th><th style="width:60px">Rok</th><th style="width:90px">Status</th><th style="width:130px">Przegląd</th><th style="width:130px">Ubezpieczenie</th><th style="width:60px">Zlecenia</th></tr></thead><tbody>' + rows + '</tbody></table>' + empty + '</div></div>';
+  var rows='';
+  for(var i=0;i<cars.length;i++){
+    var car=cars[i];
+    var cnt=orders.filter(function(o){return o.auto===car.rejestracja+' — '+car.model;}).length;
+    var ps=dateStatus(car.data_przegladu),us=dateStatus(car.data_ubezpieczenia);
+    var rowBg=(ps==='expired'||us==='expired')?'background:var(--red-bg)':(ps==='soon'||us==='soon')?'background:var(--amber-bg)':'';
+    var sb=car.status==='W trasie'?'b-blue':car.status==='Serwis'?'b-amber':'b-green';
+    rows+='<tr data-carid="'+car.id+'" class="car-row" style="'+rowBg+'"><td><strong>'+car.rejestracja+'</strong></td><td>'+car.model+'</td><td style="color:var(--text2)">'+(car.rok||'-')+'</td><td><span class="badge '+sb+'">'+car.status+'</span></td><td>'+dateBadge(car.data_przegladu)+'</td><td>'+dateBadge(car.data_ubezpieczenia)+'</td><td>'+cnt+'</td></tr>';
+  }
+  setTimeout(function(){
+    document.querySelectorAll('.car-row').forEach(function(tr){
+      tr.style.cursor='pointer';
+      tr.addEventListener('click',function(){openCarModal(this.getAttribute('data-carid'));});
+    });
+  },0);
+  return alertHtml+'<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Rejestracja</th><th>Marka i model</th><th style="width:60px">Rok</th><th style="width:90px">Status</th><th style="width:130px">Przegląd</th><th style="width:130px">Ubezpieczenie</th><th style="width:60px">Zlecenia</th></tr></thead><tbody>'+rows+'</tbody></table>'+(!cars.length?'<div class="empty">Brak aut we flocie</div>':'')+'</div></div>';
 }
 
 function renderDokumenty() {
