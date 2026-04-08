@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>TransPort — zarządzanie zleceniami</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -21,7 +21,7 @@
   --radius:8px;--radius-lg:12px;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:14px;min-height:100vh}
-.app{display:flex;height:100vh;overflow:hidden}
+.app{display:flex;height:100vh;overflow:hidden;height:100dvh}
 .sidebar{width:200px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
 .logo{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
 .logo-title{font-size:16px;font-weight:600;color:var(--text)}
@@ -63,7 +63,7 @@ tr:hover td{background:var(--bg2);cursor:pointer}
 .b-amber{background:var(--amber-bg);color:var(--amber-text)}
 .b-gray{background:var(--gray-bg);color:var(--gray-text)}
 .b-red{background:var(--red-bg);color:var(--red-text)}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:flex-start;justify-content:center;padding-top:50px;overflow-y:auto}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:flex-start;justify-content:center;padding-top:50px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .modal-overlay.open{display:flex}
 .modal{background:var(--bg);border-radius:var(--radius-lg);border:1px solid var(--border);width:560px;max-width:95vw}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
@@ -103,6 +103,180 @@ tr:hover td{background:var(--bg2);cursor:pointer}
 .sync-indicator.offline{background:#E24B4A}
 .filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .filter-row select,.filter-row input{font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:inherit}
+
+@media (max-width:768px) {
+  .app{flex-direction:column;height:100vh}
+  .sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid var(--border);flex-direction:row;flex-shrink:0;overflow-x:auto;overflow-y:hidden}
+  .sidebar-top{display:none}
+  .logo{display:none}
+  .nav-sec{display:none}
+  .nav{padding:10px 14px;flex-direction:column;gap:3px;font-size:10px;border-left:none;border-bottom:2px solid transparent;white-space:nowrap;min-width:60px;align-items:center}
+  .nav.active{border-left:none;border-bottom-color:#378ADD}
+  .nav svg{width:18px;height:18px}
+  .sidebar > div[style*="flex:1"]{display:none}
+  .sidebar > div[style*="padding:14px 16px"]{display:none}
+  .main{flex:1;min-height:0;overflow:hidden}
+  .topbar{padding:10px 14px}
+  .topbar h2{font-size:14px}
+  .content{padding:12px 14px}
+  .metrics{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+  .metric-val{font-size:18px}
+  .two-col{grid-template-columns:1fr}
+  table{font-size:11px}
+  th,td{padding:6px 6px}
+  .modal{width:95vw;max-width:95vw;margin:0 auto}
+  .modal-body{grid-template-columns:1fr;gap:10px;padding:14px}
+  .modal-overlay{padding-top:10px;align-items:flex-start}
+  .btn{font-size:11px;padding:6px 10px}
+  .topbar-right{gap:6px}
+  #sync-text{display:none}
+}
+@media (max-width:480px) {
+  .metrics{grid-template-columns:1fr 1fr}
+  .metric{padding:10px}
+  .metric-val{font-size:16px}
+  .topbar h2{font-size:13px}
+  .content{padding:10px}
+}
+
+@media (max-width:768px) {
+  .sidebar-bottom{display:none}
+}
+
+@media (max-width: 768px) {
+  .app { flex-direction: column; height: auto; min-height: 100vh; }
+  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); flex-direction: column; }
+  .sidebar .logo { padding: 12px 16px 10px; }
+  .sidebar .nav-sec { display: none; }
+  .nav-mobile-bar { display: flex !important; overflow-x: auto; padding: 4px 8px; gap: 4px; background: var(--bg); border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
+  .nav-mobile-bar .nav { flex-shrink: 0; padding: 7px 12px; border-left: none; border-radius: var(--radius); font-size: 12px; white-space: nowrap; }
+  .nav-mobile-bar .nav.active { background: var(--blue-bg); color: var(--blue-text); }
+  .nav-mobile-bar .nav svg { width: 13px; height: 13px; }
+  .sidebar-bottom { display: none !important; }
+  .main { flex: 1; overflow: visible; }
+  .topbar { padding: 10px 14px; }
+  .topbar h2 { font-size: 14px; }
+  .content { padding: 12px 14px; }
+  .metrics { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
+  .metric-val { font-size: 18px; }
+  .two-col { grid-template-columns: 1fr; }
+  table { font-size: 11px; }
+  th, td { padding: 7px 6px; }
+  .modal { width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .modal-body { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
+  .field.full { grid-column: 1; }
+  .modal-overlay { padding-top: 20px; align-items: flex-start; }
+  .btn { padding: 8px 12px; font-size: 12px; }
+  .btn-primary { padding: 9px 14px; }
+  .topbar-right { gap: 6px; }
+  #sync-text { display: none; }
+  .card { padding: 12px; }
+  .card-title { font-size: 11px; }
+  .driver-row { padding: 6px 0; }
+  .avatar { width: 26px; height: 26px; font-size: 9px; }
+  .filter-row { flex-wrap: wrap; gap: 6px; }
+  .filter-row input, .filter-row select { font-size: 12px; width: 100%; }
+  .badge { font-size: 9px; padding: 2px 6px; }
+  /* Hide less important table columns on mobile */
+  .hide-mobile { display: none !important; }
+}
+@media (min-width: 769px) {
+  .nav-mobile-bar { display: none !important; }
+  .sidebar-bottom { display: block; }
+}
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  .app { flex-direction: column; height: 100vh; overflow: hidden; }
+  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; overflow-y: hidden; }
+  .logo { display: none; }
+  .nav-sec { display: none; }
+  .sidebar > div:last-child { display: none; }
+  .sidebar { display: flex; flex-direction: row; padding: 0; }
+  .nav { flex-direction: column; padding: 8px 10px; gap: 3px; font-size: 10px; border-left: none; border-bottom: 2px solid transparent; min-width: 60px; text-align: center; white-space: nowrap; }
+  .nav svg { width: 18px; height: 18px; }
+  .nav.active { border-left: none; border-bottom-color: var(--blue); }
+  .main { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .topbar { padding: 10px 12px; }
+  .topbar h2 { font-size: 14px; }
+  .topbar-right { gap: 6px; }
+  .btn { padding: 6px 10px; font-size: 11px; }
+  .content { padding: 12px; overflow-y: auto; flex: 1; }
+  .metrics { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .metric { padding: 10px; }
+  .metric-val { font-size: 18px; }
+  .two-col { grid-template-columns: 1fr; }
+  .card { padding: 12px; margin-bottom: 10px; }
+  table { font-size: 11px; }
+  th, td { padding: 7px 6px; }
+  .modal-overlay { padding-top: 0; align-items: flex-end; }
+  .modal { width: 100%; max-width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; max-height: 92vh; overflow-y: auto; }
+  .modal-body { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
+  .field input, .field select, .field textarea { font-size: 16px; padding: 10px 12px; }
+  .filter-row { flex-wrap: wrap; }
+  .filter-row input { width: 100% !important; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .detail-row.full { grid-column: 1; }
+}
+@media (max-width: 480px) {
+  .metrics { grid-template-columns: 1fr; }
+  .topbar { flex-wrap: wrap; gap: 8px; }
+  .topbar h2 { width: 100%; }
+}
+
+/* ── RESPONSIVE / MOBILE ── */
+.hamburger { display:none; background:none; border:none; cursor:pointer; padding:8px; color:var(--text); flex-direction:column; gap:4px; }
+.hamburger span { display:block; width:20px; height:2px; background:currentColor; border-radius:2px; transition:all .2s; }
+.sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:40; }
+.sidebar-overlay.open { display:block; }
+
+@media (max-width: 768px) {
+  .app { flex-direction:column; height:auto; min-height:100vh; }
+  .sidebar {
+    position:fixed; left:-210px; top:0; bottom:0; z-index:50;
+    width:210px; transition:left .25s ease; overflow-y:auto;
+    box-shadow:2px 0 12px rgba(0,0,0,0.15);
+  }
+  .sidebar.open { left:0; }
+  .main { width:100%; height:auto; overflow:visible; }
+  .topbar { padding:10px 14px; }
+  .topbar h2 { font-size:14px; }
+  .hamburger { display:flex; }
+  .content { padding:12px 14px; overflow-y:visible; }
+  .metrics { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .metric-val { font-size:18px; }
+  table { font-size:11px; }
+  th, td { padding:7px 6px; }
+  .two-col { grid-template-columns:1fr; }
+  .modal-overlay { padding-top:0; align-items:flex-end; }
+  .modal { width:100%; max-width:100%; border-radius:var(--radius-lg) var(--radius-lg) 0 0; max-height:90vh; overflow-y:auto; }
+  .modal-body { grid-template-columns:1fr; }
+  .filter-row { flex-direction:column; }
+  .filter-row select, .filter-row input { width:100%; }
+  .login-box { width:90vw; padding:24px 20px; }
+  .topbar-right { gap:6px; }
+  .topbar-right > span { display:none; }
+  .btn { padding:6px 10px; font-size:11px; }
+  .btn-primary { padding:7px 12px; }
+  /* Cards on mobile */
+  .card { padding:12px; }
+  /* Hide less important table columns on mobile */
+  .hide-mobile { display:none !important; }
+  /* Full width cards */
+  .card { margin-bottom:10px; }
+  /* Better touch targets */
+  .nav { padding:12px 16px; font-size:14px; }
+  tr { cursor:pointer; }
+  td, th { white-space:nowrap; }
+  /* Scrollable tables */
+  .card[style*="padding:0"] { overflow-x:auto; }
+}
+
+@media (max-width: 480px) {
+  .metrics { grid-template-columns:1fr 1fr; }
+  .topbar h2 { font-size:13px; }
+  .content { padding:10px; }
+}
 </style>
 </head>
 <body>
@@ -121,7 +295,8 @@ tr:hover td{background:var(--bg2);cursor:pointer}
 </div>
 
 <div id="app-screen" class="app" style="display:none">
-  <div class="sidebar">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="sidebar" id="main-sidebar">
     <div class="logo">
       <div class="logo-title">TransPort</div>
       <div class="logo-sub">zarządzanie flotą</div>
@@ -154,13 +329,13 @@ tr:hover td{background:var(--bg2);cursor:pointer}
       <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Prowizja spedytora
     </div>
     <div style="flex:1"></div>
-    <div style="padding:14px 16px;border-top:1px solid var(--border)">
+    <div class="sidebar-bottom" style="padding:14px 16px;border-top:1px solid var(--border)">
       <button class="btn btn-sm" onclick="logout()">Wyloguj</button>
     </div>
   </div>
 
   <div class="main">
-    <div class="topbar">
+    <div class="topbar" id="main-topbar">
       <h2 id="view-title">Dashboard</h2>
       <div class="topbar-right">
         <span><span class="sync-indicator" id="sync-dot"></span><span id="sync-text" style="font-size:11px;color:var(--text3)">połączono</span></span>
@@ -324,6 +499,9 @@ function showView(v) {
   document.querySelectorAll('.nav').forEach(n => {
     if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + v + "'")) n.classList.add('active');
   });
+  // sync mobile action button
+  const mobileActs = document.getElementById('topbar-actions-mobile');
+  if (mobileActs) mobileActs.innerHTML = document.getElementById('topbar-actions').innerHTML;
   const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne', rozliczenia:'Prowizja spedytora' };
   document.getElementById('view-title').textContent = titles[v] || v;
   const acts = document.getElementById('topbar-actions');
@@ -413,7 +591,7 @@ function renderZlecenia() {
   </div>
   <div class="card" style="padding:0;overflow:hidden">
     <div style="overflow-x:auto"><table id="orders-table">
-      <thead><tr><th style="width:80px">Nr</th><th style="width:180px">Trasa</th><th style="width:130px">Klient</th><th style="width:110px">Kierowca</th><th style="width:90px">Załadunek</th><th style="width:90px">Dostawa</th><th style="width:80px">Fracht</th><th style="width:90px">Status</th></tr></thead>
+      <thead><tr><th style="width:80px">Nr</th><th style="width:180px">Trasa</th><th style="width:130px">Klient</th><th style="width:110px">Kierowca</th><th style="width:90px">Załadunek</th><th style="width:90px" class="hide-mobile">Dostawa</th><th style="width:80px">Fracht</th><th style="width:90px">Status</th></tr></thead>
       <tbody id="orders-tbody">${orders.map(o => orderRow(o, true)).join('')}</tbody>
     </table></div>
     ${!orders.length ? '<div class="empty">Brak zleceń. Dodaj pierwsze zlecenie.</div>' : ''}
@@ -1013,7 +1191,7 @@ function nextPodwNumer() {
 
 function renderPodwykonawcy() {
   if (!podw.length) return '<div class="empty">Brak zleceń zewnętrznych. Dodaj pierwsze zlecenie dla podwykonawcy.</div>';
-  return `<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table>
+  return `<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table>
     <thead><tr>
       <th style="width:130px">Numer</th>
       <th style="width:160px">Zleceniobiorca</th>
@@ -1448,7 +1626,127 @@ function printPodwHTML(id) {
     .podpis{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#666}
     p{margin:1mm 0;line-height:1.4}
     @media print{body{padding:0} button{display:none}}
-  </style></head><body>
+  
+@media (max-width:768px) {
+  .app{flex-direction:column;height:100vh}
+  .sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid var(--border);flex-direction:row;flex-shrink:0;overflow-x:auto;overflow-y:hidden}
+  .sidebar-top{display:none}
+  .logo{display:none}
+  .nav-sec{display:none}
+  .nav{padding:10px 14px;flex-direction:column;gap:3px;font-size:10px;border-left:none;border-bottom:2px solid transparent;white-space:nowrap;min-width:60px;align-items:center}
+  .nav.active{border-left:none;border-bottom-color:#378ADD}
+  .nav svg{width:18px;height:18px}
+  .sidebar > div[style*="flex:1"]{display:none}
+  .sidebar > div[style*="padding:14px 16px"]{display:none}
+  .main{flex:1;min-height:0;overflow:hidden}
+  .topbar{padding:10px 14px}
+  .topbar h2{font-size:14px}
+  .content{padding:12px 14px}
+  .metrics{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+  .metric-val{font-size:18px}
+  .two-col{grid-template-columns:1fr}
+  table{font-size:11px}
+  th,td{padding:6px 6px}
+  .modal{width:95vw;max-width:95vw;margin:0 auto}
+  .modal-body{grid-template-columns:1fr;gap:10px;padding:14px}
+  .modal-overlay{padding-top:10px;align-items:flex-start}
+  .btn{font-size:11px;padding:6px 10px}
+  .topbar-right{gap:6px}
+  #sync-text{display:none}
+}
+@media (max-width:480px) {
+  .metrics{grid-template-columns:1fr 1fr}
+  .metric{padding:10px}
+  .metric-val{font-size:16px}
+  .topbar h2{font-size:13px}
+  .content{padding:10px}
+}
+
+@media (max-width:768px) {
+  .sidebar-bottom{display:none}
+}
+
+@media (max-width: 768px) {
+  .app { flex-direction: column; height: auto; min-height: 100vh; }
+  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); flex-direction: column; }
+  .sidebar .logo { padding: 12px 16px 10px; }
+  .sidebar .nav-sec { display: none; }
+  .nav-mobile-bar { display: flex !important; overflow-x: auto; padding: 4px 8px; gap: 4px; background: var(--bg); border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
+  .nav-mobile-bar .nav { flex-shrink: 0; padding: 7px 12px; border-left: none; border-radius: var(--radius); font-size: 12px; white-space: nowrap; }
+  .nav-mobile-bar .nav.active { background: var(--blue-bg); color: var(--blue-text); }
+  .nav-mobile-bar .nav svg { width: 13px; height: 13px; }
+  .sidebar-bottom { display: none !important; }
+  .main { flex: 1; overflow: visible; }
+  .topbar { padding: 10px 14px; }
+  .topbar h2 { font-size: 14px; }
+  .content { padding: 12px 14px; }
+  .metrics { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
+  .metric-val { font-size: 18px; }
+  .two-col { grid-template-columns: 1fr; }
+  table { font-size: 11px; }
+  th, td { padding: 7px 6px; }
+  .modal { width: 95vw; max-height: 90vh; overflow-y: auto; }
+  .modal-body { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
+  .field.full { grid-column: 1; }
+  .modal-overlay { padding-top: 20px; align-items: flex-start; }
+  .btn { padding: 8px 12px; font-size: 12px; }
+  .btn-primary { padding: 9px 14px; }
+  .topbar-right { gap: 6px; }
+  #sync-text { display: none; }
+  .card { padding: 12px; }
+  .card-title { font-size: 11px; }
+  .driver-row { padding: 6px 0; }
+  .avatar { width: 26px; height: 26px; font-size: 9px; }
+  .filter-row { flex-wrap: wrap; gap: 6px; }
+  .filter-row input, .filter-row select { font-size: 12px; width: 100%; }
+  .badge { font-size: 9px; padding: 2px 6px; }
+  /* Hide less important table columns on mobile */
+  .hide-mobile { display: none !important; }
+}
+@media (min-width: 769px) {
+  .nav-mobile-bar { display: none !important; }
+  .sidebar-bottom { display: block; }
+}
+
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+  .app { flex-direction: column; height: 100vh; overflow: hidden; }
+  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; overflow-y: hidden; }
+  .logo { display: none; }
+  .nav-sec { display: none; }
+  .sidebar > div:last-child { display: none; }
+  .sidebar { display: flex; flex-direction: row; padding: 0; }
+  .nav { flex-direction: column; padding: 8px 10px; gap: 3px; font-size: 10px; border-left: none; border-bottom: 2px solid transparent; min-width: 60px; text-align: center; white-space: nowrap; }
+  .nav svg { width: 18px; height: 18px; }
+  .nav.active { border-left: none; border-bottom-color: var(--blue); }
+  .main { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .topbar { padding: 10px 12px; }
+  .topbar h2 { font-size: 14px; }
+  .topbar-right { gap: 6px; }
+  .btn { padding: 6px 10px; font-size: 11px; }
+  .content { padding: 12px; overflow-y: auto; flex: 1; }
+  .metrics { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .metric { padding: 10px; }
+  .metric-val { font-size: 18px; }
+  .two-col { grid-template-columns: 1fr; }
+  .card { padding: 12px; margin-bottom: 10px; }
+  table { font-size: 11px; }
+  th, td { padding: 7px 6px; }
+  .modal-overlay { padding-top: 0; align-items: flex-end; }
+  .modal { width: 100%; max-width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; max-height: 92vh; overflow-y: auto; }
+  .modal-body { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
+  .field input, .field select, .field textarea { font-size: 16px; padding: 10px 12px; }
+  .filter-row { flex-wrap: wrap; }
+  .filter-row input { width: 100% !important; }
+  .detail-grid { grid-template-columns: 1fr; }
+  .detail-row.full { grid-column: 1; }
+}
+@media (max-width: 480px) {
+  .metrics { grid-template-columns: 1fr; }
+  .topbar { flex-wrap: wrap; gap: 8px; }
+  .topbar h2 { width: 100%; }
+}
+</style></head><body>
   <button onclick="window.print()" style="position:fixed;top:10px;right:10px;padding:8px 16px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Drukuj / Zapisz PDF</button>
   <div class="header">
     <div class="logo">LTE <small>LOGISTIC<br>Sp. z o.o.</small></div>
@@ -1531,6 +1829,25 @@ function printPodwHTML(id) {
   </body></html>`);
   win.document.close();
 }
+
+function toggleSidebar() {
+  const sb = document.getElementById('main-sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('main-sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+// Close sidebar when nav item clicked on mobile
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.nav').forEach(n => {
+    n.addEventListener('click', () => {
+      if (window.innerWidth <= 768) closeSidebar();
+    });
+  });
+});
 </script>
 </body>
 </html>
