@@ -518,6 +518,9 @@ function showView(v) {
     flota:     '<button class="btn btn-primary" onclick="openCarModal()">+ Auto</button>',
     dokumenty: '<button class="btn btn-primary" onclick="openDocModal()">+ Dokument</button>',
     podwykonawcy: '<button class="btn btn-primary" onclick="openPodwModal()">+ Nowe zlecenie zewnętrzne</button>',
+    raporty: '<button class="btn" onclick="exportExcelRaport()">Export Excel</button>',
+    kalkulator: '',
+    rozliczenia: '',
   };
   acts.innerHTML = btns[v] || '';
   renderView(v);
