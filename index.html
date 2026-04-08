@@ -1079,15 +1079,25 @@ const NOTIFY_EMAIL = ''; // wpisz swoj email np. jan@firma.pl
 const RESEND_API_KEY = ''; // wpisz klucz z resend.com
 
 // ── PDF EXPORT ─────────────────────────────────────────────
-async function exportPDF(id) {
+function exportPDF(id) {
   var o = orders.find(function(x){return x.id===id;});
   if (!o) return;
   var { jsPDF } = window.jspdf;
   var doc = new jsPDF({ unit:'mm', format:'a4' });
-  await loadPolishFont(doc);
   var W=210, L=15, R=195, TW=180;
 
-  function tx(s){ return (s||'').toString();
+  function tx(s){
+    var str = (s||'').toString()
+      .replace(/ą/g,'a').replace(/Ą/g,'A')
+      .replace(/ć/g,'c').replace(/Ć/g,'C')
+      .replace(/ę/g,'e').replace(/Ę/g,'E')
+      .replace(/ł/g,'l').replace(/Ł/g,'L')
+      .replace(/ń/g,'n').replace(/Ń/g,'N')
+      .replace(/ó/g,'o').replace(/Ó/g,'O')
+      .replace(/ś/g,'s').replace(/Ś/g,'S')
+      .replace(/ź/g,'z').replace(/Ź/g,'Z')
+      .replace(/ż/g,'z').replace(/Ż/g,'Z');
+    return str;
     var str = (s||'').toString()
       .replace(/ą/g,'a').replace(/Ą/g,'A')
       .replace(/ć/g,'c').replace(/Ć/g,'C')
@@ -1206,6 +1216,7 @@ async function exportPDF(id) {
 
   // UWAGI
   if(o.uwagi){
+    if(y > 240){ doc.addPage(); y = 15; }
     doc.setFillColor(255,248,225); doc.rect(L,y,TW,6,'F');
     doc.setTextColor(100,70,0); doc.setFontSize(8); doc.setFont('helvetica','bold');
     doc.text('UWAGI', L+3, y+4.3);
@@ -1727,15 +1738,25 @@ function renderRozliczenia() {
   </div>`;
 }
 
-async function printPodwHTML(id) {
+function printPodwHTML(id) {
   var p = id ? podw.find(function(x){return x.id===id;}) : null;
   if (!p) return;
   var { jsPDF } = window.jspdf;
   var doc = new jsPDF({ unit:'mm', format:'a4' });
-  await loadPolishFont(doc);
   var W=210, L=15, R=195, TW=180;
 
-  function tx(s){ return (s||'').toString();
+  function tx(s){
+    var str = (s||'').toString()
+      .replace(/ą/g,'a').replace(/Ą/g,'A')
+      .replace(/ć/g,'c').replace(/Ć/g,'C')
+      .replace(/ę/g,'e').replace(/Ę/g,'E')
+      .replace(/ł/g,'l').replace(/Ł/g,'L')
+      .replace(/ń/g,'n').replace(/Ń/g,'N')
+      .replace(/ó/g,'o').replace(/Ó/g,'O')
+      .replace(/ś/g,'s').replace(/Ś/g,'S')
+      .replace(/ź/g,'z').replace(/Ź/g,'Z')
+      .replace(/ż/g,'z').replace(/Ż/g,'Z');
+    return str;
     var str = (s||'').toString();
     // Insert zero-width space every 35 chars in words longer than 35 chars
     return str.replace(/\S{36,}/g, function(word){
@@ -2333,31 +2354,6 @@ function fillOrderForm(d) {
         }
       }
     }
-  }
-}
-
-// Load Polish-capable font for jsPDF
-var _jspdfFontLoaded = false;
-async function loadPolishFont(doc) {
-  if (_jspdfFontLoaded) {
-    doc.setFont('Roboto', 'normal');
-    return;
-  }
-  try {
-    var resp = await fetch('https://cdn.jsdelivr.net/npm/@fontsource/roboto@5/files/roboto-latin-ext-400-normal.woff');
-    if (!resp.ok) throw new Error('font load failed');
-    var buf = await resp.arrayBuffer();
-    var bytes = new Uint8Array(buf);
-    var binary = '';
-    for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
-    var base64 = btoa(binary);
-    doc.addFileToVFS('Roboto-Regular.ttf', base64);
-    doc.addFont('Roboto-Regular.ttf', 'Roboto', 'normal');
-    _jspdfFontLoaded = true;
-    doc.setFont('Roboto', 'normal');
-  } catch(e) {
-    console.warn('Polish font load failed, using helvetica:', e);
-    doc.setFont('helvetica', 'normal');
   }
 }
 </script>
