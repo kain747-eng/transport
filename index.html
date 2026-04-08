@@ -382,7 +382,7 @@ let editingId = null;
 
 // ── AUTH — proste hasło, bez Supabase auth ─────────────────
 const APP_PASSWORD = 'transport2024';
-const ANTHROPIC_KEY = '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'; // zmień na własne hasło
+const ANTHROPIC_KEY = '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'; // zmień na własne hasło
 
 function checkPassword() {
   const pass = document.getElementById('login-password').value;
@@ -2235,7 +2235,7 @@ async function callClaudeWithPDF(base64, type) {
 
   var response = await fetch('https://lpvxzokrntzvpqjkudyf.supabase.co/functions/v1/claude-proxy', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxwdnh6b2tybnR6dnBxamt1ZHlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NzA5NTIsImV4cCI6MjA5MTE0Njk1Mn0.8kCHA9nUsy9W6H92lVKW4yV-xNSwPhoNO2uJ_cphiss', 'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxwdnh6b2tybnR6dnBxamt1ZHlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NzA5NTIsImV4cCI6MjA5MTE0Njk1Mn0.8kCHA9nUsy9W6H92lVKW4yV-xNSwPhoNO2uJ_cphiss' },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
