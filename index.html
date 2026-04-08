@@ -1700,24 +1700,23 @@ function printPodwHTML(id) {
   <title>Zlecenie ${p.numer||''}</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:15mm 20mm;word-wrap:break-word;overflow-wrap:break-word}
+    body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:15mm 20mm}
     .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5mm}
-    .logo{font-size:24pt;font-weight:bold;line-height:1}
+    .logo{font-size:22pt;font-weight:bold;line-height:1}
     .logo small{font-size:8pt;font-weight:normal;display:block;color:#666}
-    .title{text-align:center;margin:5mm 0}
-    .title h1{font-size:14pt}
-    .title h2{font-size:12pt}
+    .title{text-align:center;margin:4mm 0}
+    .title h1{font-size:13pt}
+    .title h2{font-size:11pt}
     hr{border:none;border-top:1px solid #111;margin:3mm 0}
-    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin:4mm 0}
-    .box{border:1px solid #aaa;padding:3mm;word-wrap:break-word;overflow-wrap:break-word}
-    .box-header{font-weight:bold;font-size:8pt;border-bottom:1px solid #aaa;margin-bottom:2mm;padding-bottom:1mm}
-    .trasa-header{background:#f0f0f0;text-align:center;font-weight:bold;padding:2mm;border:1px solid #aaa;font-size:10pt}
-    .section-title{font-weight:bold;font-size:10pt;margin:4mm 0 2mm}
-    .podpisy{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-top:10mm}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:3mm;margin:3mm 0}
+    .box{border:1px solid #aaa;padding:2.5mm;word-break:break-all;overflow-wrap:anywhere}
+    .box-header{font-weight:bold;font-size:8pt;border-bottom:1px solid #aaa;margin-bottom:1.5mm;padding-bottom:1mm}
+    .trasa-header{background:#f0f0f0;text-align:center;font-weight:bold;padding:2mm;border:1px solid #aaa;font-size:9pt}
+    .section-title{font-weight:bold;font-size:9pt;margin:3mm 0 1.5mm}
+    .podpisy{display:grid;grid-template-columns:1fr 1fr;gap:15mm;margin-top:8mm}
     .podpis{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#666}
-    p{margin:1mm 0;line-height:1.5;word-wrap:break-word;overflow-wrap:break-word}
-    table{width:100%;border-collapse:collapse;word-wrap:break-word}
-    td{word-wrap:break-word;overflow-wrap:break-word;max-width:0}
+    p{margin:0.8mm 0;line-height:1.4;word-break:break-word;overflow-wrap:anywhere}
+    strong{font-weight:bold}
     @media print{body{padding:0} button{display:none}}
   </style></head><body>
   <button onclick="window.print()" style="position:fixed;top:10px;right:10px;padding:8px 16px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Drukuj / Zapisz PDF</button>
