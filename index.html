@@ -377,7 +377,8 @@ let orders = [], drivers = [], cars = [], docs = [], podw = [];
 let editingId = null;
 
 // ── AUTH — proste hasło, bez Supabase auth ─────────────────
-const APP_PASSWORD = 'transport2024'; // zmień na własne hasło
+const APP_PASSWORD = 'transport2024';
+const ORS_KEY = 'eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjhiODc5ZTU4MTJkODRjY2I4ZWQ1M2JkZTlmNjA0YzY1IiwiaCI6Im11cm11cjY0In0='; // zmień na własne hasło
 
 function checkPassword() {
   const pass = document.getElementById('login-password').value;
@@ -725,7 +726,7 @@ function openOrderModal(id=null) {
     <div class="field"><label>Data załadunku</label><input type="date" id="f-zaladunek" value="${o.data_zaladunek||''}"></div>
     <div class="field"><label>Data dostawy</label><input type="date" id="f-dostawa" value="${o.data_dostawa||''}"></div>
     <div class="field"><label>Fracht</label><input type="number" id="f-fracht" value="${o.fracht||''}" placeholder="0"></div>
-    <div class="field"><label>Kilometry (km)</label><input type="number" id="f-km" value="${o.kilometry||''}" placeholder="0"></div>
+    <div class="field full"><label>Kilometry (km)</label><div style="display:flex;gap:8px"><input type="number" id="f-km" value="${o.kilometry||''}" placeholder="0" style="flex:1"><button type="button" id="f-km-btn" class="btn" onclick="obliczKm('f-skad','f-dokad','f-km','f-km-btn')" style="white-space:nowrap">Oblicz km</button></div></div>
     <div class="field"><label>Waluta</label><select id="f-waluta">${'PLN,EUR,USD,GBP,CZK,HUF,RON,NOK,SEK,DKK,CHF'.split(',').map(w=>`<option ${(o.waluta||'PLN')===w?'selected':''}>${w}</option>`).join('')}</select></div>
     <div class="field"><label>Nr ref. klienta</label><input id="f-ref" value="${o.ref||''}" placeholder="opcjonalnie"></div>
     <div class="field full"><label>Uwagi</label><textarea id="f-uwagi">${o.uwagi||''}</textarea></div>
@@ -1240,7 +1241,7 @@ function openPodwModal(id=null) {
     <div class="field"><label>Godziny rozładunku</label><input id="pw-dokad-godz" value="${p.dokad_godz||''}" placeholder="ASAP do 16:00"></div>
     <div class="field full" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px"><label style="font-size:12px;font-weight:600;color:var(--text)">Wynagrodzenie</label></div>
     <div class="field"><label>Fracht netto</label><input type="number" id="pw-fracht" value="${p.fracht||''}" placeholder="0"></div>
-    <div class="field"><label>Kilometry (km)</label><input type="number" id="pw-km" value="${p.kilometry||''}" placeholder="0"></div>
+    <div class="field full"><label>Kilometry (km)</label><div style="display:flex;gap:8px"><input type="number" id="pw-km" value="${p.kilometry||''}" placeholder="0" style="flex:1"><button type="button" id="pw-km-btn" class="btn" onclick="obliczKm('pw-skad','pw-dokad','pw-km','pw-km-btn')" style="white-space:nowrap">Oblicz km</button></div></div>
     <div class="field"><label>Waluta</label><select id="pw-waluta">${'PLN,EUR,USD,GBP'.split(',').map(w=>`<option ${(p.waluta||'EUR')===w?'selected':''}>${w}</option>`).join('')}</select></div>
     <div class="field"><label>Termin płatności (dni)</label><input type="number" id="pw-platnosc" value="${p.platnosc_dni||30}"></div>
     <div class="field"><label>Referencje</label><input id="pw-ref" value="${p.referencje||''}" placeholder="opcjonalnie"></div>
@@ -1848,6 +1849,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+async function obliczKm(skadId, dokadId, kmId, btnId) {
+  const skad = document.getElementById(skadId)?.value?.trim();
+  const dokad = document.getElementById(dokadId)?.value?.trim();
+  if (!skad || !dokad) { showToast('Wpisz skąd i dokąd przed obliczeniem km.', true); return; }
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.textContent = 'Obliczam...'; btn.disabled = true; }
+  try {
+    async function geocode(place) {
+      const r = await fetch(`https://api.openrouteservice.org/geocode/search?api_key=${ORS_KEY}&text=${encodeURIComponent(place)}&size=1`);
+      const d = await r.json();
+      if (!d.features?.length) throw new Error('Nie znaleziono: ' + place);
+      return d.features[0].geometry.coordinates; // [lng, lat]
+    }
+    const [c1, c2] = await Promise.all([geocode(skad), geocode(dokad)]);
+    const r = await fetch('https://api.openrouteservice.org/v2/directions/driving-hgv', {
+      method: 'POST',
+      headers: { 'Authorization': ORS_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ coordinates: [c1, c2] })
+    });
+    const d = await r.json();
+    const meters = d.routes?.[0]?.summary?.distance;
+    if (!meters) throw new Error('Nie udało się obliczyć trasy');
+    const km = Math.round(meters / 1000);
+    const kmField = document.getElementById(kmId);
+    if (kmField) kmField.value = km;
+    showToast('Obliczono: ' + km.toLocaleString('pl-PL') + ' km');
+  } catch(e) {
+    showToast('Błąd: ' + e.message, true);
+  } finally {
+    if (btn) { btn.textContent = 'Oblicz km'; btn.disabled = false; }
+  }
+}
 </script>
 </body>
 </html>
