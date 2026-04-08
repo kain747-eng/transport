@@ -656,19 +656,20 @@ function renderFlota() {
   function dateBadge(ds) {
     if (!ds) return '-';
     var s = dateStatus(ds), f = dateFmt(ds);
-    if (s === 'expired') return '<span class="badge b-red">' + f + ' ⚠ PRZETERMINOWANY</span>';
-    if (s === 'soon') return '<span class="badge b-amber">' + f + ' ⚠ wkrótce</span>';
+    if (s === 'expired') return '<span class="badge b-red">' + f + ' PRZETERMINOWANY</span>';
+    if (s === 'soon') return '<span class="badge b-amber">' + f + ' wkrotce</span>';
     return '<span style="font-size:12px;color:var(--text2)">' + f + '</span>';
   }
   var alertHtml = '';
   var alertCars = cars.filter(function(x) {
-    return dateStatus(x.data_przegladu)==='expired'||dateStatus(x.data_przegladu)==='soon'||dateStatus(x.data_ubezpieczenia)==='expired'||dateStatus(x.data_ubezpieczenia)==='soon';
+    var p=dateStatus(x.data_przegladu), u=dateStatus(x.data_ubezpieczenia);
+    return p==='expired'||p==='soon'||u==='expired'||u==='soon';
   });
   if (alertCars.length) {
     var msgs = alertCars.map(function(x) {
       var parts=[], p=dateStatus(x.data_przegladu), u=dateStatus(x.data_ubezpieczenia);
-      if(p==='expired') parts.push(x.rejestracja+': przegląd PRZETERMINOWANY');
-      else if(p==='soon') parts.push(x.rejestracja+': przegląd '+dateFmt(x.data_przegladu));
+      if(p==='expired') parts.push(x.rejestracja+': przeglad PRZETERMINOWANY');
+      else if(p==='soon') parts.push(x.rejestracja+': przeglad '+dateFmt(x.data_przegladu));
       if(u==='expired') parts.push(x.rejestracja+': ubezp. PRZETERMINOWANE');
       else if(u==='soon') parts.push(x.rejestracja+': ubezp. '+dateFmt(x.data_ubezpieczenia));
       return parts.join(', ');
@@ -679,18 +680,20 @@ function renderFlota() {
   for(var i=0;i<cars.length;i++){
     var car=cars[i];
     var cnt=orders.filter(function(o){return o.auto===car.rejestracja+' — '+car.model;}).length;
-    var ps=dateStatus(car.data_przegladu),us=dateStatus(car.data_ubezpieczenia);
+    var ps=dateStatus(car.data_przegladu), us=dateStatus(car.data_ubezpieczenia);
     var rowBg=(ps==='expired'||us==='expired')?'background:var(--red-bg)':(ps==='soon'||us==='soon')?'background:var(--amber-bg)':'';
     var sb=car.status==='W trasie'?'b-blue':car.status==='Serwis'?'b-amber':'b-green';
-    rows+='<tr data-carid="'+car.id+'" class="car-row" style="'+rowBg+'"><td><strong>'+car.rejestracja+'</strong></td><td>'+car.model+'</td><td style="color:var(--text2)">'+(car.rok||'-')+'</td><td><span class="badge '+sb+'">'+car.status+'</span></td><td>'+dateBadge(car.data_przegladu)+'</td><td>'+dateBadge(car.data_ubezpieczenia)+'</td><td>'+cnt+'</td></tr>';
+    rows+='<tr data-id="'+car.id+'" style="'+rowBg+';cursor:pointer"><td><strong>'+car.rejestracja+'</strong></td><td>'+car.model+'</td><td style="color:var(--text2)">'+(car.rok||'-')+'</td><td><span class="badge '+sb+'">'+car.status+'</span></td><td>'+dateBadge(car.data_przegladu)+'</td><td>'+dateBadge(car.data_ubezpieczenia)+'</td><td>'+cnt+'</td></tr>';
   }
+  var html=alertHtml+'<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table id="flota-table"><thead><tr><th>Rejestracja</th><th>Marka i model</th><th style="width:60px">Rok</th><th style="width:90px">Status</th><th style="width:130px">Przeglad</th><th style="width:130px">Ubezpieczenie</th><th style="width:60px">Zlecenia</th></tr></thead><tbody>'+rows+'</tbody></table>'+(!cars.length?'<div class="empty">Brak aut we flocie</div>':'')+'</div></div>';
   setTimeout(function(){
-    document.querySelectorAll('.car-row').forEach(function(tr){
-      tr.style.cursor='pointer';
-      tr.addEventListener('click',function(){openCarModal(this.getAttribute('data-carid'));});
+    var tbl=document.getElementById('flota-table');
+    if(tbl) tbl.addEventListener('click',function(e){
+      var tr=e.target.closest('tr[data-id]');
+      if(tr) openCarModal(tr.getAttribute('data-id'));
     });
-  },0);
-  return alertHtml+'<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Rejestracja</th><th>Marka i model</th><th style="width:60px">Rok</th><th style="width:90px">Status</th><th style="width:130px">Przegląd</th><th style="width:130px">Ubezpieczenie</th><th style="width:60px">Zlecenia</th></tr></thead><tbody>'+rows+'</tbody></table>'+(!cars.length?'<div class="empty">Brak aut we flocie</div>':'')+'</div></div>';
+  },50);
+  return html;
 }
 
 function renderDokumenty() {
