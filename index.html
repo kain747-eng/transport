@@ -641,72 +641,68 @@ function renderKierowcy() {
 }
 
 function renderFlota() {
-  const today = new Date();
-  const warn30 = new Date(); warn30.setDate(today.getDate() + 30);
+  var today = new Date();
+  var warn30 = new Date(); warn30.setDate(today.getDate() + 30);
 
   function dateStatus(dateStr) {
     if (!dateStr) return null;
-    const d = new Date(dateStr);
+    var d = new Date(dateStr);
     if (d < today) return 'expired';
     if (d <= warn30) return 'soon';
     return 'ok';
   }
-
-  function dateBadge(dateStr, label) {
+  function dateFmt(dateStr) {
     if (!dateStr) return '-';
-    const s = dateStatus(dateStr);
-    const formatted = new Date(dateStr).toLocaleDateString('pl-PL');
-    if (s === 'expired') return `<span class="badge b-red">${label}: ${formatted} ⚠ PRZETERMINOWANY</span>`;
-    if (s === 'soon') return `<span class="badge b-amber">${label}: ${formatted} ⚠ wygasa wkrótce</span>`;
-    return `<span style="font-size:12px;color:var(--text2)">${formatted}</span>`;
+    return new Date(dateStr).toLocaleDateString('pl-PL');
+  }
+  function dateBadge(dateStr) {
+    if (!dateStr) return '-';
+    var s = dateStatus(dateStr);
+    var f = dateFmt(dateStr);
+    if (s === 'expired') return '<span class="badge b-red">' + f + ' ⚠ PRZETERMINOWANY</span>';
+    if (s === 'soon') return '<span class="badge b-amber">' + f + ' ⚠ wkrótce</span>';
+    return '<span style="font-size:12px;color:var(--text2)">' + f + '</span>';
   }
 
-  // Alert bar for expired/soon
-  const alerts = cars.filter(c => {
-    const p = dateStatus(c.data_przegladu);
-    const u = dateStatus(c.data_ubezpieczenia);
+  var alertHtml = '';
+  var alertCars = cars.filter(function(car) {
+    var p = dateStatus(car.data_przegladu);
+    var u = dateStatus(car.data_ubezpieczenia);
     return p === 'expired' || p === 'soon' || u === 'expired' || u === 'soon';
   });
+  if (alertCars.length) {
+    var msgs = alertCars.map(function(car) {
+      var parts = [];
+      var p = dateStatus(car.data_przegladu);
+      var u = dateStatus(car.data_ubezpieczenia);
+      if (p === 'expired') parts.push(car.rejestracja + ': przegląd PRZETERMINOWANY');
+      else if (p === 'soon') parts.push(car.rejestracja + ': przegląd wygasa ' + dateFmt(car.data_przegladu));
+      if (u === 'expired') parts.push(car.rejestracja + ': ubezpieczenie PRZETERMINOWANE');
+      else if (u === 'soon') parts.push(car.rejestracja + ': ubezpieczenie wygasa ' + dateFmt(car.data_ubezpieczenia));
+      return parts.join(', ');
+    }).join(' | ');
+    alertHtml = '<div style="background:var(--color-background-warning);border:1px solid var(--color-border-warning);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--color-text-warning)"><strong>Uwaga!</strong> ' + msgs + '</div>';
+  }
 
-  const alertHtml = alerts.length ? `
-    <div style="background:var(--color-background-warning);border:1px solid var(--color-border-warning);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--color-text-warning)">
-      <strong>Uwaga!</strong> ${alerts.map(c => {
-        const msgs = [];
-        const p = dateStatus(c.data_przegladu);
-        const u = dateStatus(c.data_ubezpieczenia);
-        if (p === 'expired') msgs.push(c.rejestracja + ': przegląd PRZETERMINOWANY');
-        else if (p === 'soon') msgs.push(c.rejestracja + ': przegląd wygasa ' + new Date(c.data_przegladu).toLocaleDateString('pl-PL'));
-        if (u === 'expired') msgs.push(c.rejestracja + ': ubezpieczenie PRZETERMINOWANE');
-        else if (u === 'soon') msgs.push(c.rejestracja + ': ubezpieczenie wygasa ' + new Date(c.data_ubezpieczenia).toLocaleDateString('pl-PL'));
-        return msgs.join(', ');
-      }).join(' &nbsp;|&nbsp; ')}
-    </div>` : '';
+  var rows = '';
+  cars.forEach(function(car) {
+    var cnt = orders.filter(function(o) { return o.auto === car.rejestracja + ' — ' + car.model; }).length;
+    var ps = dateStatus(car.data_przegladu);
+    var us = dateStatus(car.data_ubezpieczenia);
+    var rowBg = (ps==='expired'||us==='expired') ? 'background:var(--red-bg)' : (ps==='soon'||us==='soon') ? 'background:var(--amber-bg)' : '';
+    var sb = car.status==='W trasie' ? 'b-blue' : car.status==='Serwis' ? 'b-amber' : 'b-green';
+    rows += '<tr onclick="openCarModal(\"' + car.id + '\")" style="' + rowBg + '">';
+    rows += '<td><strong>' + car.rejestracja + '</strong></td>';
+    rows += '<td>' + car.model + '</td>';
+    rows += '<td style="color:var(--text2)">' + (car.rok||'-') + '</td>';
+    rows += '<td><span class="badge ' + sb + '">' + car.status + '</span></td>';
+    rows += '<td>' + dateBadge(car.data_przegladu) + '</td>';
+    rows += '<td>' + dateBadge(car.data_ubezpieczenia) + '</td>';
+    rows += '<td>' + cnt + '</td></tr>';
+  });
 
-  return alertHtml + `<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table>
-    <thead><tr>
-      <th>Rejestracja</th><th>Marka i model</th>
-      <th style="width:60px">Rok</th>
-      <th style="width:90px">Status</th>
-      <th style="width:140px">Przegląd</th>
-      <th style="width:140px">Ubezpieczenie</th>
-      <th style="width:60px">Zlecenia</th>
-    </tr></thead>
-    <tbody>${cars.map(car => {
-      const cnt = orders.filter(o => o.auto === car.rejestracja + ' — ' + car.model).length;
-      const ps = dateStatus(car.data_przegladu);
-      const us = dateStatus(car.data_ubezpieczenia);
-      const rowBg = (ps==='expired'||us==='expired') ? 'background:var(--red-bg)' : (ps==='soon'||us==='soon') ? 'background:var(--amber-bg)' : '';
-      return \`<tr onclick="openCarModal('\${car.id}')" style="\${rowBg}">
-        <td><strong>\${car.rejestracja}</strong></td>
-        <td>\${car.model}</td>
-        <td style="color:var(--text2)">\${car.rok||'-'}</td>
-        <td><span class="badge \${car.status==='W trasie'?'b-blue':car.status==='Serwis'?'b-amber':'b-green'}">\${car.status}</span></td>
-        <td>\${dateBadge(car.data_przegladu,'')}</td>
-        <td>\${dateBadge(car.data_ubezpieczenia,'')}</td>
-        <td>\${cnt}</td>
-      </tr>\`;
-    }).join('')}</tbody>
-  </table>${!cars.length?'<div class="empty">Brak aut we flocie</div>':''}</div>\`;
+  var empty = !cars.length ? '<div class="empty">Brak aut we flocie</div>' : '';
+  return alertHtml + '<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Rejestracja</th><th>Marka i model</th><th style="width:60px">Rok</th><th style="width:90px">Status</th><th style="width:130px">Przegląd</th><th style="width:130px">Ubezpieczenie</th><th style="width:60px">Zlecenia</th></tr></thead><tbody>' + rows + '</tbody></table>' + empty + '</div></div>';
 }
 
 function renderDokumenty() {
