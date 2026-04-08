@@ -1697,7 +1697,15 @@ function printPodwHTML(id) {
   var doc = new jsPDF({ unit:'mm', format:'a4' });
   var W=210, L=15, R=195, TW=180;
 
-  function tx(s){ return (s||'').toString(); }
+  function tx(s){
+    var str = (s||'').toString();
+    // Insert zero-width space every 35 chars in words longer than 35 chars
+    return str.replace(/\S{36,}/g, function(word){
+      var result = '';
+      for(var i=0;i<word.length;i+=35){ result += word.slice(i,i+35) + (i+35<word.length?' ':''); }
+      return result;
+    });
+  }
 
   function addText(text, x, y, maxW, opts) {
     opts = opts||{};
