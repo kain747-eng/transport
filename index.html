@@ -328,6 +328,9 @@ tr:hover td{background:var(--bg2);cursor:pointer}
     <div class="nav" onclick="showView('rozliczenia')">
       <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Prowizja spedytora
     </div>
+    <div class="nav" onclick="showView('kalkulator')">
+      <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4M5 12h3"/></svg>Kalkulator paliwa
+    </div>
     <div style="flex:1"></div>
     <div class="sidebar-bottom" style="padding:14px 16px;border-top:1px solid var(--border)">
       <button class="btn btn-sm" onclick="logout()">Wyloguj</button>
@@ -502,7 +505,7 @@ function showView(v) {
   // sync mobile action button
   const mobileActs = document.getElementById('topbar-actions-mobile');
   if (mobileActs) mobileActs.innerHTML = document.getElementById('topbar-actions').innerHTML;
-  const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne', rozliczenia:'Prowizja spedytora' };
+  const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne', rozliczenia:'Prowizja spedytora', kalkulator:'Kalkulator dodatku paliwowego' };
   document.getElementById('view-title').textContent = titles[v] || v;
   const acts = document.getElementById('topbar-actions');
   const btns = {
@@ -527,6 +530,7 @@ function renderView(v) {
   else if (v === 'raporty')   c.innerHTML = renderRaporty();
   else if (v === 'podwykonawcy') c.innerHTML = renderPodwykonawcy();
   else if (v === 'rozliczenia') c.innerHTML = renderRozliczenia();
+  else if (v === 'kalkulator') { c.innerHTML = renderKalkulator(); setTimeout(kalkuluj, 0); }
 }
 
 // ── VIEWS ─────────────────────────────────────────────────
@@ -1929,6 +1933,129 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
+
+// ── KALKULATOR DODATKU PALIWOWEGO ──────────────────────────
+function renderKalkulator() {
+  return `
+  <div style="max-width:640px">
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title">A. Parametry bazowe</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="field">
+          <label>Bazowa cena transportu (€)</label>
+          <input type="number" id="k-cena-baza" value="2740" oninput="kalkuluj()">
+        </div>
+        <div class="field">
+          <label>Cena diesla — baza (PLN/l)</label>
+          <input type="number" id="k-diesel-baza" value="4.60" step="0.01" oninput="kalkuluj()">
+        </div>
+        <div class="field">
+          <label>Udział paliwa w cenie trasy (%)</label>
+          <input type="number" id="k-udzial" value="35" min="1" max="99" oninput="kalkuluj()">
+        </div>
+        <div class="field" style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Typowe wartości</div>
+          <div style="font-size:12px;color:var(--text2)">Trasy &lt;500 km: 25–30%<br>Trasy 500–1500 km: 30–35%<br>Trasy &gt;1500 km: 35–40%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px">
+      <div class="card-title">B. Parametry bieżące</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+        <div class="field">
+          <label>Aktualna cena diesla (PLN/l)</label>
+          <input type="number" id="k-diesel-akt" value="6.76" step="0.01" oninput="kalkuluj()">
+        </div>
+        <div class="field">
+          <label>Cena rynkowa przewoźnika (€) <span style="font-weight:400;color:var(--text3)">opcjonalnie</span></label>
+          <input type="number" id="k-cena-rynek" placeholder="np. 3200" oninput="kalkuluj()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:14px;border:2px solid var(--color-border-info)">
+      <div class="card-title">C. Wyniki kalkulacji</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" id="k-wyniki">
+        <div class="metric"><div class="metric-label">Szacowana cena</div><div class="metric-val blue" id="k-r-cena">—</div></div>
+        <div class="metric"><div class="metric-label">Zmiana vs baza</div><div class="metric-val" id="k-r-zmiana">—</div></div>
+        <div class="metric"><div class="metric-label">Zmiana ceny diesla</div><div class="metric-val" id="k-r-diesel">—</div></div>
+        <div class="metric"><div class="metric-label">Składnik nieparliwowy</div><div class="metric-val" id="k-r-npar">—</div></div>
+        <div class="metric"><div class="metric-label">Składnik paliwowy</div><div class="metric-val" id="k-r-par">—</div></div>
+        <div class="metric"><div class="metric-label">Odchylenie od rynku</div><div class="metric-val" id="k-r-rynek">—</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">D. Tabela scenariuszy — cena diesla vs cena transportu</div>
+      <div style="overflow-x:auto"><table id="k-tabela">
+        <thead><tr>
+          <th>Cena diesla (PLN/l)</th>
+          <th>Szac. cena transportu (€)</th>
+          <th>Zmiana vs baza (%)</th>
+          <th>Zmiana vs baza (€)</th>
+        </tr></thead>
+        <tbody id="k-tabela-body"></tbody>
+      </table></div>
+    </div>
+  </div>`;
+}
+
+function kalkuluj() {
+  const cenaBaza = parseFloat(document.getElementById('k-cena-baza')?.value) || 0;
+  const dieselBaza = parseFloat(document.getElementById('k-diesel-baza')?.value) || 1;
+  const udzial = (parseFloat(document.getElementById('k-udzial')?.value) || 35) / 100;
+  const dieselAkt = parseFloat(document.getElementById('k-diesel-akt')?.value) || 0;
+  const cenaRynek = parseFloat(document.getElementById('k-cena-rynek')?.value) || 0;
+
+  const npar = cenaBaza * (1 - udzial);
+  const parBaza = cenaBaza * udzial;
+  const wspolczynnik = dieselAkt / dieselBaza;
+  const parAkt = parBaza * wspolczynnik;
+  const cenaObl = npar + parAkt;
+  const zmianaPct = ((cenaObl - cenaBaza) / cenaBaza * 100);
+  const zmianaEur = cenaObl - cenaBaza;
+  const dieselZmPct = ((dieselAkt - dieselBaza) / dieselBaza * 100);
+  const odchRynek = cenaRynek ? cenaObl - cenaRynek : null;
+
+  const fmt = v => v.toFixed(2) + ' €';
+  const fmtPct = v => (v >= 0 ? '+' : '') + v.toFixed(1) + '%';
+
+  const el = id => document.getElementById(id);
+  if (!el('k-r-cena')) return;
+
+  el('k-r-cena').textContent = fmt(cenaObl);
+  el('k-r-zmiana').textContent = fmtPct(zmianaPct);
+  el('k-r-zmiana').style.color = zmianaPct > 0 ? 'var(--amber-text)' : 'var(--green-text)';
+  el('k-r-diesel').textContent = fmtPct(dieselZmPct);
+  el('k-r-diesel').style.color = dieselZmPct > 0 ? 'var(--amber-text)' : 'var(--green-text)';
+  el('k-r-npar').textContent = fmt(npar);
+  el('k-r-par').textContent = fmt(parAkt);
+  el('k-r-rynek').textContent = odchRynek !== null ? (odchRynek >= 0 ? '+' : '') + fmt(odchRynek) : '—';
+  if (odchRynek !== null) el('k-r-rynek').style.color = odchRynek > 0 ? 'var(--amber-text)' : 'var(--green-text)';
+
+  // Tabela scenariuszy
+  const tbody = el('k-tabela-body');
+  if (!tbody) return;
+  const scenariusze = [3.5, 4.0, 4.5, 4.6, 5.0, 5.5, 6.0, 6.5, 6.76, 7.0, 7.5, 8.0];
+  tbody.innerHTML = scenariusze.map(diesel => {
+    const c = cenaBaza * (1 - udzial) + cenaBaza * udzial * diesel / dieselBaza;
+    const dp = (c - cenaBaza) / cenaBaza * 100;
+    const de = c - cenaBaza;
+    const isAkt = Math.abs(diesel - dieselAkt) < 0.01;
+    const isBaza = Math.abs(diesel - dieselBaza) < 0.01;
+    const bg = isAkt ? 'background:var(--blue-bg)' : isBaza ? 'background:var(--green-bg)' : '';
+    return `<tr style="${bg}">
+      <td>${diesel.toFixed(2)} PLN/l${isAkt?' ◀ aktualny':''}${isBaza?' ◀ baza':''}</td>
+      <td style="font-weight:500">${c.toFixed(2)} €</td>
+      <td style="color:${dp>0?'var(--amber-text)':'var(--green-text)'}">${(dp>=0?'+':'')}${dp.toFixed(1)}%</td>
+      <td style="color:${de>0?'var(--amber-text)':'var(--green-text)'}">${(de>=0?'+':'')}${de.toFixed(2)} €</td>
+    </tr>`;
+  }).join('');
+}
+
+// Auto-calculate when switching to kalkulator view
+const _origShowView = showView;
 </script>
 </body>
 </html>
