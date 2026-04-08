@@ -2249,17 +2249,17 @@ async function callClaudeWithPDF(base64, type) {
     })
   });
   
-  var data = await response.json();
+  var responseText = await response.text();
+  var data;
+  try { data = JSON.parse(responseText); } catch(e) { throw new Error('Odpowiedz proxy: ' + responseText.slice(0,200)); }
   if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-  var content = data.content || [];
+  if (!data.content) throw new Error('Brak pola content. Odpowiedz: ' + JSON.stringify(data).slice(0,300));
   var textBlock = null;
-  for (var i = 0; i < content.length; i++) {
-    if (content[i].type === 'text') { textBlock = content[i]; break; }
+  for (var i = 0; i < data.content.length; i++) {
+    if (data.content[i].type === 'text') { textBlock = data.content[i]; break; }
   }
-  if (!textBlock && content.length > 0) textBlock = content[0];
-  if (!textBlock) throw new Error('Brak odpowiedzi AI. Sprawdz klucz API w Supabase Secrets.');
-  var text = (textBlock.text || '').trim();
-  text = text.replace(/```json/g,'').replace(/```/g,'').trim();
+  if (!textBlock) throw new Error('Brak bloku tekstowego. Content: ' + JSON.stringify(data.content).slice(0,200));
+  var text = textBlock.text.trim().replace(/```json/g,'').replace(/```/g,'').trim();
   return JSON.parse(text);
 }
 
