@@ -757,6 +757,7 @@ async function saveOrder() {
     klient:         document.getElementById('f-klient').value.trim(),
     status:         document.getElementById('f-status').value,
     kierowca:       document.getElementById('f-kierowca').value,
+    kierowca2:      document.getElementById('f-kierowca2')?.value||'',
     auto:           document.getElementById('f-auto').value,
     data_zaladunek: document.getElementById('f-zaladunek').value || null,
     data_dostawa:   document.getElementById('f-dostawa').value || null,
@@ -791,6 +792,24 @@ async function saveOrder() {
       await sb.from('zlecenia').update({ plik_url: urlData.publicUrl }).eq('id', savedId || editingId);
     } else {
       showToast('Błąd uploadu: ' + upErr.message, true);
+    }
+  }
+  // Auto-update driver status based on order status
+  const orderStatus = payload.status;
+  const k1 = payload.kierowca;
+  const k2 = payload.kierowca2;
+  if (k1) {
+    const newDriverStatus = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępny' : null;
+    if (newDriverStatus) {
+      const d1 = drivers.find(d => d.nazwa === k1);
+      if (d1) await sb.from('kierowcy').update({ status: newDriverStatus }).eq('id', d1.id);
+    }
+  }
+  if (k2) {
+    const newDriverStatus2 = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępny' : null;
+    if (newDriverStatus2) {
+      const d2 = drivers.find(d => d.nazwa === k2);
+      if (d2) await sb.from('kierowcy').update({ status: newDriverStatus2 }).eq('id', d2.id);
     }
   }
   closeModal();
