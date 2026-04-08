@@ -950,16 +950,16 @@ async function deleteDriver(id) {
 
 function openCarModal(id=null) {
   editingId = id;
-  const c = id ? cars.find(x=>x.id===id) : {};
+  const car = id ? cars.find(x=>x.id===id) : {};
   document.getElementById('modal-title').textContent = id ? 'Edytuj auto' : 'Nowe auto';
   document.getElementById('modal-body').innerHTML = `
-    <div class="field"><label>Rejestracja</label><input id="c-reg" value="${c.rejestracja||''}" placeholder="WA 1234X"></div>
-    <div class="field"><label>Marka i model</label><input id="c-model" value="${c.model||''}" placeholder="Volvo FH 500"></div>
-    <div class="field"><label>Rok produkcji</label><input id="c-rok" type="number" value="${c.rok||''}" placeholder="2020"></div>
-    <div class="field"><label>Status</label><select id="c-status">${['Dostępne','W trasie','Serwis'].map(s=>`<option ${c.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
-    <div class="field"><label>Data przeglądu</label><input type="date" id="c-przeglad" value="${c.data_przegladu||''}" ></div>
-    <div class="field"><label>Data ubezpieczenia</label><input type="date" id="c-ubezp" value="${c.data_ubezpieczenia||''}" ></div>
-    <div class="field full"><label>Uwagi</label><textarea id="c-uwagi">${c.uwagi||''}</textarea></div>
+    <div class="field"><label>Rejestracja</label><input id="c-reg" value="${car.rejestracja||''}" placeholder="WA 1234X"></div>
+    <div class="field"><label>Marka i model</label><input id="c-model" value="${car.model||''}" placeholder="Volvo FH 500"></div>
+    <div class="field"><label>Rok produkcji</label><input id="c-rok" type="number" value="${car.rok||''}" placeholder="2020"></div>
+    <div class="field"><label>Status</label><select id="c-status">${['Dostępne','W trasie','Serwis'].map(s=>`<option ${car.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="field"><label>Data przeglądu</label><input type="date" id="c-przeglad" value="${car.data_przegladu||''}" ></div>
+    <div class="field"><label>Data ubezpieczenia</label><input type="date" id="c-ubezp" value="${car.data_ubezpieczenia||''}" ></div>
+    <div class="field full"><label>Uwagi</label><textarea id="c-uwagi">${car.uwagi||''}</textarea></div>
   `;
   document.getElementById('modal-foot').innerHTML = `
     ${id?`<button class="btn btn-danger" onclick="deleteCar('${id}')">Usuń</button>`:''}
