@@ -1700,14 +1700,14 @@ function printPodwHTML(id) {
   <title>Zlecenie ${p.numer||''}</title>
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:15mm 20mm;word-wrap:break-word}
+    body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:15mm 20mm;word-wrap:break-word;overflow-wrap:break-word}
     .header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5mm}
     .logo{font-size:24pt;font-weight:bold;line-height:1}
     .logo small{font-size:8pt;font-weight:normal;display:block;color:#666}
     .title{text-align:center;margin:5mm 0}
     .title h1{font-size:14pt}
     .title h2{font-size:12pt}
-    hr{border:1px solid #111;margin:3mm 0}
+    hr{border:none;border-top:1px solid #111;margin:3mm 0}
     .two-col{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin:4mm 0}
     .box{border:1px solid #aaa;padding:3mm;word-wrap:break-word;overflow-wrap:break-word}
     .box-header{font-weight:bold;font-size:8pt;border-bottom:1px solid #aaa;margin-bottom:2mm;padding-bottom:1mm}
@@ -1715,129 +1715,11 @@ function printPodwHTML(id) {
     .section-title{font-weight:bold;font-size:10pt;margin:4mm 0 2mm}
     .podpisy{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-top:10mm}
     .podpis{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#666}
-    p{margin:1mm 0;line-height:1.4}
+    p{margin:1mm 0;line-height:1.5;word-wrap:break-word;overflow-wrap:break-word}
+    table{width:100%;border-collapse:collapse;word-wrap:break-word}
+    td{word-wrap:break-word;overflow-wrap:break-word;max-width:0}
     @media print{body{padding:0} button{display:none}}
-  
-@media (max-width:768px) {
-  .app{flex-direction:column;height:100vh}
-  .sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid var(--border);flex-direction:row;flex-shrink:0;overflow-x:auto;overflow-y:hidden}
-  .sidebar-top{display:none}
-  .logo{display:none}
-  .nav-sec{display:none}
-  .nav{padding:10px 14px;flex-direction:column;gap:3px;font-size:10px;border-left:none;border-bottom:2px solid transparent;white-space:nowrap;min-width:60px;align-items:center}
-  .nav.active{border-left:none;border-bottom-color:#378ADD}
-  .nav svg{width:18px;height:18px}
-  .sidebar > div[style*="flex:1"]{display:none}
-  .sidebar > div[style*="padding:14px 16px"]{display:none}
-  .main{flex:1;min-height:0;overflow:hidden}
-  .topbar{padding:10px 14px}
-  .topbar h2{font-size:14px}
-  .content{padding:12px 14px}
-  .metrics{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
-  .metric-val{font-size:18px}
-  .two-col{grid-template-columns:1fr}
-  table{font-size:11px}
-  th,td{padding:6px 6px}
-  .modal{width:95vw;max-width:95vw;margin:0 auto}
-  .modal-body{grid-template-columns:1fr;gap:10px;padding:14px}
-  .modal-overlay{padding-top:10px;align-items:flex-start}
-  .btn{font-size:11px;padding:6px 10px}
-  .topbar-right{gap:6px}
-  #sync-text{display:none}
-}
-@media (max-width:480px) {
-  .metrics{grid-template-columns:1fr 1fr}
-  .metric{padding:10px}
-  .metric-val{font-size:16px}
-  .topbar h2{font-size:13px}
-  .content{padding:10px}
-}
-
-@media (max-width:768px) {
-  .sidebar-bottom{display:none}
-}
-
-@media (max-width: 768px) {
-  .app { flex-direction: column; height: auto; min-height: 100vh; }
-  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); flex-direction: column; }
-  .sidebar .logo { padding: 12px 16px 10px; }
-  .sidebar .nav-sec { display: none; }
-  .nav-mobile-bar { display: flex !important; overflow-x: auto; padding: 4px 8px; gap: 4px; background: var(--bg); border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
-  .nav-mobile-bar .nav { flex-shrink: 0; padding: 7px 12px; border-left: none; border-radius: var(--radius); font-size: 12px; white-space: nowrap; }
-  .nav-mobile-bar .nav.active { background: var(--blue-bg); color: var(--blue-text); }
-  .nav-mobile-bar .nav svg { width: 13px; height: 13px; }
-  .sidebar-bottom { display: none !important; }
-  .main { flex: 1; overflow: visible; }
-  .topbar { padding: 10px 14px; }
-  .topbar h2 { font-size: 14px; }
-  .content { padding: 12px 14px; }
-  .metrics { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-bottom: 12px; }
-  .metric-val { font-size: 18px; }
-  .two-col { grid-template-columns: 1fr; }
-  table { font-size: 11px; }
-  th, td { padding: 7px 6px; }
-  .modal { width: 95vw; max-height: 90vh; overflow-y: auto; }
-  .modal-body { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
-  .field.full { grid-column: 1; }
-  .modal-overlay { padding-top: 20px; align-items: flex-start; }
-  .btn { padding: 8px 12px; font-size: 12px; }
-  .btn-primary { padding: 9px 14px; }
-  .topbar-right { gap: 6px; }
-  #sync-text { display: none; }
-  .card { padding: 12px; }
-  .card-title { font-size: 11px; }
-  .driver-row { padding: 6px 0; }
-  .avatar { width: 26px; height: 26px; font-size: 9px; }
-  .filter-row { flex-wrap: wrap; gap: 6px; }
-  .filter-row input, .filter-row select { font-size: 12px; width: 100%; }
-  .badge { font-size: 9px; padding: 2px 6px; }
-  /* Hide less important table columns on mobile */
-  .hide-mobile { display: none !important; }
-}
-@media (min-width: 769px) {
-  .nav-mobile-bar { display: none !important; }
-  .sidebar-bottom { display: block; }
-}
-
-/* ── MOBILE ── */
-@media (max-width: 768px) {
-  .app { flex-direction: column; height: 100vh; overflow: hidden; }
-  .sidebar { width: 100%; height: auto; border-right: none; border-bottom: 1px solid var(--border); flex-shrink: 0; overflow-x: auto; overflow-y: hidden; }
-  .logo { display: none; }
-  .nav-sec { display: none; }
-  .sidebar > div:last-child { display: none; }
-  .sidebar { display: flex; flex-direction: row; padding: 0; }
-  .nav { flex-direction: column; padding: 8px 10px; gap: 3px; font-size: 10px; border-left: none; border-bottom: 2px solid transparent; min-width: 60px; text-align: center; white-space: nowrap; }
-  .nav svg { width: 18px; height: 18px; }
-  .nav.active { border-left: none; border-bottom-color: var(--blue); }
-  .main { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
-  .topbar { padding: 10px 12px; }
-  .topbar h2 { font-size: 14px; }
-  .topbar-right { gap: 6px; }
-  .btn { padding: 6px 10px; font-size: 11px; }
-  .content { padding: 12px; overflow-y: auto; flex: 1; }
-  .metrics { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .metric { padding: 10px; }
-  .metric-val { font-size: 18px; }
-  .two-col { grid-template-columns: 1fr; }
-  .card { padding: 12px; margin-bottom: 10px; }
-  table { font-size: 11px; }
-  th, td { padding: 7px 6px; }
-  .modal-overlay { padding-top: 0; align-items: flex-end; }
-  .modal { width: 100%; max-width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; max-height: 92vh; overflow-y: auto; }
-  .modal-body { grid-template-columns: 1fr; padding: 14px; gap: 10px; }
-  .field input, .field select, .field textarea { font-size: 16px; padding: 10px 12px; }
-  .filter-row { flex-wrap: wrap; }
-  .filter-row input { width: 100% !important; }
-  .detail-grid { grid-template-columns: 1fr; }
-  .detail-row.full { grid-column: 1; }
-}
-@media (max-width: 480px) {
-  .metrics { grid-template-columns: 1fr; }
-  .topbar { flex-wrap: wrap; gap: 8px; }
-  .topbar h2 { width: 100%; }
-}
-</style></head><body>
+  </style></head><body>
   <button onclick="window.print()" style="position:fixed;top:10px;right:10px;padding:8px 16px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px">Drukuj / Zapisz PDF</button>
   <div class="header">
     <div class="logo">LTE <small>LOGISTIC<br>Sp. z o.o.</small></div>
