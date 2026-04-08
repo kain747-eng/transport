@@ -402,11 +402,13 @@ function logout() {
 }
 
 // Sprawdź czy już zalogowany
-if (sessionStorage.getItem('transport-logged') === '1') {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app-screen').style.display  = 'flex';
-  initApp();
-}
+document.addEventListener('DOMContentLoaded', function() {
+  if (sessionStorage.getItem('transport-logged') === '1') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display  = 'flex';
+    initApp();
+  }
+});
 
 // ── DB INIT ───────────────────────────────────────────────
 async function initApp() {
@@ -2050,7 +2052,7 @@ function kalkuluj() {
   }).join('');
 }
 
-// Auto-calculate when switching to kalkulator view
+//
 </script>
 </body>
 </html>
