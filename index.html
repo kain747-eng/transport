@@ -767,6 +767,14 @@ function openOrderModal(id=null) {
   const o = id ? orders.find(x=>x.id===id) : {};
   document.getElementById('modal-title').textContent = id ? 'Edytuj zlecenie' : 'Nowe zlecenie';
   document.getElementById('modal-body').innerHTML = `
+    <div class="field full" style="background:var(--color-background-info);border-radius:var(--border-radius-md);padding:12px;border:1px solid var(--color-border-info)">
+      <label style="color:var(--color-text-info);font-weight:500">Wgraj PDF zlecenia — AI wypełni formularz automatycznie</label>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input type="file" id="f-pdf-input" accept=".pdf" style="flex:1;padding:4px 0;border:none;background:transparent">
+        <button type="button" id="f-pdf-btn" class="btn btn-primary" onclick="czytajPDFOrder()" style="white-space:nowrap">Czytaj PDF</button>
+      </div>
+      <div id="f-pdf-status" style="font-size:12px;color:var(--color-text-info);margin-top:6px"></div>
+    </div>
     <div class="field"><label>Skąd</label><input id="f-skad" value="${o.skad||''}" placeholder="Miasto, adres załadunku"></div>
     <div class="field"><label>Dokąd</label><input id="f-dokad" value="${o.dokad||''}" placeholder="Miasto, adres rozładunku"></div>
     <div class="field full" style="position:relative"><label>Nr zlecenia <span style="font-weight:400;color:var(--text3)">(zostaw puste = auto)</span></label><div style="display:flex;gap:6px"><input id="f-numer" value="${o.numer||''}" placeholder="np. ZL-001 lub numer klienta" style="flex:1"><button type="button" onclick="copyNumer()" style="padding:7px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:12px;color:var(--text2);white-space:nowrap">Kopiuj</button></div></div>
@@ -1294,6 +1302,14 @@ function openPodwModal(id=null) {
   document.getElementById('modal-title').textContent = id ? 'Edytuj zlecenie zewnętrzne' : 'Nowe zlecenie zewnętrzne';
   document.getElementById('modal-body').innerHTML = `
     <input type="hidden" id="pw-id" value="${id||''}">
+    <div class="field full" style="background:var(--color-background-info);border-radius:var(--border-radius-md);padding:12px;border:1px solid var(--color-border-info)">
+      <label style="color:var(--color-text-info);font-weight:500">Wgraj PDF zlecenia od klienta — AI wypełni formularz automatycznie</label>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <input type="file" id="pw-pdf-input" accept=".pdf" style="flex:1;padding:4px 0;border:none;background:transparent">
+        <button type="button" id="pw-pdf-btn" class="btn btn-primary" onclick="czytajPDF()" style="white-space:nowrap">Czytaj PDF</button>
+      </div>
+      <div id="pw-pdf-status" style="font-size:12px;color:var(--color-text-info);margin-top:6px"></div>
+    </div>
     <div class="field full"><label>Numer zlecenia</label><input id="pw-numer" value="${numer}" style="font-family:monospace;font-weight:600"></div>
     <div class="field"><label>Status</label><select id="pw-status">${['Nowe','W trasie','Dostarczone','Anulowane'].map(s=>`<option ${(p.status||'Nowe')===s?'selected':''}>${s}</option>`).join('')}</select></div>
     <div class="field full" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px"><label style="font-size:12px;font-weight:600;color:var(--text)">Zleceniobiorca (podwykonawca)</label></div>
@@ -2154,6 +2170,141 @@ function exportExcelRaport() {
   var date = new Date().toLocaleDateString('pl-PL').replace(/\./g,'-');
   XLSX.writeFile(wb, 'raport-' + date + '.xlsx');
   showToast('Raport Excel pobrany');
+}
+
+async function czytajPDF() {
+  const input = document.getElementById('pw-pdf-input');
+  const status = document.getElementById('pw-pdf-status');
+  const btn = document.getElementById('pw-pdf-btn');
+  if (!input.files || !input.files[0]) { showToast('Wybierz plik PDF', true); return; }
+  
+  btn.textContent = 'Czytam...'; btn.disabled = true;
+  status.textContent = 'AI analizuje PDF...';
+  
+  try {
+    const base64 = await fileToBase64(input.files[0]);
+    const result = await callClaudeWithPDF(base64, 'podwykonawcy');
+    fillPodwForm(result);
+    status.textContent = 'Formularz wypełniony automatycznie. Sprawdź i popraw jeśli trzeba.';
+    status.style.color = 'var(--color-text-success)';
+  } catch(e) {
+    status.textContent = 'Błąd: ' + e.message;
+    status.style.color = 'var(--color-text-danger)';
+  } finally {
+    btn.textContent = 'Czytaj PDF'; btn.disabled = false;
+  }
+}
+
+async function czytajPDFOrder() {
+  const input = document.getElementById('f-pdf-input');
+  const status = document.getElementById('f-pdf-status');
+  const btn = document.getElementById('f-pdf-btn');
+  if (!input.files || !input.files[0]) { showToast('Wybierz plik PDF', true); return; }
+  
+  btn.textContent = 'Czytam...'; btn.disabled = true;
+  status.textContent = 'AI analizuje PDF...';
+  
+  try {
+    const base64 = await fileToBase64(input.files[0]);
+    const result = await callClaudeWithPDF(base64, 'zlecenie');
+    fillOrderForm(result);
+    status.textContent = 'Formularz wypełniony automatycznie. Sprawdź i popraw jeśli trzeba.';
+    status.style.color = 'var(--color-text-success)';
+  } catch(e) {
+    status.textContent = 'Błąd: ' + e.message;
+    status.style.color = 'var(--color-text-danger)';
+  } finally {
+    btn.textContent = 'Czytaj PDF'; btn.disabled = false;
+  }
+}
+
+function fileToBase64(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function() { resolve(reader.result.split(',')[1]); };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function callClaudeWithPDF(base64, type) {
+  var prompt = type === 'podwykonawcy' ? 
+    'Przeanalizuj to zlecenie transportowe i wyciągnij dane w formacie JSON. Zwróć TYLKO JSON bez żadnego tekstu przed ani po. Format: {"numer":"","zleceniobiorca_nazwa":"","zleceniobiorca_adres":"","zleceniobiorca_nip":"","kierowca":"","kierowca_tel":"","auto":"","skad":"","skad_adres":"","skad_data":"YYYY-MM-DD lub pusty","skad_godz":"","dokad":"","dokad_adres":"","dokad_data":"YYYY-MM-DD lub pusty","dokad_godz":"","fracht":0,"waluta":"EUR","platnosc_dni":30,"referencje":"","uwagi":""}' :
+    'Przeanalizuj to zlecenie transportowe i wyciągnij dane w formacie JSON. Zwróć TYLKO JSON bez żadnego tekstu przed ani po. Format: {"numer":"","skad":"","dokad":"","klient":"","kierowca":"","auto":"","data_zaladunek":"YYYY-MM-DD lub pusty","data_dostawa":"YYYY-MM-DD lub pusty","fracht":0,"waluta":"EUR","uwagi":""}';
+
+  var response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{
+        role: 'user',
+        content: [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } },
+          { type: 'text', text: prompt }
+        ]
+      }]
+    })
+  });
+  
+  var data = await response.json();
+  if (data.error) throw new Error(data.error.message);
+  var text = data.content[0].text.trim();
+  // Strip markdown code blocks if present
+  text = text.replace(/^```json\n?|^```\n?|\n?```$/g, '').trim();
+  return JSON.parse(text);
+}
+
+function fillPodwForm(d) {
+  function set(id, val) { var el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; }
+  set('pw-numer', d.numer);
+  set('pw-nazwa', d.zleceniobiorca_nazwa);
+  set('pw-adres', d.zleceniobiorca_adres);
+  set('pw-nip', d.zleceniobiorca_nip);
+  set('pw-kierowca', d.kierowca);
+  set('pw-kierowca-tel', d.kierowca_tel);
+  set('pw-auto', d.auto);
+  set('pw-skad', d.skad);
+  set('pw-skad-adres', d.skad_adres);
+  set('pw-skad-data', d.skad_data);
+  set('pw-skad-godz', d.skad_godz);
+  set('pw-dokad', d.dokad);
+  set('pw-dokad-adres', d.dokad_adres);
+  set('pw-dokad-data', d.dokad_data);
+  set('pw-dokad-godz', d.dokad_godz);
+  if (d.fracht) set('pw-fracht', d.fracht);
+  if (d.waluta) set('pw-waluta', d.waluta);
+  if (d.platnosc_dni) set('pw-platnosc', d.platnosc_dni);
+  set('pw-ref', d.referencje);
+  set('pw-uwagi', d.uwagi);
+}
+
+function fillOrderForm(d) {
+  function set(id, val) { var el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; }
+  set('f-numer', d.numer);
+  set('f-skad', d.skad);
+  set('f-dokad', d.dokad);
+  set('f-klient', d.klient);
+  set('f-zaladunek', d.data_zaladunek);
+  set('f-dostawa', d.data_dostawa);
+  if (d.fracht) set('f-fracht', d.fracht);
+  if (d.waluta) {
+    var sel = document.getElementById('f-waluta');
+    if (sel) sel.value = d.waluta;
+  }
+  set('f-uwagi', d.uwagi);
+  // Try to match kierowca from list
+  if (d.kierowca) {
+    var sel = document.getElementById('f-kierowca');
+    if (sel) {
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].text.toLowerCase().includes(d.kierowca.toLowerCase())) {
+          sel.selectedIndex = i; break;
+        }
+      }
+    }
+  }
 }
 </script>
 </body>
