@@ -1857,20 +1857,21 @@ async function obliczKm(skadId, dokadId, kmId, btnId) {
   const btn = document.getElementById(btnId);
   if (btn) { btn.textContent = 'Obliczam...'; btn.disabled = true; }
   try {
+    // Use OpenStreetMap Nominatim for geocoding (no CORS issues)
     async function geocode(place) {
-      const r = await fetch(`https://api.openrouteservice.org/geocode/search?api_key=${ORS_KEY}&text=${encodeURIComponent(place)}&size=1`);
+      const r = await fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q=' + encodeURIComponent(place), {
+        headers: { 'Accept-Language': 'pl', 'User-Agent': 'TransPortApp/1.0' }
+      });
       const d = await r.json();
-      if (!d.features?.length) throw new Error('Nie znaleziono: ' + place);
-      return d.features[0].geometry.coordinates; // [lng, lat]
+      if (!d.length) throw new Error('Nie znaleziono: ' + place);
+      return [parseFloat(d[0].lon), parseFloat(d[0].lat)];
     }
     const [c1, c2] = await Promise.all([geocode(skad), geocode(dokad)]);
-    const r = await fetch('https://api.openrouteservice.org/v2/directions/driving-hgv', {
-      method: 'POST',
-      headers: { 'Authorization': ORS_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ coordinates: [c1, c2] })
-    });
+    // Use ORS directions with GET (better CORS)
+    const url = `https://api.openrouteservice.org/v2/directions/driving-hgv?api_key=eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjhiODc5ZTU4MTJkODRjY2I4ZWQ1M2JkZTlmNjA0YzY1IiwiaCI6Im11cm11cjY0In0=&start=${c1[0]},${c1[1]}&end=${c2[0]},${c2[1]}`;
+    const r = await fetch(url);
     const d = await r.json();
-    const meters = d.routes?.[0]?.summary?.distance;
+    const meters = d.features?.[0]?.properties?.summary?.distance;
     if (!meters) throw new Error('Nie udało się obliczyć trasy');
     const km = Math.round(meters / 1000);
     const kmField = document.getElementById(kmId);
