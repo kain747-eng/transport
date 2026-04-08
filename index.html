@@ -1096,12 +1096,10 @@ function exportPDF(id) {
   doc.setFont('helvetica', 'normal');
   doc.text(o.numer || '', W - pad, 17, { align: 'right' });
 
-  // Date
   doc.setTextColor(100, 100, 100);
   doc.setFontSize(9);
   doc.text('Data wydruku: ' + new Date().toLocaleDateString('pl-PL'), pad, 35);
 
-  // Section helper
   function section(title, y) {
     doc.setFillColor(240, 240, 245);
     doc.rect(pad, y, W - pad * 2, 7, 'F');
@@ -1118,38 +1116,39 @@ function exportPDF(id) {
     doc.setFontSize(8);
     doc.text(label, x, y);
     doc.setTextColor(30, 30, 30);
-    doc.setFontSize(10);
+    doc.setFontSize(9);
     doc.setFont('helvetica', 'bold');
-    doc.text(String(value || '-'), x, y + 5);
-    return y + 13;
+    const lines = doc.splitTextToSize(String(value || '-'), colW - 4);
+    doc.text(lines, x, y + 5);
+    return y + Math.max(13, lines.length * 4.5 + 5);
   }
 
   let y = 42;
+  const col1 = pad, col2 = W / 2 + 5, colW = W / 2 - pad - 5;
 
   // Trasa
   y = section('Trasa', y);
-  const col1 = pad, col2 = W / 2 + 5, colW = W / 2 - pad - 5;
-  row('ZAŁADUNEK', o.skad, col1, y, colW);
-  row('ROZŁADUNEK', o.dokad, col2, y, colW);
-  y += 13;
+  const y1 = row('ZALADUNEK', o.skad, col1, y, colW);
+  const y2 = row('ROZLADUNEK', o.dokad, col2, y, colW);
+  y = Math.max(y1, y2);
 
   // Daty
   y = section('Terminy', y);
-  row('DATA ZAŁADUNKU', o.data_zaladunek, col1, y, colW);
-  row('DATA DOSTAWY', o.data_dostawa, col2, y, colW);
-  y += 13;
+  const y3 = row('DATA ZALADUNKU', o.data_zaladunek, col1, y, colW);
+  const y4 = row('DATA DOSTAWY', o.data_dostawa, col2, y, colW);
+  y = Math.max(y3, y4);
 
   // Zleceniodawca
   y = section('Zleceniodawca', y);
-  row('KLIENT / FIRMA', o.klient, col1, y, colW);
-  row('NR REF. KLIENTA', o.ref, col2, y, colW);
-  y += 13;
+  const y5 = row('KLIENT / FIRMA', o.klient, col1, y, colW);
+  const y6 = row('NR REF. KLIENTA', o.ref, col2, y, colW);
+  y = Math.max(y5, y6);
 
   // Realizacja
   y = section('Realizacja', y);
-  row('KIEROWCA', o.kierowca, col1, y, colW);
-  row('AUTO', o.auto, col2, y, colW);
-  y += 13;
+  const y7 = row('KIEROWCA', (o.kierowca||'') + (o.kierowca2?' + '+o.kierowca2:''), col1, y, colW);
+  const y8 = row('AUTO', o.auto, col2, y, colW);
+  y = Math.max(y7, y8);
 
   // Fracht
   y = section('Wynagrodzenie', y);
@@ -1190,10 +1189,10 @@ function exportPDF(id) {
   doc.rect(0, 287, W, 10, 'F');
   doc.setFontSize(7);
   doc.setTextColor(150);
-  doc.text('Wygenerowano przez TransPort — system zarządzania flotą', W / 2, 293, { align: 'center' });
+  doc.text('Wygenerowano przez TransPort', W / 2, 293, { align: 'center' });
 
   doc.save('zlecenie-' + (o.numer || o.id.slice(0, 8)) + '.pdf');
-  showToast('PDF wygenerowany ✓');
+  showToast('PDF wygenerowany');
 }
 
 // ── EMAIL NOTIFICATION ──────────────────────────────────────
