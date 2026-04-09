@@ -106,23 +106,27 @@ tr:hover td{background:var(--bg2);cursor:pointer}
 .filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
 .filter-row select,.filter-row input{font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:inherit}
 
-.hamburger{display:none;background:none;border:none;cursor:pointer;padding:8px;color:var(--text);flex-direction:column;gap:5px;align-items:center;justify-content:center}
-.hamburger span{display:block;width:22px;height:2px;background:currentColor;border-radius:2px}
-.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:40}
-.sidebar-overlay.open{display:block}
+
+
+/* ── MOBILE TAB BAR ── */
+.tab-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);z-index:100;padding:0 0 env(safe-area-inset-bottom,0)}
+.tab-bar-inner{display:flex;justify-content:space-around;align-items:stretch}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 6px;cursor:pointer;color:var(--text2);font-size:9px;gap:3px;border:none;background:none;font-family:inherit}
+.tab-item.active{color:var(--blue)}
+.tab-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.tab-more-menu{display:none;position:fixed;bottom:60px;right:0;left:0;background:var(--bg);border-top:1px solid var(--border);z-index:99;padding:8px 0}
+.tab-more-menu.open{display:block}
+.tab-more-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--text);font-size:14px}
+.tab-more-item:active{background:var(--bg2)}
+.tab-more-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5}
 
 @media (max-width:900px){
-  .app{flex-direction:column;height:auto;min-height:100vh;overflow:visible}
-  .sidebar{
-    position:fixed;left:-220px;top:0;bottom:0;z-index:50;
-    width:210px;transition:left .25s ease;overflow-y:auto;
-    background:var(--bg);display:flex;flex-direction:column;
-    box-shadow:3px 0 15px rgba(0,0,0,0.2)
-  }
-  .sidebar.open{left:0}
-  .main{width:100%;overflow:visible;height:auto;display:block}
-  .content{overflow-y:visible;padding:12px 14px;height:auto}
-  .hamburger{display:flex !important}
+  .app{flex-direction:row;height:100vh;overflow:hidden}
+  .sidebar{display:none !important}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .content{flex:1;overflow-y:auto;padding:12px 14px;padding-bottom:70px}
+  .tab-bar{display:block}
+  .hamburger{display:none !important}
   .topbar{padding:10px 14px}
   .topbar h2{font-size:14px}
   .topbar-right>span{display:none}
@@ -130,7 +134,7 @@ tr:hover td{background:var(--bg2);cursor:pointer}
   .metric{padding:10px}
   .metric-val{font-size:18px}
   table{font-size:11px}
-  th,td{padding:6px 6px}
+  th,td{padding:6px 5px}
   .two-col{grid-template-columns:1fr}
   .modal-overlay{padding-top:0;align-items:flex-end}
   .modal{width:100%;max-width:100%;border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-height:90vh;overflow-y:auto}
@@ -140,13 +144,11 @@ tr:hover td{background:var(--bg2);cursor:pointer}
   .filter-row select,.filter-row input{width:100%}
   .card{padding:12px;margin-bottom:10px}
   .btn{padding:7px 10px;font-size:11px}
-  .btn-primary{padding:8px 12px}
   .hide-mobile{display:none !important}
-  .nav-sec{padding:10px 14px 2px;font-size:9px}
 }
 @media (max-width:500px){
   .metrics{grid-template-columns:1fr 1fr}
-  .content{padding:10px}
+  .content{padding:10px;padding-bottom:70px}
 }
 </style>
 </head>
@@ -221,6 +223,52 @@ tr:hover td{background:var(--bg2);cursor:pointer}
     </div>
     <div class="content" id="main-content">
       <div class="loader">Ładowanie danych...</div>
+    </div>
+  </div>
+  <!-- Mobile Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-bar-inner">
+      <button class="tab-item active" id="tab-dashboard" onclick="tabNav('dashboard')">
+        <svg viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="tab-item" id="tab-zlecenia" onclick="tabNav('zlecenia')">
+        <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h7"/></svg>
+        Zlecenia
+      </button>
+      <button class="tab-item" id="tab-kierowcy" onclick="tabNav('kierowcy')">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+        Kierowcy
+      </button>
+      <button class="tab-item" id="tab-flota" onclick="tabNav('flota')">
+        <svg viewBox="0 0 16 16"><rect x="1" y="5" width="14" height="8" rx="1"/><path d="M4 5V3a1 1 0 011-1h6a1 1 0 011 1v2"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="11.5" cy="13" r="1.5"/></svg>
+        Flota
+      </button>
+      <button class="tab-item" id="tab-more" onclick="toggleMoreMenu()">
+        <svg viewBox="0 0 16 16"><circle cx="4" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="8" r="1.5" fill="currentColor"/></svg>
+        Więcej
+      </button>
+    </div>
+  </div>
+  <!-- More Menu -->
+  <div class="tab-more-menu" id="tab-more-menu">
+    <div class="tab-more-item" onclick="tabNav('podwykonawcy');toggleMoreMenu()">
+      <svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14"/></svg>Zlecenia zewnętrzne
+    </div>
+    <div class="tab-more-item" onclick="tabNav('dokumenty');toggleMoreMenu()">
+      <svg viewBox="0 0 16 16"><path d="M4 2h6l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/></svg>Dokumenty
+    </div>
+    <div class="tab-more-item" onclick="tabNav('raporty');toggleMoreMenu()">
+      <svg viewBox="0 0 16 16"><path d="M2 12l4-4 3 3 5-7"/></svg>Raporty
+    </div>
+    <div class="tab-more-item" onclick="tabNav('rozliczenia');toggleMoreMenu()">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Prowizja spedytora
+    </div>
+    <div class="tab-more-item" onclick="tabNav('kalkulator');toggleMoreMenu()">
+      <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4"/></svg>Kalkulator paliwa
+    </div>
+    <div class="tab-more-item" style="color:var(--text2);border-top:1px solid var(--border);margin-top:4px" onclick="logout()">
+      <svg viewBox="0 0 16 16"><path d="M10 8H3M6 5l-3 3 3 3M10 3h3a1 1 0 011 1v8a1 1 0 01-1 1h-3"/></svg>Wyloguj
     </div>
   </div>
 </div>
@@ -2152,6 +2200,27 @@ function fillOrderForm(d) {
     }
   }
 }
+
+function tabNav(v) {
+  showView(v);
+  document.querySelectorAll('.tab-item').forEach(function(t){ t.classList.remove('active'); });
+  var el = document.getElementById('tab-'+v);
+  if(el) el.classList.add('active');
+  else document.getElementById('tab-more').classList.add('active');
+}
+
+function toggleMoreMenu() {
+  var m = document.getElementById('tab-more-menu');
+  m.classList.toggle('open');
+}
+
+document.addEventListener('click', function(e){
+  var menu = document.getElementById('tab-more-menu');
+  var btn = document.getElementById('tab-more');
+  if(menu && menu.classList.contains('open') && !menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)){
+    menu.classList.remove('open');
+  }
+});
 </script>
 </body>
 </html>
