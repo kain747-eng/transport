@@ -802,6 +802,17 @@ async function saveOrder() {
       if (d2) await sb.from('kierowcy').update({ status: newDriverStatus2 }).eq('id', d2.id);
     }
   }
+  // Auto-update car status
+  const autoVal = payload.auto;
+  if (autoVal) {
+    const newCarStatus = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępne' : null;
+    if (newCarStatus) {
+      const carParts = autoVal.split(' — ');
+      const carRej = carParts[0];
+      const car = cars.find(c => c.rejestracja === carRej);
+      if (car) await sb.from('flota').update({ status: newCarStatus }).eq('id', car.id);
+    }
+  }
   closeModal();
   showToast(editingId ? 'Zlecenie zaktualizowane ✓' : 'Zlecenie dodane ✓');
   await loadAll(); renderView(currentView);
@@ -3114,6 +3125,17 @@ async function saveOrder() {
     if (newDriverStatus2) {
       const d2 = drivers.find(d => d.nazwa === k2);
       if (d2) await sb.from('kierowcy').update({ status: newDriverStatus2 }).eq('id', d2.id);
+    }
+  }
+  // Auto-update car status
+  const autoVal = payload.auto;
+  if (autoVal) {
+    const newCarStatus = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępne' : null;
+    if (newCarStatus) {
+      const carParts = autoVal.split(' — ');
+      const carRej = carParts[0];
+      const car = cars.find(c => c.rejestracja === carRej);
+      if (car) await sb.from('flota').update({ status: newCarStatus }).eq('id', car.id);
     }
   }
   closeModal();
