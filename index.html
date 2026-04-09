@@ -467,7 +467,8 @@ function openOrderModal(id) {
   var walutyOpts = 'PLN,EUR,USD,GBP,CZK,HUF'.split(',').map(function(w){return '<option'+((o.waluta||'PLN')===w?' selected':'')+'>'+w+'</option>'}).join('');
   document.getElementById('modal-body').innerHTML =
     '<div class="field full" style="background:var(--blue-bg);border-radius:var(--radius);padding:12px;border:1px solid #b8d4f0"><label style="color:var(--blue-text);font-weight:600">Wgraj PDF zlecenia — AI wypełni formularz</label><div style="display:flex;gap:8px;margin-top:8px"><input type="file" id="f-pdf" accept=".pdf" style="flex:1;border:none;background:transparent"><button type="button" class="btn btn-primary" onclick="czytajPDFOrder()" id="f-pdf-btn">Czytaj PDF</button></div><div id="f-pdf-status" style="font-size:12px;color:var(--blue-text);margin-top:6px"></div></div>' +
-    '<div class="field"><label>Skąd</label><input id="f-skad" value="'+(o.skad||'')+'" placeholder="Miasto, adres załadunku"></div>' +
+    '<div class="field"><label>Skad (załadunek)</label><input id="f-skad" value="'+(o.skad||'')+'" placeholder="Miasto, adres zaladunek"></div>' +
+    '<div class="field"><label>Dojazd z (opcjonalnie)</label><input id="f-dojazd" value="'+(o.dojazd||'')+'" placeholder="np. Warszawa - skad jedzie auto"></div>' +
     '<div class="field"><label>Dokąd</label><input id="f-dokad" value="'+(o.dokad||'')+'" placeholder="Miasto, adres rozładunku"></div>' +
     '<div class="field"><label>Nr zlecenia</label><input id="f-numer" value="'+(o.numer||'')+'" placeholder="auto"></div>' +
     '<div class="field"><label>Klient</label><input id="f-klient" value="'+(o.klient||'')+'" placeholder="Nazwa firmy"></div>' +
@@ -491,7 +492,7 @@ function openOrderModal(id) {
   openModal();
   setTimeout(function(){
     var b=document.getElementById('btn-calc-km');
-    if(b) b.onclick=function(){autoCalcKm('f-skad','f-dokad','f-km','f-km-st');};
+    if(b) b.onclick=function(){autoCalcKm('f-skad','f-dokad','f-km','f-km-st','f-dojazd');};
   },0);
 }
 
@@ -514,6 +515,7 @@ async function saveOrder() {
     kilometry: parseFloat(document.getElementById('f-km').value)||0,
     prowizja_pct: parseFloat(document.getElementById('f-prow').value)||4,
     ref: document.getElementById('f-ref').value.trim(),
+    dojazd: document.getElementById('f-dojazd')?.value.trim()||'',
     uwagi: document.getElementById('f-uwagi').value.trim()
   };
   var err;
@@ -1474,10 +1476,13 @@ function exportExcelProwizja() {
 async function calcDistanceKm(origin, destination) {
   if (!origin || !destination || origin.length < 3 || destination.length < 3) return null;
   try {
-    var resp = await fetch(
-      'https://maps.googleapis.com/maps/api/distancematrix/json?origins=' + encodeURIComponent(origin) +
-      '&destinations=' + encodeURIComponent(destination) + '&mode=driving&key=' + GOOGLE_KEY
-    );
+    // Use Supabase proxy to avoid CORS
+    var gmUrl = 'https://maps.googleapis.com/maps/api/distancematrix/json?origins=' + encodeURIComponent(origin) + '&destinations=' + encodeURIComponent(destination) + '&mode=driving&key=' + GOOGLE_KEY;
+    var resp = await fetch(CLAUDE_PROXY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
+      body: JSON.stringify({_gmaps_proxy: gmUrl})
+    });
     var data = await resp.json();
     if (data.rows && data.rows[0] && data.rows[0].elements[0] && data.rows[0].elements[0].status==='OK') {
       return Math.round(data.rows[0].elements[0].distance.value / 1000);
@@ -1486,21 +1491,25 @@ async function calcDistanceKm(origin, destination) {
   return null;
 }
 
-async function autoCalcKm(skadId, dokadId, kmId, statusId) {
+async function autoCalcKm(skadId, dokadId, kmId, statusId, dojazdId) {
   var skadEl = document.getElementById(skadId);
   var dokadEl = document.getElementById(dokadId);
   var kmEl = document.getElementById(kmId);
   var stEl = document.getElementById(statusId);
+  var dojazdEl = dojazdId ? document.getElementById(dojazdId) : null;
   if (!skadEl || !dokadEl || !kmEl) return;
-  var o = skadEl.value.trim(), d = dokadEl.value.trim();
-  if (o.length < 3 || d.length < 3) { showToast('Wpisz adresy skad i dokad', true); return; }
-  if (stEl) stEl.textContent = 'Obliczam...';
-  var km = await calcDistanceKm(o, d);
+  var origin = (dojazdEl && dojazdEl.value.trim()) ? dojazdEl.value.trim() : skadEl.value.trim();
+  var dest = dokadEl.value.trim();
+  if (origin.length < 3 || dest.length < 3) { showToast('Wpisz adresy skad i dokad', true); return; }
+  if (stEl) { stEl.textContent = 'Obliczam...'; stEl.style.color = 'var(--text2)'; }
+  var km = await calcDistanceKm(origin, dest);
   if (km) {
     kmEl.value = km;
     if (stEl) { stEl.textContent = km + ' km (Google Maps)'; stEl.style.color = 'var(--green-text)'; }
+    showToast('Obliczono: ' + km + ' km');
   } else {
     if (stEl) { stEl.textContent = 'Nie udalo sie obliczyc'; stEl.style.color = 'var(--red-text)'; }
+    showToast('Blad obliczania km', true);
   }
 }
 </script>
