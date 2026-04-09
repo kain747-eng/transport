@@ -1157,7 +1157,7 @@
       const pass = document.getElementById('login-password').value;
       const err = document.getElementById('login-error');
       if (pass === APP_PASSWORD) {
-        sessionStorage.setItem('transport-logged', '1');
+        try { sessionStorage.setItem('transport-logged', '1'); } catch (e) { console.warn('Storage blocked:', e); }
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('app-screen').style.display = 'flex';
         initApp();
@@ -1167,18 +1167,20 @@
     }
 
     function logout() {
-      sessionStorage.removeItem('transport-logged');
+      try { sessionStorage.removeItem('transport-logged'); } catch (e) { }
       document.getElementById('login-screen').style.display = 'flex';
       document.getElementById('app-screen').style.display = 'none';
     }
 
     // Sprawdź czy już zalogowany
     document.addEventListener('DOMContentLoaded', function () {
-      if (sessionStorage.getItem('transport-logged') === '1') {
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app-screen').style.display = 'flex';
-        initApp();
-      }
+      try {
+        if (sessionStorage.getItem('transport-logged') === '1') {
+          document.getElementById('login-screen').style.display = 'none';
+          document.getElementById('app-screen').style.display = 'flex';
+          initApp();
+        }
+      } catch (e) { }
     });
 
     // ── DB INIT ───────────────────────────────────────────────
