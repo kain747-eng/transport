@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TransPort">
 <meta name="theme-color" content="#378ADD">
+<meta name="app-version" content="54188232">
 <link rel="manifest" id="pwa-manifest">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -148,6 +149,18 @@ tr:hover td{background:var(--bg2);cursor:pointer}
   .content{padding:10px}
 }
 </style>
+<script>
+(function(){
+  var VERSION = '54188232';
+  var stored = localStorage.getItem('tp-version');
+  if (stored && stored !== VERSION) {
+    localStorage.setItem('tp-version', VERSION);
+    location.reload(true);
+  } else {
+    localStorage.setItem('tp-version', VERSION);
+  }
+})();
+</script>
 </head>
 <body>
 
@@ -1118,7 +1131,19 @@ function exportOrderPDF(id) {
   var w=o.waluta||'PLN';
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Zlecenie</title>';
   html+='<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:12mm 15mm}.hdr{background:#378ADD;color:#fff;padding:6mm 8mm;margin:-12mm -15mm 6mm;display:flex;justify-content:space-between}.hdr h1{font-size:13pt;font-weight:bold}.sec-t{background:#f0f0f5;color:#185FA5;font-weight:bold;font-size:8pt;padding:2mm 3mm;margin:3mm 0 0}.tc{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ddd}.tc-c{padding:2.5mm 3mm;border-right:1px solid #ddd;word-break:break-word}.tc-c:last-child{border-right:none}.lbl{font-size:7pt;color:#888;text-transform:uppercase}.val{font-size:9pt;font-weight:bold}.frcht{background:#E6F1FB;border:1px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between}.frcht-v{font-size:16pt;font-weight:bold;color:#185FA5}.uwagi{border:1px solid #fac775;background:#faeeda;padding:2.5mm 3mm;margin:3mm 0;word-break:break-word}.pdp{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-top:12mm}.pdp-l{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#888}.ftr{margin-top:8mm;padding-top:3mm;border-top:1px solid #ddd;font-size:7pt;color:#aaa;text-align:center}.btn-p{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}@media print{.btn-p{display:none}body{padding:10mm 15mm}.hdr{margin:-10mm -15mm 6mm}}</style>';
-  html+='</head><body>';
+  html+='<script>
+(function(){
+  var VERSION = '54188232';
+  var stored = localStorage.getItem('tp-version');
+  if (stored && stored !== VERSION) {
+    localStorage.setItem('tp-version', VERSION);
+    location.reload(true);
+  } else {
+    localStorage.setItem('tp-version', VERSION);
+  }
+})();
+</script>
+</head><body>';
   html+='<button class="btn-p" onclick="window.print()">Drukuj / Zapisz PDF</button>';
   html+='<div class="hdr"><div><div style="font-size:8pt;opacity:.85">Data wydruku: '+new Date().toLocaleDateString('pl-PL')+'</div><h1>ZLECENIE TRANSPORTOWE</h1></div><div style="font-size:10pt">'+(o.numer||'')+'</div></div>';
   html+='<div class="sec-t">TRASA</div><div class="tc"><div class="tc-c"><div class="lbl">Załadunek</div><div class="val">'+(o.skad||'-')+'</div></div><div class="tc-c"><div class="lbl">Rozładunek</div><div class="val">'+(o.dokad||'-')+'</div></div></div>';
@@ -1140,7 +1165,19 @@ function printPodwPDF(id) {
   var f=(+p.fracht||0).toLocaleString('pl-PL');
   var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Zlecenie zewnętrzne</title>';
   html+='<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:10mm 15mm}.hdr{background:#378ADD;color:#fff;padding:5mm 8mm;margin:-10mm -15mm 5mm;display:flex;justify-content:space-between;align-items:center}.hdr h1{font-size:13pt;font-weight:bold}.tc{display:table;width:100%;border-collapse:collapse;margin:3mm 0}.tc-c{display:table-cell;width:50%;border:1px solid #ddd;padding:2.5mm 3mm;vertical-align:top;word-break:break-word}.tc-hdr{font-weight:bold;font-size:8pt;border-bottom:1px solid #ddd;margin-bottom:1.5mm;padding-bottom:1mm;color:#185FA5}.lbl{font-size:7pt;color:#888}.val{font-size:9pt;font-weight:bold}.frcht{background:#E6F1FB;border:1px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between}.frcht-v{font-size:14pt;font-weight:bold;color:#185FA5}.uwagi{border:1px solid #fac775;background:#faeeda;padding:2.5mm 3mm;margin:3mm 0}.warunki{font-size:8pt;color:#444;line-height:1.4;margin:2mm 0}.pdp{display:grid;grid-template-columns:1fr 1fr;gap:15mm;margin-top:10mm}.pdp-l{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#888}.btn-p{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}@media print{.btn-p{display:none}}</style>';
-  html+='</head><body>';
+  html+='<script>
+(function(){
+  var VERSION = '54188232';
+  var stored = localStorage.getItem('tp-version');
+  if (stored && stored !== VERSION) {
+    localStorage.setItem('tp-version', VERSION);
+    location.reload(true);
+  } else {
+    localStorage.setItem('tp-version', VERSION);
+  }
+})();
+</script>
+</head><body>';
   html+='<button class="btn-p" onclick="window.print()">Drukuj / Zapisz PDF</button>';
   html+='<div class="hdr"><div><div style="font-size:8pt;opacity:.85">LTE LOGISTIC SP. Z O.O. | Kielecka 41A/8, 02-530 Warszawa | NIP: PL5213966752</div><h1>ZLECENIE TRANSPORTOWE '+(p.numer||'')+'</h1></div><div style="font-size:8pt;opacity:.85">'+new Date().toLocaleDateString('pl-PL')+'</div></div>';
   html+='<div class="tc"><div class="tc-c"><div class="tc-hdr">ZLECENIODAWCA</div><div style="font-weight:bold">LTE LOGISTIC SP. Z O.O.</div><div>Kielecka 41A/8, PL 02-530 Warszawa</div><div>VAT: PL5213966752</div></div><div class="tc-c"><div class="tc-hdr">ZLECENIOBIORCA</div><div style="font-weight:bold">'+(p.zleceniobiorca_nazwa||'-')+'</div><div>'+(p.zleceniobiorca_adres||'')+'</div>'+(p.zleceniobiorca_nip?'<div>NIP: '+p.zleceniobiorca_nip+'</div>':'')+(p.kierowca?'<div>Kierowca: <strong>'+p.kierowca+'</strong></div>':'')+(p.kierowca_tel?'<div>Tel: '+p.kierowca_tel+'</div>':'')+(p.auto?'<div>Auta: '+p.auto+'</div>':'')+'</div></div>';
