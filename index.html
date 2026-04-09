@@ -1,881 +1,190 @@
 <!DOCTYPE html>
 <html lang="pl">
-
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>TransPort</title>
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="TransPort">
-  <meta name="theme-color" content="#378ADD">
-  <link rel="manifest" id="pwa-manifest">
-  <link rel="apple-touch-icon" sizes="180x180"
-    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0
-    }
-
-    :root {
-      --bg: #ffffff;
-      --bg2: #f8f8f6;
-      --bg3: #f1f0eb;
-      --text: #1a1a18;
-      --text2: #6b6a65;
-      --text3: #9e9d98;
-      --border: #e0dfd9;
-      --border2: #c8c7c0;
-      --blue: #378ADD;
-      --blue-bg: #E6F1FB;
-      --blue-text: #0C447C;
-      --green-bg: #EAF3DE;
-      --green-text: #27500A;
-      --amber-bg: #FAEEDA;
-      --amber-text: #633806;
-      --red-bg: #FCEBEB;
-      --red-text: #791F1F;
-      --gray-bg: #F1EFE8;
-      --gray-text: #444441;
-      --radius: 8px;
-      --radius-lg: 12px;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg3);
-      color: var(--text);
-      font-size: 14px;
-      min-height: 100vh
-    }
-
-    .app {
-      display: flex;
-      height: 100vh;
-      overflow: hidden
-    }
-
-    .sidebar {
-      width: 200px;
-      background: var(--bg);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      flex-shrink: 0;
-      overflow-y: auto
-    }
-
-    .logo {
-      padding: 18px 16px 14px;
-      border-bottom: 1px solid var(--border)
-    }
-
-    .logo-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--text)
-    }
-
-    .logo-sub {
-      font-size: 11px;
-      color: var(--text2);
-      margin-top: 2px
-    }
-
-    .nav-sec {
-      font-size: 10px;
-      color: var(--text3);
-      padding: 14px 16px 4px;
-      letter-spacing: .06em;
-      text-transform: uppercase;
-      font-weight: 500
-    }
-
-    .nav {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      padding: 9px 16px;
-      font-size: 13px;
-      cursor: pointer;
-      color: var(--text2);
-      border-left: 2px solid transparent;
-      transition: background .15s;
-      user-select: none
-    }
-
-    .nav:hover {
-      background: var(--bg2);
-      color: var(--text)
-    }
-
-    .nav.active {
-      color: var(--blue-text);
-      background: var(--blue-bg);
-      border-left-color: var(--blue);
-      font-weight: 500
-    }
-
-    .nav svg {
-      width: 15px;
-      height: 15px;
-      flex-shrink: 0;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.5;
-      stroke-linecap: round;
-      stroke-linejoin: round
-    }
-
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-      overflow: hidden
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 13px 22px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg);
-      flex-shrink: 0
-    }
-
-    .topbar h2 {
-      font-size: 15px;
-      font-weight: 600
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 10px
-    }
-
-    .user-badge {
-      font-size: 12px;
-      color: var(--text2);
-      background: var(--bg2);
-      padding: 4px 10px;
-      border-radius: 20px;
-      border: 1px solid var(--border)
-    }
-
-    .content {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 22px;
-      background: var(--bg3)
-    }
-
-    .btn {
-      font-size: 12px;
-      padding: 7px 14px;
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      cursor: pointer;
-      background: var(--bg);
-      color: var(--text);
-      transition: background .15s;
-      font-family: inherit
-    }
-
-    .btn:hover {
-      background: var(--bg2)
-    }
-
-    .btn-primary {
-      background: var(--blue);
-      color: #fff;
-      border-color: #185FA5
-    }
-
-    .btn-primary:hover {
-      background: #185FA5
-    }
-
-    .btn-danger {
-      color: var(--red-text);
-      border-color: #f09595
-    }
-
-    .btn-danger:hover {
-      background: var(--red-bg)
-    }
-
-    .btn-sm {
-      padding: 4px 10px;
-      font-size: 11px
-    }
-
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 20px
-    }
-
-    .metric {
-      background: var(--bg);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      padding: 14px
-    }
-
-    .metric-label {
-      font-size: 11px;
-      color: var(--text2);
-      margin-bottom: 4px
-    }
-
-    .metric-val {
-      font-size: 24px;
-      font-weight: 600
-    }
-
-    .metric-val.blue {
-      color: var(--blue-text)
-    }
-
-    .metric-val.green {
-      color: var(--green-text)
-    }
-
-    .metric-val.amber {
-      color: var(--amber-text)
-    }
-
-    .card {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 16px;
-      margin-bottom: 16px
-    }
-
-    .card-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text2);
-      margin-bottom: 12px;
-      text-transform: uppercase;
-      letter-spacing: .04em
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px
-    }
-
-    th {
-      text-align: left;
-      padding: 8px 10px;
-      color: var(--text3);
-      font-weight: 500;
-      font-size: 11px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg2)
-    }
-
-    td {
-      padding: 10px 10px;
-      border-bottom: 1px solid var(--border);
-      color: var(--text);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap
-    }
-
-    tr:hover td {
-      background: var(--bg2);
-      cursor: pointer
-    }
-
-    .badge {
-      display: inline-block;
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-weight: 600;
-      white-space: nowrap
-    }
-
-    .b-blue {
-      background: var(--blue-bg);
-      color: var(--blue-text)
-    }
-
-    .b-green {
-      background: var(--green-bg);
-      color: var(--green-text)
-    }
-
-    .b-amber {
-      background: var(--amber-bg);
-      color: var(--amber-text)
-    }
-
-    .b-gray {
-      background: var(--gray-bg);
-      color: var(--gray-text)
-    }
-
-    .b-red {
-      background: var(--red-bg);
-      color: var(--red-text)
-    }
-
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.4);
-      z-index: 100;
-      align-items: flex-start;
-      justify-content: center;
-      padding-top: 50px;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch
-    }
-
-    .modal-overlay.open {
-      display: flex
-    }
-
-    .modal {
-      background: var(--bg);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      width: 560px;
-      max-width: 95vw
-    }
-
-    .modal-head {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border)
-    }
-
-    .modal-head h3 {
-      font-size: 15px;
-      font-weight: 600
-    }
-
-    .modal-body {
-      padding: 20px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px
-    }
-
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 5px
-    }
-
-    .field.full {
-      grid-column: 1/-1
-    }
-
-    .field label {
-      font-size: 11px;
-      color: var(--text2);
-      font-weight: 500
-    }
-
-    .field input,
-    .field select,
-    .field textarea {
-      font-size: 13px;
-      padding: 8px 10px;
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      background: var(--bg);
-      color: var(--text);
-      width: 100%;
-      font-family: inherit;
-      transition: border-color .15s
-    }
-
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus {
-      outline: none;
-      border-color: var(--blue)
-    }
-
-    .field textarea {
-      resize: vertical;
-      min-height: 70px
-    }
-
-    .modal-foot {
-      padding: 14px 20px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: #27500A;
-      color: #EAF3DE;
-      font-size: 13px;
-      padding: 10px 18px;
-      border-radius: var(--radius);
-      z-index: 200;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: all .3s;
-      pointer-events: none
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0)
-    }
-
-    .toast.error {
-      background: #791F1F;
-      color: #FCEBEB
-    }
-
-    .loader {
-      text-align: center;
-      padding: 40px;
-      color: var(--text2);
-      font-size: 13px
-    }
-
-    .empty {
-      text-align: center;
-      padding: 50px;
-      color: var(--text3);
-      font-size: 13px
-    }
-
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px
-    }
-
-    .driver-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 7px 0;
-      border-bottom: 1px solid var(--border)
-    }
-
-    .driver-row:last-child {
-      border-bottom: none
-    }
-
-    .avatar {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      background: var(--blue-bg);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      font-weight: 600;
-      color: var(--blue-text);
-      flex-shrink: 0
-    }
-
-    .detail-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px
-    }
-
-    .detail-row {
-      background: var(--bg2);
-      border-radius: var(--radius);
-      padding: 10px 12px
-    }
-
-    .detail-row.full {
-      grid-column: 1/-1
-    }
-
-    .detail-label {
-      font-size: 10px;
-      color: var(--text3);
-      margin-bottom: 3px;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: .04em
-    }
-
-    .detail-val {
-      font-size: 13px;
-      font-weight: 500
-    }
-
-    .login-wrap {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--bg3)
-    }
-
-    .login-box {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 36px;
-      width: 360px
-    }
-
-    .login-box h2 {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 6px
-    }
-
-    .login-box p {
-      font-size: 13px;
-      color: var(--text2);
-      margin-bottom: 24px
-    }
-
-    .login-box .field {
-      margin-bottom: 14px
-    }
-
-    .login-box .field label {
-      display: block;
-      margin-bottom: 5px;
-      font-size: 12px;
-      color: var(--text2);
-      font-weight: 500
-    }
-
-    .login-box .field input {
-      width: 100%;
-      padding: 9px 12px;
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      font-size: 14px;
-      font-family: inherit
-    }
-
-    .login-box .btn {
-      width: 100%;
-      padding: 10px;
-      font-size: 14px
-    }
-
-    .login-hint {
-      font-size: 12px;
-      color: var(--text3);
-      text-align: center;
-      margin-top: 14px
-    }
-
-    .sync-indicator {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #639922;
-      display: inline-block;
-      margin-right: 6px
-    }
-
-    .sync-indicator.offline {
-      background: #E24B4A
-    }
-
-    .filter-row {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-      align-items: center
-    }
-
-    .filter-row select,
-    .filter-row input {
-      font-size: 12px;
-      padding: 5px 10px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--bg);
-      color: var(--text);
-      font-family: inherit
-    }
-
-
-
-    /* ── MOBILE TAB BAR ── */
-    .tab-bar {
-      display: none;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: var(--bg);
-      border-top: 1px solid var(--border);
-      z-index: 100;
-      padding: 0 0 env(safe-area-inset-bottom, 0)
-    }
-
-    .tab-bar-inner {
-      display: flex;
-      justify-content: space-around;
-      align-items: stretch
-    }
-
-    .tab-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 4px 6px;
-      cursor: pointer;
-      color: var(--text2);
-      font-size: 9px;
-      gap: 3px;
-      border: none;
-      background: none;
-      font-family: inherit
-    }
-
-    .tab-item.active {
-      color: var(--blue)
-    }
-
-    .tab-item svg {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.5;
-      stroke-linecap: round;
-      stroke-linejoin: round
-    }
-
-    .tab-more-menu {
-      display: none;
-      position: fixed;
-      bottom: 60px;
-      right: 0;
-      left: 0;
-      background: var(--bg);
-      border-top: 1px solid var(--border);
-      z-index: 99;
-      padding: 8px 0
-    }
-
-    .tab-more-menu.open {
-      display: block
-    }
-
-    .tab-more-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 20px;
-      cursor: pointer;
-      color: var(--text);
-      font-size: 14px
-    }
-
-    .tab-more-item:active {
-      background: var(--bg2)
-    }
-
-    .tab-more-item svg {
-      width: 18px;
-      height: 18px;
-      stroke: currentColor;
-      fill: none;
-      stroke-width: 1.5
-    }
-
-    @media (max-width:900px) {
-      .app {
-        flex-direction: row;
-        height: 100vh;
-        overflow: hidden
-      }
-
-      .sidebar {
-        display: none !important
-      }
-
-      .main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden
-      }
-
-      .content {
-        flex: 1;
-        overflow-y: auto;
-        padding: 12px 14px;
-        padding-bottom: 70px
-      }
-
-      .tab-bar {
-        display: block
-      }
-
-      .hamburger {
-        display: none !important
-      }
-
-      .topbar {
-        padding: 10px 14px
-      }
-
-      .topbar h2 {
-        font-size: 14px
-      }
-
-      .topbar-right>span {
-        display: none
-      }
-
-      .metrics {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-        margin-bottom: 12px
-      }
-
-      .metric {
-        padding: 10px
-      }
-
-      .metric-val {
-        font-size: 18px
-      }
-
-      table {
-        font-size: 11px
-      }
-
-      th,
-      td {
-        padding: 6px 5px
-      }
-
-      .two-col {
-        grid-template-columns: 1fr
-      }
-
-      .modal-overlay {
-        padding-top: 0;
-        align-items: flex-end
-      }
-
-      .modal {
-        width: 100%;
-        max-width: 100%;
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-        max-height: 90vh;
-        overflow-y: auto
-      }
-
-      .modal-body {
-        grid-template-columns: 1fr;
-        padding: 14px;
-        gap: 10px
-      }
-
-      .field.full {
-        grid-column: 1
-      }
-
-      .filter-row {
-        flex-wrap: wrap;
-        gap: 6px
-      }
-
-      .filter-row select,
-      .filter-row input {
-        width: 100%
-      }
-
-      .card {
-        padding: 12px;
-        margin-bottom: 10px
-      }
-
-      .btn {
-        padding: 7px 10px;
-        font-size: 11px
-      }
-
-      .hide-mobile {
-        display: none !important
-      }
-    }
-
-    @media (max-width:500px) {
-      .metrics {
-        grid-template-columns: 1fr 1fr
-      }
-
-      .content {
-        padding: 10px;
-        padding-bottom: 70px
-      }
-    }
-  </style>
-
-  <script>
-    // PWA Manifest
-    const manifest = {
-      name: 'TransPort — zarządzanie flotą',
-      short_name: 'TransPort',
-      description: 'System zarządzania zleceniami transportowymi',
-      start_url: '.',
-      display: 'standalone',
-      background_color: '#f1f0eb',
-      theme_color: '#378ADD',
-      orientation: 'any',
-      icons: [
-        {
-          src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23378ADD'/><text y='360' x='256' font-size='300' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>T</text></svg>",
-          sizes: '512x512',
-          type: 'image/svg+xml',
-          purpose: 'any maskable'
-        }
-      ]
-    };
-    const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    document.getElementById('pwa-manifest').setAttribute('href', url);
-
-    // Service Worker for offline support
-    if ('serviceWorker' in navigator) {
-      const swCode = `
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TransPort</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TransPort">
+<meta name="theme-color" content="#378ADD">
+<link rel="manifest" id="pwa-manifest">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;--bg2:#f8f8f6;--bg3:#f1f0eb;
+  --text:#1a1a18;--text2:#6b6a65;--text3:#9e9d98;
+  --border:#e0dfd9;--border2:#c8c7c0;
+  --blue:#378ADD;--blue-bg:#E6F1FB;--blue-text:#0C447C;
+  --green-bg:#EAF3DE;--green-text:#27500A;
+  --amber-bg:#FAEEDA;--amber-text:#633806;
+  --red-bg:#FCEBEB;--red-text:#791F1F;
+  --gray-bg:#F1EFE8;--gray-text:#444441;
+  --radius:8px;--radius-lg:12px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:14px;min-height:100vh}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:200px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.logo{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
+.logo-title{font-size:16px;font-weight:600;color:var(--text)}
+.logo-sub{font-size:11px;color:var(--text2);margin-top:2px}
+.nav-sec{font-size:10px;color:var(--text3);padding:14px 16px 4px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.nav{display:flex;align-items:center;gap:9px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--text2);border-left:2px solid transparent;transition:background .15s;user-select:none}
+.nav:hover{background:var(--bg2);color:var(--text)}
+.nav.active{color:var(--blue-text);background:var(--blue-bg);border-left-color:var(--blue);font-weight:500}
+.nav svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 22px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
+.topbar h2{font-size:15px;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.user-badge{font-size:12px;color:var(--text2);background:var(--bg2);padding:4px 10px;border-radius:20px;border:1px solid var(--border)}
+.content{flex:1;overflow-y:auto;padding:20px 22px;background:var(--bg3)}
+.btn{font-size:12px;padding:7px 14px;border:1px solid var(--border2);border-radius:var(--radius);cursor:pointer;background:var(--bg);color:var(--text);transition:background .15s;font-family:inherit}
+.btn:hover{background:var(--bg2)}
+.btn-primary{background:var(--blue);color:#fff;border-color:#185FA5}
+.btn-primary:hover{background:#185FA5}
+.btn-danger{color:var(--red-text);border-color:#f09595}
+.btn-danger:hover{background:var(--red-bg)}
+.btn-sm{padding:4px 10px;font-size:11px}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.metric{background:var(--bg);border-radius:var(--radius-lg);border:1px solid var(--border);padding:14px}
+.metric-label{font-size:11px;color:var(--text2);margin-bottom:4px}
+.metric-val{font-size:24px;font-weight:600}
+.metric-val.blue{color:var(--blue-text)}
+.metric-val.green{color:var(--green-text)}
+.metric-val.amber{color:var(--amber-text)}
+.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px}
+.card-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;color:var(--text3);font-weight:500;font-size:11px;border-bottom:1px solid var(--border);background:var(--bg2)}
+td{padding:10px 10px;border-bottom:1px solid var(--border);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr:hover td{background:var(--bg2);cursor:pointer}
+.badge{display:inline-block;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:600;white-space:nowrap}
+.b-blue{background:var(--blue-bg);color:var(--blue-text)}
+.b-green{background:var(--green-bg);color:var(--green-text)}
+.b-amber{background:var(--amber-bg);color:var(--amber-text)}
+.b-gray{background:var(--gray-bg);color:var(--gray-text)}
+.b-red{background:var(--red-bg);color:var(--red-text)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:flex-start;justify-content:center;padding-top:50px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg);border-radius:var(--radius-lg);border:1px solid var(--border);width:560px;max-width:95vw}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-head h3{font-size:15px;font-weight:600}
+.modal-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.full{grid-column:1/-1}
+.field label{font-size:11px;color:var(--text2);font-weight:500}
+.field input,.field select,.field textarea{font-size:13px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);width:100%;font-family:inherit;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue)}
+.field textarea{resize:vertical;min-height:70px}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
+.toast{position:fixed;bottom:24px;right:24px;background:#27500A;color:#EAF3DE;font-size:13px;padding:10px 18px;border-radius:var(--radius);z-index:200;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.error{background:#791F1F;color:#FCEBEB}
+.loader{text-align:center;padding:40px;color:var(--text2);font-size:13px}
+.empty{text-align:center;padding:50px;color:var(--text3);font-size:13px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.driver-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.driver-row:last-child{border-bottom:none}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--blue-text);flex-shrink:0}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.detail-row{background:var(--bg2);border-radius:var(--radius);padding:10px 12px}
+.detail-row.full{grid-column:1/-1}
+.detail-label{font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.detail-val{font-size:13px;font-weight:500}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg3)}
+.login-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;width:360px}
+.login-box h2{font-size:20px;font-weight:600;margin-bottom:6px}
+.login-box p{font-size:13px;color:var(--text2);margin-bottom:24px}
+.login-box .field{margin-bottom:14px}
+.login-box .field label{display:block;margin-bottom:5px;font-size:12px;color:var(--text2);font-weight:500}
+.login-box .field input{width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-family:inherit}
+.login-box .btn{width:100%;padding:10px;font-size:14px}
+.login-hint{font-size:12px;color:var(--text3);text-align:center;margin-top:14px}
+.sync-indicator{width:7px;height:7px;border-radius:50%;background:#639922;display:inline-block;margin-right:6px}
+.sync-indicator.offline{background:#E24B4A}
+.filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.filter-row select,.filter-row input{font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:inherit}
+
+
+
+/* ── MOBILE TAB BAR ── */
+.tab-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);z-index:100;padding:0 0 env(safe-area-inset-bottom,0)}
+.tab-bar-inner{display:flex;justify-content:space-around;align-items:stretch}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 6px;cursor:pointer;color:var(--text2);font-size:9px;gap:3px;border:none;background:none;font-family:inherit}
+.tab-item.active{color:var(--blue)}
+.tab-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.tab-more-menu{display:none;position:fixed;bottom:60px;right:0;left:0;background:var(--bg);border-top:1px solid var(--border);z-index:99;padding:8px 0}
+.tab-more-menu.open{display:block}
+.tab-more-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--text);font-size:14px}
+.tab-more-item:active{background:var(--bg2)}
+.tab-more-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5}
+
+@media (max-width:900px){
+  .app{flex-direction:row;height:100vh;overflow:hidden}
+  .sidebar{display:none !important}
+  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+  .content{flex:1;overflow-y:auto;padding:12px 14px;padding-bottom:70px}
+  .tab-bar{display:block}
+  .hamburger{display:none !important}
+  .topbar{padding:10px 14px}
+  .topbar h2{font-size:14px}
+  .topbar-right>span{display:none}
+  .metrics{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+  .metric{padding:10px}
+  .metric-val{font-size:18px}
+  table{font-size:11px}
+  th,td{padding:6px 5px}
+  .two-col{grid-template-columns:1fr}
+  .modal-overlay{padding-top:0;align-items:flex-end}
+  .modal{width:100%;max-width:100%;border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-height:90vh;overflow-y:auto}
+  .modal-body{grid-template-columns:1fr;padding:14px;gap:10px}
+  .field.full{grid-column:1}
+  .filter-row{flex-wrap:wrap;gap:6px}
+  .filter-row select,.filter-row input{width:100%}
+  .card{padding:12px;margin-bottom:10px}
+  .btn{padding:7px 10px;font-size:11px}
+  .hide-mobile{display:none !important}
+}
+@media (max-width:500px){
+  .metrics{grid-template-columns:1fr 1fr}
+  .content{padding:10px;padding-bottom:70px}
+}
+</style>
+
+<script>
+// PWA Manifest
+const manifest = {
+  name: 'TransPort — zarządzanie flotą',
+  short_name: 'TransPort',
+  description: 'System zarządzania zleceniami transportowymi',
+  start_url: '.',
+  display: 'standalone',
+  background_color: '#f1f0eb',
+  theme_color: '#378ADD',
+  orientation: 'any',
+  icons: [
+    {
+      src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23378ADD'/><text y='360' x='256' font-size='300' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>T</text></svg>",
+      sizes: '512x512',
+      type: 'image/svg+xml',
+      purpose: 'any maskable'
+    }
+  ]
+};
+const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const url = URL.createObjectURL(blob);
+document.getElementById('pwa-manifest').setAttribute('href', url);
+
+// Service Worker for offline support
+if ('serviceWorker' in navigator) {
+  const swCode = `
     const CACHE = 'transport-v1';
     const ASSETS = ['/transport/', '/transport/index.html'];
     self.addEventListener('install', e => {
@@ -891,340 +200,270 @@
       e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
     });
   `;
-      const swBlob = new Blob([swCode], { type: 'application/javascript' });
-      const swUrl = URL.createObjectURL(swBlob);
-      navigator.serviceWorker.register(swUrl, { scope: '/transport/' }).catch(() => { });
-    }
-  </script>
-  <script>
-    (function () {
-      // Inline manifest
-      var manifest = {
-        name: 'TransPort',
-        short_name: 'TransPort',
-        start_url: '/transport/',
-        display: 'standalone',
-        background_color: '#f1f0eb',
-        theme_color: '#378ADD',
-        icons: [{ src: 'https://kain747-eng.github.io/transport/icon.png', sizes: '192x192', type: 'image/png' }]
-      };
-      var blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-      document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl, {scope: '/transport/'}).catch(()=>{});
+}
+</script>
+<script>
+(function(){
+  // Inline manifest
+  var manifest = {
+    name: 'TransPort',
+    short_name: 'TransPort',
+    start_url: '/transport/',
+    display: 'standalone',
+    background_color: '#f1f0eb',
+    theme_color: '#378ADD',
+    icons: [{src:'https://kain747-eng.github.io/transport/icon.png',sizes:'192x192',type:'image/png'}]
+  };
+  var blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
 
-      // Service Worker
-      if ('serviceWorker' in navigator) {
-        var sw = [
-          'var C="tp-v2";',
-          'self.addEventListener("install",function(e){self.skipWaiting();});',
-          'self.addEventListener("activate",function(e){e.waitUntil(clients.claim());});',
-          'self.addEventListener("fetch",function(e){',
-          '  if(e.request.method!=="GET")return;',
-          '  e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));',
-          '});'
-        ].join('\n');
-        var swBlob = new Blob([sw], { type: 'application/javascript' });
-        navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function () { });
-      }
-    })();
-  </script>
+  // Service Worker
+  if('serviceWorker' in navigator){
+    var sw = [
+      'var C="tp-v2";',
+      'self.addEventListener("install",function(e){self.skipWaiting();});',
+      'self.addEventListener("activate",function(e){e.waitUntil(clients.claim());});',
+      'self.addEventListener("fetch",function(e){',
+      '  if(e.request.method!=="GET")return;',
+      '  e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));',
+      '});'
+    ].join('\n');
+    var swBlob = new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
+  }
+})();
+</script>
 </head>
-
 <body>
 
-  <div id="login-screen" class="login-wrap">
-    <div class="login-box">
-      <h2>TransPort</h2>
-      <p>Wpisz hasło dostępu do systemu</p>
-      <div class="field" style="margin-bottom:14px">
-        <label>Hasło</label>
-        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"
-          onkeydown="if(event.key==='Enter')checkPassword()">
-      </div>
-      <button class="btn btn-primary" onclick="checkPassword()">Wejdź</button>
-      <div id="login-error" style="color:#791F1F;font-size:12px;margin-top:10px;text-align:center"></div>
+<div id="login-screen" class="login-wrap">
+  <div class="login-box">
+    <h2>TransPort</h2>
+    <p>Wpisz hasło dostępu do systemu</p>
+    <div class="field" style="margin-bottom:14px">
+      <label>Hasło</label>
+      <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPassword()">
+    </div>
+    <button class="btn btn-primary" onclick="checkPassword()">Wejdź</button>
+    <div id="login-error" style="color:#791F1F;font-size:12px;margin-top:10px;text-align:center"></div>
+  </div>
+</div>
+
+<div id="app-screen" class="app" style="display:none">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="sidebar" id="main-sidebar">
+    <div class="logo">
+      <div class="logo-title">TransPort</div>
+      <div class="logo-sub">zarządzanie flotą</div>
+    </div>
+    <div class="nav-sec">Główne</div>
+    <div class="nav active" onclick="showView('dashboard')">
+      <svg viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>Dashboard
+    </div>
+    <div class="nav" onclick="showView('zlecenia')">
+      <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h7"/></svg>Zlecenia
+    </div>
+    <div class="nav" onclick="showView('kierowcy')">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Kierowcy
+    </div>
+    <div class="nav" onclick="showView('flota')">
+      <svg viewBox="0 0 16 16"><rect x="1" y="5" width="14" height="8" rx="1"/><path d="M4 5V3a1 1 0 011-1h6a1 1 0 011 1v2"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="11.5" cy="13" r="1.5"/></svg>Flota
+    </div>
+    <div class="nav-sec">Dokumenty</div>
+    <div class="nav" onclick="showView('dokumenty')">
+      <svg viewBox="0 0 16 16"><path d="M4 2h6l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M10 2v4h4M6 9h4M6 12h3"/></svg>Dokumenty
+    </div>
+    <div class="nav" onclick="showView('podwykonawcy')">
+      <svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14"/></svg>Zlecenia zewnętrzne
+    </div>
+    <div class="nav-sec">Analizy</div>
+    <div class="nav" onclick="showView('raporty')">
+      <svg viewBox="0 0 16 16"><path d="M2 12l4-4 3 3 5-7"/></svg>Raporty
+    </div>
+    <div class="nav" onclick="showView('rozliczenia')">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Prowizja spedytora
+    </div>
+    <div class="nav" onclick="showView('kalkulator')">
+      <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4M5 12h3"/></svg>Kalkulator paliwa
+    </div>
+    <div class="nav" onclick="showView('kalendarz')">
+      <svg viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="13" rx="1"/><path d="M1 6h14M5 1v2M11 1v2"/></svg>Kalendarz
+    </div>
+    <div style="flex:1"></div>
+    <div class="sidebar-bottom" style="padding:14px 16px;border-top:1px solid var(--border)">
+      <button class="btn btn-sm" onclick="logout()">Wyloguj</button>
     </div>
   </div>
 
-  <div id="app-screen" class="app" style="display:none">
-    <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
-    <div class="sidebar" id="main-sidebar">
-      <div class="logo">
-        <div class="logo-title">TransPort</div>
-        <div class="logo-sub">zarządzanie flotą</div>
+  <div class="main">
+    <div class="topbar" id="main-topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
+        <h2 id="view-title">Dashboard</h2>
       </div>
-      <div class="nav-sec">Główne</div>
-      <div class="nav active" onclick="showView('dashboard')">
-        <svg viewBox="0 0 16 16">
-          <rect x="1" y="1" width="6" height="6" rx="1" />
-          <rect x="9" y="1" width="6" height="6" rx="1" />
-          <rect x="1" y="9" width="6" height="6" rx="1" />
-          <rect x="9" y="9" width="6" height="6" rx="1" />
-        </svg>Dashboard
-      </div>
-      <div class="nav" onclick="showView('zlecenia')">
-        <svg viewBox="0 0 16 16">
-          <path d="M2 4h12M2 8h12M2 12h7" />
-        </svg>Zlecenia
-      </div>
-      <div class="nav" onclick="showView('kierowcy')">
-        <svg viewBox="0 0 16 16">
-          <circle cx="8" cy="6" r="3" />
-          <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" />
-        </svg>Kierowcy
-      </div>
-      <div class="nav" onclick="showView('flota')">
-        <svg viewBox="0 0 16 16">
-          <rect x="1" y="5" width="14" height="8" rx="1" />
-          <path d="M4 5V3a1 1 0 011-1h6a1 1 0 011 1v2" />
-          <circle cx="4.5" cy="13" r="1.5" />
-          <circle cx="11.5" cy="13" r="1.5" />
-        </svg>Flota
-      </div>
-      <div class="nav-sec">Dokumenty</div>
-      <div class="nav" onclick="showView('dokumenty')">
-        <svg viewBox="0 0 16 16">
-          <path d="M4 2h6l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" />
-          <path d="M10 2v4h4M6 9h4M6 12h3" />
-        </svg>Dokumenty
-      </div>
-      <div class="nav" onclick="showView('podwykonawcy')">
-        <svg viewBox="0 0 16 16">
-          <path d="M8 1v14M1 8h14" />
-        </svg>Zlecenia zewnętrzne
-      </div>
-      <div class="nav-sec">Analizy</div>
-      <div class="nav" onclick="showView('raporty')">
-        <svg viewBox="0 0 16 16">
-          <path d="M2 12l4-4 3 3 5-7" />
-        </svg>Raporty
-      </div>
-      <div class="nav" onclick="showView('rozliczenia')">
-        <svg viewBox="0 0 16 16">
-          <circle cx="8" cy="8" r="6" />
-          <path d="M8 5v3l2 2" />
-        </svg>Prowizja spedytora
-      </div>
-      <div class="nav" onclick="showView('kalkulator')">
-        <svg viewBox="0 0 16 16">
-          <rect x="2" y="2" width="12" height="12" rx="1" />
-          <path d="M5 6h6M5 9h4M5 12h3" />
-        </svg>Kalkulator paliwa
-      </div>
-      <div class="nav" onclick="showView('kalendarz')">
-        <svg viewBox="0 0 16 16">
-          <rect x="1" y="2" width="14" height="13" rx="1" />
-          <path d="M1 6h14M5 1v2M11 1v2" />
-        </svg>Kalendarz
-      </div>
-      <div style="flex:1"></div>
-      <div class="sidebar-bottom" style="padding:14px 16px;border-top:1px solid var(--border)">
-        <button class="btn btn-sm" onclick="logout()">Wyloguj</button>
+      <div class="topbar-right">
+        <span><span class="sync-indicator" id="sync-dot"></span><span id="sync-text" style="font-size:11px;color:var(--text3)">połączono</span></span>
+        <div id="topbar-actions"></div>
       </div>
     </div>
-
-    <div class="main">
-      <div class="topbar" id="main-topbar">
-        <div style="display:flex;align-items:center;gap:10px">
-          <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()"
-            aria-label="Menu"><span></span><span></span><span></span></button>
-          <h2 id="view-title">Dashboard</h2>
-        </div>
-        <div class="topbar-right">
-          <span><span class="sync-indicator" id="sync-dot"></span><span id="sync-text"
-              style="font-size:11px;color:var(--text3)">połączono</span></span>
-          <div id="topbar-actions"></div>
-        </div>
-      </div>
-      <div class="content" id="main-content">
-        <div class="loader">Ładowanie danych...</div>
-      </div>
-    </div>
-    <!-- Mobile Tab Bar -->
-    <div class="tab-bar">
-      <div class="tab-bar-inner">
-        <button class="tab-item active" id="tab-dashboard" onclick="tabNav('dashboard')">
-          <svg viewBox="0 0 16 16">
-            <rect x="1" y="1" width="6" height="6" rx="1" />
-            <rect x="9" y="1" width="6" height="6" rx="1" />
-            <rect x="1" y="9" width="6" height="6" rx="1" />
-            <rect x="9" y="9" width="6" height="6" rx="1" />
-          </svg>
-          Dashboard
-        </button>
-        <button class="tab-item" id="tab-zlecenia" onclick="tabNav('zlecenia')">
-          <svg viewBox="0 0 16 16">
-            <path d="M2 4h12M2 8h12M2 12h7" />
-          </svg>
-          Zlecenia
-        </button>
-        <button class="tab-item" id="tab-kierowcy" onclick="tabNav('kierowcy')">
-          <svg viewBox="0 0 16 16">
-            <circle cx="8" cy="6" r="3" />
-            <path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6" />
-          </svg>
-          Kierowcy
-        </button>
-        <button class="tab-item" id="tab-flota" onclick="tabNav('flota')">
-          <svg viewBox="0 0 16 16">
-            <rect x="1" y="5" width="14" height="8" rx="1" />
-            <path d="M4 5V3a1 1 0 011-1h6a1 1 0 011 1v2" />
-            <circle cx="4.5" cy="13" r="1.5" />
-            <circle cx="11.5" cy="13" r="1.5" />
-          </svg>
-          Flota
-        </button>
-        <button class="tab-item" id="tab-more" onclick="toggleMoreMenu()">
-          <svg viewBox="0 0 16 16">
-            <circle cx="4" cy="8" r="1.5" fill="currentColor" />
-            <circle cx="8" cy="8" r="1.5" fill="currentColor" />
-            <circle cx="12" cy="8" r="1.5" fill="currentColor" />
-          </svg>
-          Więcej
-        </button>
-      </div>
-    </div>
-    <!-- More Menu -->
-    <div class="tab-more-menu" id="tab-more-menu">
-      <div class="tab-more-item" onclick="tabNav('podwykonawcy');toggleMoreMenu()">
-        <svg viewBox="0 0 16 16">
-          <path d="M8 1v14M1 8h14" />
-        </svg>Zlecenia zewnętrzne
-      </div>
-      <div class="tab-more-item" onclick="tabNav('dokumenty');toggleMoreMenu()">
-        <svg viewBox="0 0 16 16">
-          <path d="M4 2h6l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" />
-        </svg>Dokumenty
-      </div>
-      <div class="tab-more-item" onclick="tabNav('raporty');toggleMoreMenu()">
-        <svg viewBox="0 0 16 16">
-          <path d="M2 12l4-4 3 3 5-7" />
-        </svg>Raporty
-      </div>
-      <div class="tab-more-item" onclick="tabNav('rozliczenia');toggleMoreMenu()">
-        <svg viewBox="0 0 16 16">
-          <circle cx="8" cy="8" r="6" />
-          <path d="M8 5v3l2 2" />
-        </svg>Prowizja spedytora
-      </div>
-      <div class="tab-more-item" onclick="tabNav('kalkulator');toggleMoreMenu()">
-        <svg viewBox="0 0 16 16">
-          <rect x="2" y="2" width="12" height="12" rx="1" />
-          <path d="M5 6h6M5 9h4" />
-        </svg>Kalkulator paliwa
-      </div>
-      <div class="tab-more-item" style="color:var(--text2);border-top:1px solid var(--border);margin-top:4px"
-        onclick="logout()">
-        <svg viewBox="0 0 16 16">
-          <path d="M10 8H3M6 5l-3 3 3 3M10 3h3a1 1 0 011 1v8a1 1 0 01-1 1h-3" />
-        </svg>Wyloguj
-      </div>
+    <div class="content" id="main-content">
+      <div class="loader">Ładowanie danych...</div>
     </div>
   </div>
-
-  <div class="modal-overlay" id="modal-overlay">
-    <div class="modal">
-      <div class="modal-head">
-        <h3 id="modal-title">Nowe zlecenie</h3>
-        <button class="btn btn-sm" onclick="closeModal()">✕</button>
-      </div>
-      <div class="modal-body" id="modal-body"></div>
-      <div class="modal-foot" id="modal-foot"></div>
+  <!-- Mobile Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-bar-inner">
+      <button class="tab-item active" id="tab-dashboard" onclick="tabNav('dashboard')">
+        <svg viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+        Dashboard
+      </button>
+      <button class="tab-item" id="tab-zlecenia" onclick="tabNav('zlecenia')">
+        <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h7"/></svg>
+        Zlecenia
+      </button>
+      <button class="tab-item" id="tab-kierowcy" onclick="tabNav('kierowcy')">
+        <svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+        Kierowcy
+      </button>
+      <button class="tab-item" id="tab-flota" onclick="tabNav('flota')">
+        <svg viewBox="0 0 16 16"><rect x="1" y="5" width="14" height="8" rx="1"/><path d="M4 5V3a1 1 0 011-1h6a1 1 0 011 1v2"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="11.5" cy="13" r="1.5"/></svg>
+        Flota
+      </button>
+      <button class="tab-item" id="tab-more" onclick="toggleMoreMenu()">
+        <svg viewBox="0 0 16 16"><circle cx="4" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="8" r="1.5" fill="currentColor"/></svg>
+        Więcej
+      </button>
     </div>
   </div>
+  <!-- More Menu -->
+  <div class="tab-more-menu" id="tab-more-menu">
+    <div class="tab-more-item" onclick="tabNav('podwykonawcy');toggleMoreMenu()">
+      <svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14"/></svg>Zlecenia zewnętrzne
+    </div>
+    <div class="tab-more-item" onclick="tabNav('dokumenty');toggleMoreMenu()">
+      <svg viewBox="0 0 16 16"><path d="M4 2h6l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/></svg>Dokumenty
+    </div>
+    <div class="tab-more-item" onclick="tabNav('raporty');toggleMoreMenu()">
+      <svg viewBox="0 0 16 16"><path d="M2 12l4-4 3 3 5-7"/></svg>Raporty
+    </div>
+    <div class="tab-more-item" onclick="tabNav('rozliczenia');toggleMoreMenu()">
+      <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Prowizja spedytora
+    </div>
+    <div class="tab-more-item" onclick="tabNav('kalkulator');toggleMoreMenu()">
+      <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4"/></svg>Kalkulator paliwa
+    </div>
+    <div class="tab-more-item" style="color:var(--text2);border-top:1px solid var(--border);margin-top:4px" onclick="logout()">
+      <svg viewBox="0 0 16 16"><path d="M10 8H3M6 5l-3 3 3 3M10 3h3a1 1 0 011 1v8a1 1 0 01-1 1h-3"/></svg>Wyloguj
+    </div>
+  </div>
+</div>
 
-  <div class="toast" id="toast"></div>
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="modal-title">Nowe zlecenie</h3>
+      <button class="btn btn-sm" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-foot" id="modal-foot"></div>
+  </div>
+</div>
 
-  <script>
-    const SUPABASE_URL = 'https://lpvxzokrntzvpqjkudyf.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxwdnh6b2tybnR6dnBxamt1ZHlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NzA5NTIsImV4cCI6MjA5MTE0Njk1Mn0.8kCHA9nUsy9W6H92lVKW4yV-xNSwPhoNO2uJ_cphiss';
+<div class="toast" id="toast"></div>
 
-    const { createClient } = supabase;
-    const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
-      auth: { persistSession: false, autoRefreshToken: false }
-    });
+<script>
 
-    const STATUS_MAP = { 'Nowe': 'b-gray', 'W trasie': 'b-blue', 'Oczekuje': 'b-amber', 'Dostarczone': 'b-green', 'Anulowane': 'b-red' };
-    let currentView = 'dashboard';
-    let currentUser = null;
-    let orders = [], drivers = [], cars = [], docs = [], podw = [], kalEvents = [];
-    let editingId = null;
+const SUPABASE_URL = 'https://lpvxzokrntzvpqjkudyf.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxwdnh6b2tybnR6dnBxamt1ZHlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NzA5NTIsImV4cCI6MjA5MTE0Njk1Mn0.8kCHA9nUsy9W6H92lVKW4yV-xNSwPhoNO2uJ_cphiss';
 
-    // ── AUTH — proste hasło, bez Supabase auth ─────────────────
-    const APP_PASSWORD = 'transport2024';
-    // zmień na własne hasło
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false }
+});
 
-    function checkPassword() {
-      const pass = document.getElementById('login-password').value;
-      const err = document.getElementById('login-error');
-      if (pass === APP_PASSWORD) {
-        try { sessionStorage.setItem('transport-logged', '1'); } catch (e) { console.warn('Storage blocked:', e); }
-        document.getElementById('login-screen').style.display = 'none';
-        document.getElementById('app-screen').style.display = 'flex';
-        initApp();
-      } else {
-        err.textContent = 'Nieprawidłowe hasło.';
-      }
-    }
+const STATUS_MAP = {'Nowe':'b-gray','W trasie':'b-blue','Oczekuje':'b-amber','Dostarczone':'b-green','Anulowane':'b-red'};
+let currentView = 'dashboard';
+let currentUser = null;
+let orders = [], drivers = [], cars = [], docs = [], podw = [], kalEvents = [];
+let editingId = null;
 
-    function logout() {
-      try { sessionStorage.removeItem('transport-logged'); } catch (e) { }
-      document.getElementById('login-screen').style.display = 'flex';
-      document.getElementById('app-screen').style.display = 'none';
-    }
+// ── AUTH — proste hasło, bez Supabase auth ─────────────────
+const APP_PASSWORD = 'transport2024';
+ // zmień na własne hasło
 
-    // Sprawdź czy już zalogowany
-    document.addEventListener('DOMContentLoaded', function () {
-      try {
-        if (sessionStorage.getItem('transport-logged') === '1') {
-          document.getElementById('login-screen').style.display = 'none';
-          document.getElementById('app-screen').style.display = 'flex';
-          initApp();
-        }
-      } catch (e) { }
-    });
+function checkPassword() {
+  const pass = document.getElementById('login-password').value;
+  const err  = document.getElementById('login-error');
+  if (pass === APP_PASSWORD) {
+    sessionStorage.setItem('transport-logged', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display  = 'flex';
+    initApp();
+  } else {
+    err.textContent = 'Nieprawidłowe hasło.';
+  }
+}
 
-    // ── DB INIT ───────────────────────────────────────────────
-    async function initApp() {
-      await ensureTables();
-      await loadAll();
-      showView('dashboard');
-      setupRealtime();
-    }
+function logout() {
+  sessionStorage.removeItem('transport-logged');
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display  = 'none';
+}
 
-    async function ensureTables() {
-      // no-op
-    }
+// Sprawdź czy już zalogowany
+document.addEventListener('DOMContentLoaded', function() {
+  if (sessionStorage.getItem('transport-logged') === '1') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display  = 'flex';
+    initApp();
+  }
+});
 
-    async function loadAll() {
-      setSync(true);
-      try {
-        const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
+// ── DB INIT ───────────────────────────────────────────────
+async function initApp() {
+  await ensureTables();
+  await loadAll();
+  showView('dashboard');
+  setupRealtime();
+}
 
-        const fetchData = Promise.all([
-          sb.from('zlecenia').select('*').order('created_at', { ascending: false }),
-          sb.from('kierowcy').select('*').order('nazwa'),
-          sb.from('flota').select('*').order('rejestracja'),
-          sb.from('dokumenty').select('*').order('created_at', { ascending: false }),
-          sb.from('podwykonawcy_zlecenia').select('*').order('created_at', { ascending: false }),
-          sb.from('kalendarz').select('*').order('data', { ascending: true }),
-        ]);
+async function ensureTables() {
+  // no-op
+}
 
-        const [z, k, f, d, pw, ke] = await Promise.race([fetchData, timeout(8000)]);
+async function loadAll() {
+  setSync(true);
+  try {
+    const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
 
-        if (z.error) throw new Error('zlecenia: ' + z.error.message);
-        if (k.error) throw new Error('kierowcy: ' + k.error.message);
-        if (f.error) throw new Error('flota: ' + f.error.message);
-        if (d.error) throw new Error('dokumenty: ' + d.error.message);
-        if (pw.error) throw new Error('podwykonawcy: ' + pw.error.message);
+    const fetchData = Promise.all([
+      sb.from('zlecenia').select('*').order('created_at', { ascending: false }),
+      sb.from('kierowcy').select('*').order('nazwa'),
+      sb.from('flota').select('*').order('rejestracja'),
+      sb.from('dokumenty').select('*').order('created_at', { ascending: false }),
+      sb.from('podwykonawcy_zlecenia').select('*').order('created_at', { ascending: false }),
+      sb.from('kalendarz').select('*').order('data', { ascending: true }),
+    ]);
 
-        orders = z.data || [];
-        drivers = k.data || [];
-        cars = f.data || [];
-        docs = d.data || [];
-        podw = pw.data || [];
-        kalEvents = ke.data || [];
-      } catch (e) {
-        document.getElementById('main-content').innerHTML = `
+    const [z, k, f, d, pw, ke] = await Promise.race([fetchData, timeout(8000)]);
+
+    if (z.error) throw new Error('zlecenia: ' + z.error.message);
+    if (k.error) throw new Error('kierowcy: ' + k.error.message);
+    if (f.error) throw new Error('flota: ' + f.error.message);
+    if (d.error) throw new Error('dokumenty: ' + d.error.message);
+    if (pw.error) throw new Error('podwykonawcy: ' + pw.error.message);
+
+    orders  = z.data || [];
+    drivers = k.data || [];
+    cars    = f.data || [];
+    docs    = d.data || [];
+    podw    = pw.data || [];
+    kalEvents = ke.data || [];
+  } catch(e) {
+    document.getElementById('main-content').innerHTML = `
       <div style="background:#FCEBEB;border:1px solid #f09595;border-radius:12px;padding:24px;margin-bottom:16px;color:#791F1F">
         <div style="font-size:15px;font-weight:600;margin-bottom:8px">Błąd połączenia z bazą danych</div>
         <div style="font-size:13px;margin-bottom:12px">${e.message}</div>
@@ -1243,97 +482,97 @@ create policy "dostep" on flota for all to anon, authenticated using (true) with
 create policy "dostep" on dokumenty for all to anon, authenticated using (true) with check (true);</pre>
         <button class="btn btn-primary" style="margin-top:12px" onclick="location.reload()">Odśwież po uruchomieniu SQL</button>
       </div>`;
-        setSync(false);
-        return;
-      }
-      setSync(false);
+    setSync(false);
+    return;
+  }
+  setSync(false);
+}
+
+function setupRealtime() {
+  // Realtime przez polling co 30 sekund
+  setInterval(async () => {
+    await loadAll();
+    renderView(currentView);
+  }, 30000);
+
+  // Odświeżaj też gdy użytkownik wraca do karty
+  document.addEventListener('visibilitychange', async () => {
+    if (document.visibilityState === 'visible') {
+      await loadAll();
+      renderView(currentView);
     }
+  });
+}
 
-    function setupRealtime() {
-      // Realtime przez polling co 30 sekund
-      setInterval(async () => {
-        await loadAll();
-        renderView(currentView);
-      }, 30000);
+function setSync(loading) {
+  const dot  = document.getElementById('sync-dot');
+  const text = document.getElementById('sync-text');
+  if (loading) { dot.className = 'sync-indicator offline'; text.textContent = 'synchronizacja...'; }
+  else         { dot.className = 'sync-indicator';          text.textContent = 'połączono'; }
+}
 
-      // Odświeżaj też gdy użytkownik wraca do karty
-      document.addEventListener('visibilitychange', async () => {
-        if (document.visibilityState === 'visible') {
-          await loadAll();
-          renderView(currentView);
-        }
-      });
-    }
+// ── NAVIGATION ────────────────────────────────────────────
+function showView(v) {
+  currentView = v;
+  document.querySelectorAll('.nav').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.nav').forEach(n => {
+    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + v + "'")) n.classList.add('active');
+  });
+  // sync mobile action button
+  const mobileActs = document.getElementById('topbar-actions-mobile');
+  if (mobileActs) mobileActs.innerHTML = document.getElementById('topbar-actions').innerHTML;
+  const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne', rozliczenia:'Prowizja spedytora', kalkulator:'Kalkulator dodatku paliwowego', kalendarz:'Kalendarz' };
+  document.getElementById('view-title').textContent = titles[v] || v;
+  const acts = document.getElementById('topbar-actions');
+  const btns = {
+    zlecenia:  '<button class="btn" onclick="exportExcel()">Export Excel</button><button class="btn btn-primary" onclick="openOrderModal()">+ Nowe zlecenie</button>',
+    dashboard: '<button class="btn btn-primary" onclick="openOrderModal()">+ Nowe zlecenie</button>',
+    kierowcy:  '<button class="btn btn-primary" onclick="openDriverModal()">+ Kierowca</button>',
+    flota:     '<button class="btn btn-primary" onclick="openCarModal()">+ Auto</button>',
+    dokumenty: '<button class="btn btn-primary" onclick="openDocModal()">+ Dokument</button>',
+    podwykonawcy: '<button class="btn btn-primary" onclick="openPodwModal()">+ Nowe zlecenie zewnętrzne</button>',
+    raporty: '<button class="btn" onclick="exportExcelRaport()">Export Excel</button><button class="btn" onclick="exportExcelProwizja()">Export prowizji</button>',
+    kalkulator: '',
+    kalendarz: '<button class="btn btn-primary" onclick="openKalModal(null, null)">+ Notatka / Wydarzenie</button>',
+    rozliczenia: '',
+  };
+  acts.innerHTML = btns[v] || '';
+  renderView(v);
+}
 
-    function setSync(loading) {
-      const dot = document.getElementById('sync-dot');
-      const text = document.getElementById('sync-text');
-      if (loading) { dot.className = 'sync-indicator offline'; text.textContent = 'synchronizacja...'; }
-      else { dot.className = 'sync-indicator'; text.textContent = 'połączono'; }
-    }
+function renderView(v) {
+  const c = document.getElementById('main-content');
+  if      (v === 'dashboard') c.innerHTML = renderDashboard();
+  else if (v === 'zlecenia')  c.innerHTML = renderZlecenia();
+  else if (v === 'kierowcy')  c.innerHTML = renderKierowcy();
+  else if (v === 'flota')     c.innerHTML = renderFlota();
+  else if (v === 'dokumenty') c.innerHTML = renderDokumenty();
+  else if (v === 'raporty') { c.innerHTML = renderRaporty(); var cb=document.getElementById('r-clear-btn'); if(cb) cb.onclick=function(){document.getElementById('r-month').value='';renderView('raporty');}; }
+  else if (v === 'podwykonawcy') c.innerHTML = renderPodwykonawcy();
+  else if (v === 'rozliczenia') c.innerHTML = renderRozliczenia();
+  else if (v === 'kalkulator') { c.innerHTML = renderKalkulator(); setTimeout(kalkuluj, 0); }
+  else if (v === 'kalendarz') c.innerHTML = renderKalendarz();
+}
 
-    // ── NAVIGATION ────────────────────────────────────────────
-    function showView(v) {
-      currentView = v;
-      document.querySelectorAll('.nav').forEach(n => n.classList.remove('active'));
-      document.querySelectorAll('.nav').forEach(n => {
-        if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + v + "'")) n.classList.add('active');
-      });
-      // sync mobile action button
-      const mobileActs = document.getElementById('topbar-actions-mobile');
-      if (mobileActs) mobileActs.innerHTML = document.getElementById('topbar-actions').innerHTML;
-      const titles = { dashboard: 'Dashboard', zlecenia: 'Zlecenia', kierowcy: 'Kierowcy', flota: 'Flota', dokumenty: 'Dokumenty', raporty: 'Raporty', podwykonawcy: 'Zlecenia zewnętrzne', rozliczenia: 'Prowizja spedytora', kalkulator: 'Kalkulator dodatku paliwowego', kalendarz: 'Kalendarz' };
-      document.getElementById('view-title').textContent = titles[v] || v;
-      const acts = document.getElementById('topbar-actions');
-      const btns = {
-        zlecenia: '<button class="btn" onclick="exportExcel()">Export Excel</button><button class="btn btn-primary" onclick="openOrderModal()">+ Nowe zlecenie</button>',
-        dashboard: '<button class="btn btn-primary" onclick="openOrderModal()">+ Nowe zlecenie</button>',
-        kierowcy: '<button class="btn btn-primary" onclick="openDriverModal()">+ Kierowca</button>',
-        flota: '<button class="btn btn-primary" onclick="openCarModal()">+ Auto</button>',
-        dokumenty: '<button class="btn btn-primary" onclick="openDocModal()">+ Dokument</button>',
-        podwykonawcy: '<button class="btn btn-primary" onclick="openPodwModal()">+ Nowe zlecenie zewnętrzne</button>',
-        raporty: '<button class="btn" onclick="exportExcelRaport()">Export Excel</button><button class="btn" onclick="exportExcelProwizja()">Export prowizji</button>',
-        kalkulator: '',
-        kalendarz: '<button class="btn btn-primary" onclick="openKalModal(null, null)">+ Notatka / Wydarzenie</button>',
-        rozliczenia: '',
-      };
-      acts.innerHTML = btns[v] || '';
-      renderView(v);
-    }
-
-    function renderView(v) {
-      const c = document.getElementById('main-content');
-      if (v === 'dashboard') c.innerHTML = renderDashboard();
-      else if (v === 'zlecenia') c.innerHTML = renderZlecenia();
-      else if (v === 'kierowcy') c.innerHTML = renderKierowcy();
-      else if (v === 'flota') c.innerHTML = renderFlota();
-      else if (v === 'dokumenty') c.innerHTML = renderDokumenty();
-      else if (v === 'raporty') { c.innerHTML = renderRaporty(); var cb = document.getElementById('r-clear-btn'); if (cb) cb.onclick = function () { document.getElementById('r-month').value = ''; renderView('raporty'); }; }
-      else if (v === 'podwykonawcy') c.innerHTML = renderPodwykonawcy();
-      else if (v === 'rozliczenia') c.innerHTML = renderRozliczenia();
-      else if (v === 'kalkulator') { c.innerHTML = renderKalkulator(); setTimeout(kalkuluj, 0); }
-      else if (v === 'kalendarz') c.innerHTML = renderKalendarz();
-    }
-
-    // ── VIEWS ─────────────────────────────────────────────────
-    function renderDashboard() {
-      const wT = orders.filter(o => o.status === 'W trasie').length;
-      const dst = orders.filter(o => o.status === 'Dostarczone').length;
-      const last = orders.slice(0, 8);
-      const przychodyWg = {};
-      orders.forEach(o => {
-        const w = o.waluta || 'PLN';
-        przychodyWg[w] = (przychodyWg[w] || 0) + (+o.fracht || 0);
-      });
-      const przychodyHtml = Object.entries(przychodyWg).length
-        ? Object.entries(przychodyWg).map(([w, v]) =>
-          `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px">
+// ── VIEWS ─────────────────────────────────────────────────
+function renderDashboard() {
+  const wT  = orders.filter(o => o.status === 'W trasie').length;
+  const dst = orders.filter(o => o.status === 'Dostarczone').length;
+  const last = orders.slice(0, 8);
+  const przychodyWg = {};
+  orders.forEach(o => {
+    const w = o.waluta || 'PLN';
+    przychodyWg[w] = (przychodyWg[w] || 0) + (+o.fracht || 0);
+  });
+  const przychodyHtml = Object.entries(przychodyWg).length
+    ? Object.entries(przychodyWg).map(([w,v]) =>
+        `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px">
           <span style="font-size:11px;color:var(--text3)">${w}</span>
           <span style="font-size:16px;font-weight:600;color:var(--amber-text)">${v.toLocaleString('pl-PL')}</span>
         </div>`
-        ).join('')
-        : '<span style="font-size:20px;font-weight:600">0</span>';
-      return `
+      ).join('')
+    : '<span style="font-size:20px;font-weight:600">0</span>';
+  return `
   <div class="metrics">
     <div class="metric"><div class="metric-label">Wszystkie zlecenia</div><div class="metric-val">${orders.length}</div></div>
     <div class="metric"><div class="metric-label">W trasie</div><div class="metric-val blue">${wT}</div></div>
@@ -1353,21 +592,21 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
       ${drivers.length ? drivers.map(d => `<div class="driver-row">
         <div class="avatar">${initials(d.nazwa)}</div>
         <div style="flex:1;font-size:13px">${d.nazwa}</div>
-        <span class="badge ${d.status === 'W trasie' ? 'b-blue' : d.status === 'Urlop' ? 'b-amber' : 'b-green'}">${d.status}</span>
+        <span class="badge ${d.status==='W trasie'?'b-blue':d.status==='Urlop'?'b-amber':'b-green'}">${d.status}</span>
       </div>`).join('') : '<div class="empty">Brak kierowców</div>'}
     </div>
     <div class="card">
       <div class="card-title">Flota — status</div>
       ${cars.length ? cars.map(c => `<div class="driver-row">
         <div style="flex:1;font-size:13px">${c.rejestracja} — ${c.model}</div>
-        <span class="badge ${c.status === 'W trasie' ? 'b-blue' : c.status === 'Serwis' ? 'b-amber' : 'b-green'}">${c.status}</span>
+        <span class="badge ${c.status==='W trasie'?'b-blue':c.status==='Serwis'?'b-amber':'b-green'}">${c.status}</span>
       </div>`).join('') : '<div class="empty">Brak aut</div>'}
     </div>
   </div>`;
-    }
+}
 
-    function renderZlecenia() {
-      return `
+function renderZlecenia() {
+  return `
   <div class="filter-row">
     <input placeholder="Szukaj trasy, klienta..." id="search-input" oninput="filterOrders()" style="width:220px">
     <select id="filter-status" onchange="filterOrders()">
@@ -1382,255 +621,172 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
     </table></div>
     ${!orders.length ? '<div class="empty">Brak zleceń. Dodaj pierwsze zlecenie.</div>' : ''}
   </div>`;
-    }
+}
 
-    function orderRow(o, showDostawa = false) {
-      return `<tr onclick="showDetail('${o.id}')">
-    <td style="font-family:monospace;color:var(--text3);font-size:12px">${o.numer || o.id?.slice(0, 8)}</td>
-    <td>${o.skad || ''} → ${o.dokad || ''}</td>
-    <td>${o.klient || '-'}</td>
-    <td>${o.kierowca || '-'}</td>
-    <td>${o.data_zaladunek || '-'}</td>
-    ${showDostawa ? `<td>${o.data_dostawa || '-'}</td>` : ''}
-    <td>${(+o.fracht || 0).toLocaleString('pl-PL')} ${o.waluta || 'PLN'}</td>
-    <td><span class="badge ${STATUS_MAP[o.status] || 'b-gray'}">${o.status || '-'}</span></td>
+function orderRow(o, showDostawa=false) {
+  return `<tr onclick="showDetail('${o.id}')">
+    <td style="font-family:monospace;color:var(--text3);font-size:12px">${o.numer||o.id?.slice(0,8)}</td>
+    <td>${o.skad||''} → ${o.dokad||''}</td>
+    <td>${o.klient||'-'}</td>
+    <td>${o.kierowca||'-'}</td>
+    <td>${o.data_zaladunek||'-'}</td>
+    ${showDostawa ? `<td>${o.data_dostawa||'-'}</td>` : ''}
+    <td>${(+o.fracht||0).toLocaleString('pl-PL')} ${o.waluta||'PLN'}</td>
+    <td><span class="badge ${STATUS_MAP[o.status]||'b-gray'}">${o.status||'-'}</span></td>
   </tr>`;
-    }
+}
 
-    function filterOrders() {
-      const q = (document.getElementById('search-input')?.value || '').toLowerCase();
-      const st = document.getElementById('filter-status')?.value || '';
-      const filtered = orders.filter(o => {
-        const match = !q || [o.skad, o.dokad, o.klient, o.kierowca].some(v => (v || '').toLowerCase().includes(q));
-        const statusMatch = !st || o.status === st;
-        return match && statusMatch;
-      });
-      const tbody = document.getElementById('orders-tbody');
-      if (tbody) tbody.innerHTML = filtered.map(o => orderRow(o, true)).join('');
-    }
+function filterOrders() {
+  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
+  const st = document.getElementById('filter-status')?.value||'';
+  const filtered = orders.filter(o => {
+    const match = !q || [o.skad,o.dokad,o.klient,o.kierowca].some(v => (v||'').toLowerCase().includes(q));
+    const statusMatch = !st || o.status === st;
+    return match && statusMatch;
+  });
+  const tbody = document.getElementById('orders-tbody');
+  if (tbody) tbody.innerHTML = filtered.map(o => orderRow(o, true)).join('');
+}
 
-    function renderKierowcy() {
-      return `<div class="card" style="padding:0;overflow:hidden"><table>
+function renderKierowcy() {
+  return `<div class="card" style="padding:0;overflow:hidden"><table>
     <thead><tr><th>Imię i nazwisko</th><th style="width:130px">Telefon</th><th style="width:100px">Status</th><th style="width:70px">Zlecenia</th></tr></thead>
     <tbody>${drivers.map(d => {
-        const cnt = orders.filter(o => o.kierowca === d.nazwa).length;
-        return `<tr onclick="openDriverModal('${d.id}')"><td><div style="display:flex;align-items:center;gap:9px"><div class="avatar">${initials(d.nazwa)}</div>${d.nazwa}</div></td>
-        <td style="color:var(--text2)">${d.telefon || '-'}</td>
-        <td><span class="badge ${d.status === 'W trasie' ? 'b-blue' : d.status === 'Urlop' ? 'b-amber' : 'b-green'}">${d.status}</span></td>
+      const cnt = orders.filter(o => o.kierowca === d.nazwa).length;
+      return `<tr onclick="openDriverModal('${d.id}')"><td><div style="display:flex;align-items:center;gap:9px"><div class="avatar">${initials(d.nazwa)}</div>${d.nazwa}</div></td>
+        <td style="color:var(--text2)">${d.telefon||'-'}</td>
+        <td><span class="badge ${d.status==='W trasie'?'b-blue':d.status==='Urlop'?'b-amber':'b-green'}">${d.status}</span></td>
         <td>${cnt}</td></tr>`;
-      }).join('')}</tbody>
-  </table>${!drivers.length ? '<div class="empty">Brak kierowców</div>' : ''}</div>`;
-    }
+    }).join('')}</tbody>
+  </table>${!drivers.length?'<div class="empty">Brak kierowców</div>':''}</div>`;
+}
 
-    function renderFlota() {
-      var today = new Date();
-      var warn30 = new Date(); warn30.setDate(today.getDate() + 30);
-      function dateStatus(ds) {
-        if (!ds) return null;
-        var d = new Date(ds);
-        if (d < today) return 'expired';
-        if (d <= warn30) return 'soon';
-        return 'ok';
-      }
-      function dateFmt(ds) { return ds ? new Date(ds).toLocaleDateString('pl-PL') : '-'; }
-      function dateBadge(ds) {
-        if (!ds) return '-';
-        var s = dateStatus(ds), f = dateFmt(ds);
-        if (s === 'expired') return '<span class="badge b-red">' + f + ' PRZETERMINOWANY</span>';
-        if (s === 'soon') return '<span class="badge b-amber">' + f + ' wkrotce</span>';
-        return '<span style="font-size:12px;color:var(--text2)">' + f + '</span>';
-      }
-      var alertHtml = '';
-      var alertCars = cars.filter(function (x) {
-        var p = dateStatus(x.data_przegladu), u = dateStatus(x.data_ubezpieczenia);
-        return p === 'expired' || p === 'soon' || u === 'expired' || u === 'soon';
-      });
-      if (alertCars.length) {
-        var msgs = alertCars.map(function (x) {
-          var parts = [], p = dateStatus(x.data_przegladu), u = dateStatus(x.data_ubezpieczenia);
-          if (p === 'expired') parts.push(x.rejestracja + ': przeglad PRZETERMINOWANY');
-          else if (p === 'soon') parts.push(x.rejestracja + ': przeglad ' + dateFmt(x.data_przegladu));
-          if (u === 'expired') parts.push(x.rejestracja + ': ubezp. PRZETERMINOWANE');
-          else if (u === 'soon') parts.push(x.rejestracja + ': ubezp. ' + dateFmt(x.data_ubezpieczenia));
-          return parts.join(', ');
-        }).join(' | ');
-        alertHtml = '<div style="background:var(--color-background-warning);border:1px solid var(--color-border-warning);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--color-text-warning)"><strong>Uwaga!</strong> ' + msgs + '</div>';
-      }
-      var rows = '';
-      for (var i = 0; i < cars.length; i++) {
-        var car = cars[i];
-        var cnt = orders.filter(function (o) { return o.auto === car.rejestracja + ' — ' + car.model; }).length;
-        var ps = dateStatus(car.data_przegladu), us = dateStatus(car.data_ubezpieczenia);
-        var rowBg = (ps === 'expired' || us === 'expired') ? 'background:var(--red-bg)' : (ps === 'soon' || us === 'soon') ? 'background:var(--amber-bg)' : '';
-        var sb = car.status === 'W trasie' ? 'b-blue' : car.status === 'Serwis' ? 'b-amber' : 'b-green';
-        rows += '<tr data-id="' + car.id + '" style="' + rowBg + ';cursor:pointer"><td><strong>' + car.rejestracja + '</strong></td><td>' + car.model + '</td><td style="color:var(--text2)">' + (car.rok || '-') + '</td><td><span class="badge ' + sb + '">' + car.status + '</span></td><td>' + dateBadge(car.data_przegladu) + '</td><td>' + dateBadge(car.data_ubezpieczenia) + '</td><td>' + cnt + '</td></tr>';
-      }
-      var html = alertHtml + '<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table id="flota-table"><thead><tr><th>Rejestracja</th><th>Marka i model</th><th style="width:60px">Rok</th><th style="width:90px">Status</th><th style="width:130px">Przeglad</th><th style="width:130px">Ubezpieczenie</th><th style="width:60px">Zlecenia</th></tr></thead><tbody>' + rows + '</tbody></table>' + (!cars.length ? '<div class="empty">Brak aut we flocie</div>' : '') + '</div></div>';
-      setTimeout(function () {
-        var tbl = document.getElementById('flota-table');
-        if (tbl) tbl.addEventListener('click', function (e) {
-          var tr = e.target.closest('tr[data-id]');
-          if (tr) openCarModal(tr.getAttribute('data-id'));
-        });
-      }, 50);
-      return html;
-    }
+function renderFlota() {
+  var today = new Date();
+  var warn30 = new Date(); warn30.setDate(today.getDate() + 30);
+  function dateStatus(ds) {
+    if (!ds) return null;
+    var d = new Date(ds);
+    if (d < today) return 'expired';
+    if (d <= warn30) return 'soon';
+    return 'ok';
+  }
+  function dateFmt(ds) { return ds ? new Date(ds).toLocaleDateString('pl-PL') : '-'; }
+  function dateBadge(ds) {
+    if (!ds) return '-';
+    var s = dateStatus(ds), f = dateFmt(ds);
+    if (s === 'expired') return '<span class="badge b-red">' + f + ' PRZETERMINOWANY</span>';
+    if (s === 'soon') return '<span class="badge b-amber">' + f + ' wkrotce</span>';
+    return '<span style="font-size:12px;color:var(--text2)">' + f + '</span>';
+  }
+  var alertHtml = '';
+  var alertCars = cars.filter(function(x) {
+    var p=dateStatus(x.data_przegladu), u=dateStatus(x.data_ubezpieczenia);
+    return p==='expired'||p==='soon'||u==='expired'||u==='soon';
+  });
+  if (alertCars.length) {
+    var msgs = alertCars.map(function(x) {
+      var parts=[], p=dateStatus(x.data_przegladu), u=dateStatus(x.data_ubezpieczenia);
+      if(p==='expired') parts.push(x.rejestracja+': przeglad PRZETERMINOWANY');
+      else if(p==='soon') parts.push(x.rejestracja+': przeglad '+dateFmt(x.data_przegladu));
+      if(u==='expired') parts.push(x.rejestracja+': ubezp. PRZETERMINOWANE');
+      else if(u==='soon') parts.push(x.rejestracja+': ubezp. '+dateFmt(x.data_ubezpieczenia));
+      return parts.join(', ');
+    }).join(' | ');
+    alertHtml='<div style="background:var(--color-background-warning);border:1px solid var(--color-border-warning);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--color-text-warning)"><strong>Uwaga!</strong> '+msgs+'</div>';
+  }
+  var rows='';
+  for(var i=0;i<cars.length;i++){
+    var car=cars[i];
+    var cnt=orders.filter(function(o){return o.auto===car.rejestracja+' — '+car.model;}).length;
+    var ps=dateStatus(car.data_przegladu), us=dateStatus(car.data_ubezpieczenia);
+    var rowBg=(ps==='expired'||us==='expired')?'background:var(--red-bg)':(ps==='soon'||us==='soon')?'background:var(--amber-bg)':'';
+    var sb=car.status==='W trasie'?'b-blue':car.status==='Serwis'?'b-amber':'b-green';
+    rows+='<tr data-id="'+car.id+'" style="'+rowBg+';cursor:pointer"><td><strong>'+car.rejestracja+'</strong></td><td>'+car.model+'</td><td style="color:var(--text2)">'+(car.rok||'-')+'</td><td><span class="badge '+sb+'">'+car.status+'</span></td><td>'+dateBadge(car.data_przegladu)+'</td><td>'+dateBadge(car.data_ubezpieczenia)+'</td><td>'+cnt+'</td></tr>';
+  }
+  var html=alertHtml+'<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table id="flota-table"><thead><tr><th>Rejestracja</th><th>Marka i model</th><th style="width:60px">Rok</th><th style="width:90px">Status</th><th style="width:130px">Przeglad</th><th style="width:130px">Ubezpieczenie</th><th style="width:60px">Zlecenia</th></tr></thead><tbody>'+rows+'</tbody></table>'+(!cars.length?'<div class="empty">Brak aut we flocie</div>':'')+'</div></div>';
+  setTimeout(function(){
+    var tbl=document.getElementById('flota-table');
+    if(tbl) tbl.addEventListener('click',function(e){
+      var tr=e.target.closest('tr[data-id]');
+      if(tr) openCarModal(tr.getAttribute('data-id'));
+    });
+  },50);
+  return html;
+}
 
-    function renderDokumenty() {
-      return `<div class="card" style="padding:0;overflow:hidden"><table>
+function renderDokumenty() {
+  return `<div class="card" style="padding:0;overflow:hidden"><table>
     <thead><tr><th>Nazwa dokumentu</th><th style="width:100px">Typ</th><th style="width:110px">Data</th><th>Uwagi</th><th style="width:70px">Plik</th></tr></thead>
     <tbody>${docs.map(d => `<tr onclick="openDocModal('${d.id}')">
       <td>${d.nazwa}</td>
       <td><span class="badge b-gray">${d.typ}</span></td>
-      <td style="color:var(--text2)">${d.data || '-'}</td>
-      <td style="color:var(--text2)">${d.uwagi || '-'}</td>
+      <td style="color:var(--text2)">${d.data||'-'}</td>
+      <td style="color:var(--text2)">${d.uwagi||'-'}</td>
       <td>${d.plik_url ? `<a href="${d.plik_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:12px;color:var(--blue-text)">Otwórz</a>` : '-'}</td>
     </tr>`).join('')}</tbody>
-  </table>${!docs.length ? '<div class="empty">Brak dokumentów</div>' : ''}</div>`;
-    }
+  </table>${!docs.length?'<div class="empty">Brak dokumentów</div>':''}</div>`;
+}
 
-    function renderRaporty() {
-      var fm = document.getElementById('r-month') ? document.getElementById('r-month').value : '';
-      function matchMonth(ds) { return !fm || (ds || '').startsWith(fm); }
-      var ownAll = orders.filter(function (o) { return o.status !== 'Anulowane' && matchMonth(o.data_zaladunek); });
-      var extAll = podw.filter(function (p) { return p.status !== 'Anulowane' && matchMonth(p.skad_data); });
-      var allZl = ownAll.concat(extAll.map(function (p) { return Object.assign({}, p, { waluta: p.waluta || 'EUR' }); }));
-      var przychodyWg = {};
-      allZl.forEach(function (o) { var w = o.waluta || 'PLN'; przychodyWg[w] = (przychodyWg[w] || 0) + (+o.fracht || 0); });
-      var przHtml = Object.entries(przychodyWg).map(function (e) {
-        return '<span style="margin-right:12px"><span style="font-size:18px;font-weight:600;color:var(--green-text)">' + e[1].toLocaleString('pl-PL') + '</span> <span style="font-size:11px;color:var(--text3)">' + e[0] + '</span></span>';
-      }).join('') || '0';
-      var prowizjaWg = {};
-      allZl.filter(function (o) { return o.kilometry > 0 && o.fracht > 0; }).forEach(function (o) {
-        var w = o.waluta || 'EUR';
-        var r = calcProwizja(+o.fracht, +o.kilometry, w, +o.prowizja_pct || 4);
-        if (r) prowizjaWg[w] = (prowizjaWg[w] || 0) + r.prowizja;
-      });
-      var prowizjaHtml = Object.entries(prowizjaWg).map(function (e) {
-        return '<span style="margin-right:12px"><span style="font-size:18px;font-weight:600;color:var(--amber-text)">' + e[1].toFixed(2) + '</span> <span style="font-size:11px;color:var(--text3)">' + e[0] + '</span></span>';
-      }).join('') || '<span style="color:var(--text3)">brak zlecen z km</span>';
-      var dst = ownAll.filter(function (o) { return o.status === 'Dostarczone'; }).length;
-      var eff = ownAll.length ? Math.round(dst / ownAll.length * 100) : 0;
-      var onchange = 'renderView(' + String.fromCharCode(39) + 'raporty' + String.fromCharCode(39) + ')';
-      var clearOnclick = 'document.getElementById(' + String.fromCharCode(39) + 'r-month' + String.fromCharCode(39) + ').value=' + String.fromCharCode(39, 39) + ';renderView(' + String.fromCharCode(39) + 'raporty' + String.fromCharCode(39) + ')';
-      var html = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">';
-      html += '<div style="font-size:13px;font-weight:500">Filtruj miesiac:</div>';
-      html += '<input type="month" id="r-month" value="' + fm + '" onchange="' + onchange + '" style="padding:6px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;background:var(--bg);color:var(--text)">';
-      if (fm) html += '<button class="btn" onclick="' + clearOnclick + '">Wyczysc</button>';
-      html += '</div>';
-      html += '<div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:12px">';
-      html += '<div class="metric"><div class="metric-label">Wlasne zlecenia</div><div class="metric-val">' + ownAll.length + '</div></div>';
-      html += '<div class="metric"><div class="metric-label">Zewnetrzne zlecenia</div><div class="metric-val blue">' + extAll.length + '</div></div>';
-      html += '<div class="metric"><div class="metric-label">Skutecznosc dostaw</div><div class="metric-val amber">' + eff + '%</div></div>';
-      html += '</div>';
-      html += '<div class="metric" style="margin-bottom:10px"><div class="metric-label">Laczny przychod</div><div style="margin-top:4px">' + przHtml + '</div></div>';
-      html += '<div class="metric" style="margin-bottom:16px"><div class="metric-label">Prowizja spedytora</div><div style="margin-top:4px">' + prowizjaHtml + '</div></div>';
-      html += '<div class="two-col">';
-      html += '<div class="card"><div class="card-title">Statusy wlasnych zlecen</div>';
-      ['Nowe', 'W trasie', 'Oczekuje', 'Dostarczone', 'Anulowane'].forEach(function (s) {
-        var n = orders.filter(function (o) { return o.status === s && matchMonth(o.data_zaladunek); }).length;
-        var total = orders.filter(function (o) { return matchMonth(o.data_zaladunek); }).length;
-        var pct = total ? Math.round(n / total * 100) : 0;
-        html += '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="badge ' + (STATUS_MAP[s] || 'b-gray') + '" style="width:90px;text-align:center">' + s + '</span><div style="flex:1;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="width:' + pct + '%;height:100%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:12px;font-weight:600;min-width:20px;text-align:right">' + n + '</span></div>';
-      });
-      html += '</div><div class="card"><div class="card-title">Top kierowcy</div>';
-      drivers.map(function (d) { return Object.assign({}, d, { cnt: orders.filter(function (o) { return o.kierowca === d.nazwa && matchMonth(o.data_zaladunek); }).length }); })
-        .sort(function (a, b) { return b.cnt - a.cnt; }).slice(0, 7).forEach(function (d) {
-          html += '<div class="driver-row"><div class="avatar">' + initials(d.nazwa) + '</div><div style="flex:1;font-size:13px">' + d.nazwa + '</div><span style="font-size:14px;font-weight:600">' + d.cnt + '</span></div>';
-        });
-      html += '</div></div>';
-      return html;
-    }
+function renderRaporty() {
+  var fm = document.getElementById('r-month') ? document.getElementById('r-month').value : '';
+  function matchMonth(ds) { return !fm || (ds||'').startsWith(fm); }
+  var ownAll = orders.filter(function(o){ return o.status!=='Anulowane' && matchMonth(o.data_zaladunek); });
+  var extAll = podw.filter(function(p){ return p.status!=='Anulowane' && matchMonth(p.skad_data); });
+  var allZl = ownAll.concat(extAll.map(function(p){ return Object.assign({},p,{waluta:p.waluta||'EUR'}); }));
+  var przychodyWg = {};
+  allZl.forEach(function(o){ var w=o.waluta||'PLN'; przychodyWg[w]=(przychodyWg[w]||0)+(+o.fracht||0); });
+  var przHtml = Object.entries(przychodyWg).map(function(e){
+    return '<span style="margin-right:12px"><span style="font-size:18px;font-weight:600;color:var(--green-text)">'+e[1].toLocaleString('pl-PL')+'</span> <span style="font-size:11px;color:var(--text3)">'+e[0]+'</span></span>';
+  }).join('') || '0';
+  var prowizjaWg = {};
+  allZl.filter(function(o){return o.kilometry>0&&o.fracht>0;}).forEach(function(o){
+    var w=o.waluta||'EUR';
+    var r=calcProwizja(+o.fracht,+o.kilometry,w,+o.prowizja_pct||4);
+    if(r) prowizjaWg[w]=(prowizjaWg[w]||0)+r.prowizja;
+  });
+  var prowizjaHtml = Object.entries(prowizjaWg).map(function(e){
+    return '<span style="margin-right:12px"><span style="font-size:18px;font-weight:600;color:var(--amber-text)">'+e[1].toFixed(2)+'</span> <span style="font-size:11px;color:var(--text3)">'+e[0]+'</span></span>';
+  }).join('') || '<span style="color:var(--text3)">brak zlecen z km</span>';
+  var dst = ownAll.filter(function(o){return o.status==='Dostarczone';}).length;
+  var eff = ownAll.length ? Math.round(dst/ownAll.length*100) : 0;
+  var onchange = 'renderView(' + String.fromCharCode(39) + 'raporty' + String.fromCharCode(39) + ')';
+  var clearOnclick = 'document.getElementById(' + String.fromCharCode(39) + 'r-month' + String.fromCharCode(39) + ').value=' + String.fromCharCode(39,39) + ';renderView(' + String.fromCharCode(39) + 'raporty' + String.fromCharCode(39) + ')';
+  var html = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">';
+  html += '<div style="font-size:13px;font-weight:500">Filtruj miesiac:</div>';
+  html += '<input type="month" id="r-month" value="'+fm+'" onchange="'+onchange+'" style="padding:6px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;background:var(--bg);color:var(--text)">';
+  if(fm) html += '<button class="btn" onclick="'+clearOnclick+'">Wyczysc</button>';
+  html += '</div>';
+  html += '<div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:12px">';
+  html += '<div class="metric"><div class="metric-label">Wlasne zlecenia</div><div class="metric-val">'+ownAll.length+'</div></div>';
+  html += '<div class="metric"><div class="metric-label">Zewnetrzne zlecenia</div><div class="metric-val blue">'+extAll.length+'</div></div>';
+  html += '<div class="metric"><div class="metric-label">Skutecznosc dostaw</div><div class="metric-val amber">'+eff+'%</div></div>';
+  html += '</div>';
+  html += '<div class="metric" style="margin-bottom:10px"><div class="metric-label">Laczny przychod</div><div style="margin-top:4px">'+przHtml+'</div></div>';
+  html += '<div class="metric" style="margin-bottom:16px"><div class="metric-label">Prowizja spedytora</div><div style="margin-top:4px">'+prowizjaHtml+'</div></div>';
+  html += '<div class="two-col">';
+  html += '<div class="card"><div class="card-title">Statusy wlasnych zlecen</div>';
+  ['Nowe','W trasie','Oczekuje','Dostarczone','Anulowane'].forEach(function(s){
+    var n=orders.filter(function(o){return o.status===s&&matchMonth(o.data_zaladunek);}).length;
+    var total=orders.filter(function(o){return matchMonth(o.data_zaladunek);}).length;
+    var pct=total?Math.round(n/total*100):0;
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="badge '+(STATUS_MAP[s]||'b-gray')+'" style="width:90px;text-align:center">'+s+'</span><div style="flex:1;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:12px;font-weight:600;min-width:20px;text-align:right">'+n+'</span></div>';
+  });
+  html += '</div><div class="card"><div class="card-title">Top kierowcy</div>';
+  drivers.map(function(d){return Object.assign({},d,{cnt:orders.filter(function(o){return o.kierowca===d.nazwa&&matchMonth(o.data_zaladunek);}).length});})
+    .sort(function(a,b){return b.cnt-a.cnt;}).slice(0,7).forEach(function(d){
+    html+='<div class="driver-row"><div class="avatar">'+initials(d.nazwa)+'</div><div style="flex:1;font-size:13px">'+d.nazwa+'</div><span style="font-size:14px;font-weight:600">'+d.cnt+'</span></div>';
+  });
+  html += '</div></div>';
+  return html;
+}
 
-    function calcProwizja(fracht, km, waluta, prowizja_pct) {
-      if (!fracht || !prowizja_pct) return null;
-      return { prowizja: fracht * (prowizja_pct / 100) };
-    }
-
-    // ── ZLECENIA ZEWNĘTRZNE (PODWYKONAWCY) ──────────────────────
-    function renderPodwykonawcy() {
-      return `
-  <div class="filter-row">
-    <input placeholder="Szukaj przewoźnika, trasy..." id="p-search-input" oninput="filterPodw()" style="width:220px">
-    <select id="p-filter-status" onchange="filterPodw()">
-      <option value="">Wszystkie statusy</option>
-      <option>Nowe</option><option>W trasie</option><option>Oczekuje</option><option>Dostarczone</option><option>Anulowane</option>
-    </select>
-  </div>
-  <div class="card" style="padding:0;overflow:hidden">
-    <div style="overflow-x:auto"><table id="podw-table">
-      <thead><tr><th style="width:80px">Nr</th><th style="width:180px">Trasa</th><th style="width:130px">Przewoźnik</th><th style="width:90px">Załadunek</th><th style="width:90px" class="hide-mobile">Dostawa</th><th style="width:80px">Fracht</th><th style="width:90px">Status</th></tr></thead>
-      <tbody id="podw-tbody">${podw.map(p => podwRow(p)).join('')}</tbody>
-    </table></div>
-    ${!podw.length ? '<div class="empty">Brak zleceń zewnętrznych.</div>' : ''}
-  </div>`;
-    }
-
-    function podwRow(p) {
-      return `<tr onclick="openPodwModal('${p.id}')" style="cursor:pointer">
-    <td style="font-family:monospace;color:var(--text3);font-size:12px">${p.id?.slice(0, 8) || '-'}</td>
-    <td>${p.skad || ''} → ${p.dokad || ''}</td>
-    <td style="font-weight:500">${p.podwykonawca || '-'}</td>
-    <td>${p.skad_data || '-'}</td>
-    <td class="hide-mobile">${p.dokad_data || '-'}</td>
-    <td style="font-weight:500">${(+p.fracht || 0).toLocaleString('pl-PL')} ${p.waluta || 'PLN'}</td>
-    <td><span class="badge ${STATUS_MAP[p.status] || 'b-gray'}">${p.status || '-'}</span></td>
-  </tr>`;
-    }
-
-    function filterPodw() {
-      const q = (document.getElementById('p-search-input')?.value || '').toLowerCase();
-      const st = document.getElementById('p-filter-status')?.value || '';
-      const filtered = podw.filter(p => {
-        const match = !q || [p.skad, p.dokad, p.podwykonawca].some(v => (v || '').toLowerCase().includes(q));
-        const statusMatch = !st || p.status === st;
-        return match && statusMatch;
-      });
-      const tbody = document.getElementById('podw-tbody');
-      if (tbody) tbody.innerHTML = filtered.map(p => podwRow(p)).join('');
-    }
-
-    function renderRozliczenia() {
-      return `<div class="card"><div class="card-title">Rozliczenia / Prowizja spedytora</div>
-        <div class="empty" style="padding:40px">
-          <svg style="width:40px;height:40px;stroke:var(--text3);fill:none;margin-bottom:10px" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
-          <br>Historia prowizji pojawia się tutaj w oparciu o zlecenia dostarczone z wpisaną wartością procentową prowizji.
-        </div>
-      </div>`;
-    }
-
-    function kalkuluj() {
-      // Funkcja pomocnicza do kalkulatora (pusta zapobiega błędom w setTimeout)
-    }
-
-    function renderKalkulator() {
-      return `<div class="card"><div class="card-title">Kalkulator dodatku paliwowego</div>
-        <div class="empty" style="padding:40px">
-          <svg style="width:40px;height:40px;stroke:var(--text3);fill:none;margin-bottom:10px" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4M5 12h3"/></svg>
-          <br>Moduł kalkulatora ładuje się w uproszczonej wersji. Brak pełnego wzoru w pamięci.
-        </div>
-      </div>`;
-    }
-
-    function renderKalendarz() {
-      return `<div class="card"><div class="card-title">Kalendarz wydarzeń / Flota</div>
-        <table>
-          <thead><tr><th>Data</th><th>Tytuł wydarzenia</th><th>Dotyczy</th></tr></thead>
-          <tbody>${kalEvents.length ? kalEvents.map(e => `<tr>
-            <td style="font-weight:500">${e.data || '-'}</td>
-            <td>${e.tytul || '-'}</td>
-            <td style="color:var(--text2)">${e.auto || e.kierowca || '-'}</td>
-          </tr>`).join('') : '<tr><td colspan="3" class="empty">Brak zaplanowanych wydarzeń w kalendarzu.</td></tr>'}</tbody>
-        </table>
-      </div>`;
-    }
-
-    // ── MODALS ─────────────────────────────────────────────────
-    function openOrderModal(id = null) {
-      editingId = id;
-      const o = id ? orders.find(x => x.id === id) : {};
-      document.getElementById('modal-title').textContent = id ? 'Edytuj zlecenie' : 'Nowe zlecenie';
-      document.getElementById('modal-body').innerHTML = `
+// ── MODALS ─────────────────────────────────────────────────
+function openOrderModal(id=null) {
+  editingId = id;
+  const o = id ? orders.find(x=>x.id===id) : {};
+  document.getElementById('modal-title').textContent = id ? 'Edytuj zlecenie' : 'Nowe zlecenie';
+  document.getElementById('modal-body').innerHTML = `
     <div class="field full" style="background:var(--color-background-info);border-radius:var(--border-radius-md);padding:12px;border:1px solid var(--color-border-info)">
       <label style="color:var(--color-text-info);font-weight:500">Wgraj PDF zlecenia — AI wypełni formularz automatycznie</label>
       <div style="display:flex;gap:8px;margin-top:8px">
@@ -1639,22 +795,22 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
       </div>
       <div id="f-pdf-status" style="font-size:12px;color:var(--color-text-info);margin-top:6px"></div>
     </div>
-    <div class="field"><label>Skąd</label><input id="f-skad" value="${o.skad || ''}" placeholder="Miasto, adres załadunku"></div>
-    <div class="field"><label>Dokąd</label><input id="f-dokad" value="${o.dokad || ''}" placeholder="Miasto, adres rozładunku"></div>
-    <div class="field full" style="position:relative"><label>Nr zlecenia <span style="font-weight:400;color:var(--text3)">(zostaw puste = auto)</span></label><div style="display:flex;gap:6px"><input id="f-numer" value="${o.numer || ''}" placeholder="np. ZL-001 lub numer klienta" style="flex:1"><button type="button" onclick="copyNumer()" style="padding:7px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:12px;color:var(--text2);white-space:nowrap">Kopiuj</button></div></div>
-    <div class="field"><label>Klient / zleceniodawca</label><input id="f-klient" value="${o.klient || ''}" placeholder="Nazwa firmy"></div>
-    <div class="field"><label>Status</label><select id="f-status">${['Nowe', 'Oczekuje', 'W trasie', 'Dostarczone', 'Anulowane'].map(s => `<option ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
-    <div class="field"><label>Kierowca 1</label><select id="f-kierowca"><option value="">— wybierz —</option>${drivers.map(d => `<option ${o.kierowca === d.nazwa ? 'selected' : ''}>${d.nazwa}</option>`).join('')}</select></div>
-    <div class="field"><label>Kierowca 2 (opcjonalnie)</label><select id="f-kierowca2"><option value="">— brak —</option>${drivers.map(d => `<option ${(o.kierowca2 || '') === d.nazwa ? 'selected' : ''}>${d.nazwa}</option>`).join('')}</select></div>
-    <div class="field"><label>Auto</label><select id="f-auto"><option value="">— wybierz —</option>${cars.map(c => `<option value="${c.rejestracja} — ${c.model}" ${o.auto === c.rejestracja + ' — ' + c.model ? 'selected' : ''}>${c.rejestracja} — ${c.model}</option>`).join('')}</select></div>
-    <div class="field"><label>Data załadunku</label><input type="date" id="f-zaladunek" value="${o.data_zaladunek || ''}"></div>
-    <div class="field"><label>Data dostawy</label><input type="date" id="f-dostawa" value="${o.data_dostawa || ''}"></div>
-    <div class="field"><label>Fracht</label><input type="number" id="f-fracht" value="${o.fracht || ''}" placeholder="0"></div>
-    <div class="field"><label>Kilometry (km)</label><input type="number" id="f-km" value="${o.kilometry || ''}" placeholder="0"></div>
-    <div class="field"><label>Prowizja spedytora (%)</label><input type="number" id="f-prowizja" value="${o.prowizja_pct || 4}" step="0.5" min="0" max="100" placeholder="4"></div>
-    <div class="field"><label>Waluta</label><select id="f-waluta">${'PLN,EUR,USD,GBP,CZK,HUF,RON,NOK,SEK,DKK,CHF'.split(',').map(w => `<option ${(o.waluta || 'PLN') === w ? 'selected' : ''}>${w}</option>`).join('')}</select></div>
-    <div class="field"><label>Nr ref. klienta</label><input id="f-ref" value="${o.ref || ''}" placeholder="opcjonalnie"></div>
-    <div class="field full"><label>Uwagi</label><textarea id="f-uwagi">${o.uwagi || ''}</textarea></div>
+    <div class="field"><label>Skąd</label><input id="f-skad" value="${o.skad||''}" placeholder="Miasto, adres załadunku"></div>
+    <div class="field"><label>Dokąd</label><input id="f-dokad" value="${o.dokad||''}" placeholder="Miasto, adres rozładunku"></div>
+    <div class="field full" style="position:relative"><label>Nr zlecenia <span style="font-weight:400;color:var(--text3)">(zostaw puste = auto)</span></label><div style="display:flex;gap:6px"><input id="f-numer" value="${o.numer||''}" placeholder="np. ZL-001 lub numer klienta" style="flex:1"><button type="button" onclick="copyNumer()" style="padding:7px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:12px;color:var(--text2);white-space:nowrap">Kopiuj</button></div></div>
+    <div class="field"><label>Klient / zleceniodawca</label><input id="f-klient" value="${o.klient||''}" placeholder="Nazwa firmy"></div>
+    <div class="field"><label>Status</label><select id="f-status">${['Nowe','Oczekuje','W trasie','Dostarczone','Anulowane'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="field"><label>Kierowca 1</label><select id="f-kierowca"><option value="">— wybierz —</option>${drivers.map(d=>`<option ${o.kierowca===d.nazwa?'selected':''}>${d.nazwa}</option>`).join('')}</select></div>
+    <div class="field"><label>Kierowca 2 (opcjonalnie)</label><select id="f-kierowca2"><option value="">— brak —</option>${drivers.map(d=>`<option ${(o.kierowca2||'')=== d.nazwa?'selected':''}>${d.nazwa}</option>`).join('')}</select></div>
+    <div class="field"><label>Auto</label><select id="f-auto"><option value="">— wybierz —</option>${cars.map(c=>`<option value="${c.rejestracja} — ${c.model}" ${o.auto===c.rejestracja+' — '+c.model?'selected':''}>${c.rejestracja} — ${c.model}</option>`).join('')}</select></div>
+    <div class="field"><label>Data załadunku</label><input type="date" id="f-zaladunek" value="${o.data_zaladunek||''}"></div>
+    <div class="field"><label>Data dostawy</label><input type="date" id="f-dostawa" value="${o.data_dostawa||''}"></div>
+    <div class="field"><label>Fracht</label><input type="number" id="f-fracht" value="${o.fracht||''}" placeholder="0"></div>
+    <div class="field"><label>Kilometry (km)</label><input type="number" id="f-km" value="${o.kilometry||''}" placeholder="0"></div>
+    <div class="field"><label>Prowizja spedytora (%)</label><input type="number" id="f-prowizja" value="${o.prowizja_pct||4}" step="0.5" min="0" max="100" placeholder="4"></div>
+    <div class="field"><label>Waluta</label><select id="f-waluta">${'PLN,EUR,USD,GBP,CZK,HUF,RON,NOK,SEK,DKK,CHF'.split(',').map(w=>`<option ${(o.waluta||'PLN')===w?'selected':''}>${w}</option>`).join('')}</select></div>
+    <div class="field"><label>Nr ref. klienta</label><input id="f-ref" value="${o.ref||''}" placeholder="opcjonalnie"></div>
+    <div class="field full"><label>Uwagi</label><textarea id="f-uwagi">${o.uwagi||''}</textarea></div>
     <div class="field full">
       <label>Plik zlecenia od klienta <span style="font-weight:400;color:var(--text3)">(PDF, JPG, PNG — max 10MB)</span></label>
       <input type="file" id="f-plik" accept=".pdf,.jpg,.jpeg,.png" style="padding:6px 0;border:none;background:transparent">
@@ -1665,219 +821,217 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
       </div>` : ''}
     </div>
   `;
-      document.getElementById('modal-foot').innerHTML = `
+  document.getElementById('modal-foot').innerHTML = `
     ${id ? `<button class="btn btn-danger" onclick="deleteOrder('${id}')">Usuń zlecenie</button>` : ''}
     <button class="btn" onclick="closeModal()">Anuluj</button>
     <button class="btn btn-primary" onclick="saveOrder()">Zapisz</button>
   `;
-      openModal();
-    } function czytajPDFOrder() {
-      showToast('Narzędzie do skanowania PDF jest niedostępne (brak odpowiednich bibliotek w uciętych fragmentach). Proszę użyć standardowego uploaddokumentu poniżej formularza.', false);
+  openModal();
+}
+
+async function saveOrder() {
+  let savedId = null;
+  const skad  = document.getElementById('f-skad').value.trim();
+  const dokad = document.getElementById('f-dokad').value.trim();
+  if (!skad || !dokad) { showToast('Uzupełnij pola Skąd i Dokąd.', true); return; }
+  const payload = {
+    skad, dokad,
+    klient:         document.getElementById('f-klient').value.trim(),
+    status:         document.getElementById('f-status').value,
+    kierowca:       document.getElementById('f-kierowca').value,
+    kierowca2:      document.getElementById('f-kierowca2')?.value||'',
+    auto:           document.getElementById('f-auto').value,
+    data_zaladunek: document.getElementById('f-zaladunek').value || null,
+    data_dostawa:   document.getElementById('f-dostawa').value || null,
+    fracht:         parseFloat(document.getElementById('f-fracht').value) || 0,
+    kilometry:      parseFloat(document.getElementById('f-km').value) || 0,
+    prowizja_pct:   parseFloat(document.getElementById('f-prowizja')?.value) || 4,
+    waluta:         (document.getElementById('f-waluta')||{value:'PLN'}).value,
+    ref:            document.getElementById('f-ref').value.trim(),
+    uwagi:          document.getElementById('f-uwagi').value.trim(),
+    numer:          (document.getElementById('f-numer')||{value:''}).value.trim() || undefined,
+    
+  };
+  if (!editingId) {
+    delete payload.numer_wlasny;
+    const { data: insData, error } = await sb.from('zlecenia').insert(payload).select('id').single();
+    if (error) { showToast('Błąd zapisu: ' + error.message, true); return; }
+    savedId = insData?.id;
+    await sendNewOrderEmail(payload);
+  } else {
+    delete payload.numer_wlasny; const { error } = await sb.from('zlecenia').update(payload).eq('id', editingId);
+    if (error) { showToast('Błąd aktualizacji: ' + error.message, true); return; }
+    savedId = editingId;
+  }
+  // Upload pliku jeśli wybrany
+  const plikInput = document.getElementById('f-plik');
+  if (plikInput && plikInput.files && plikInput.files[0]) {
+    const plik = plikInput.files[0];
+    const ext = plik.name.split('.').pop();
+    const sciezka = 'zlecenia/' + (savedId || editingId) + '.' + ext;
+    const { error: upErr } = await sb.storage.from('zlecenia-pliki').upload(sciezka, plik, { upsert: true });
+    if (!upErr) {
+      const { data: urlData } = sb.storage.from('zlecenia-pliki').getPublicUrl(sciezka);
+      await sb.from('zlecenia').update({ plik_url: urlData.publicUrl }).eq('id', savedId || editingId);
+    } else {
+      showToast('Błąd uploadu: ' + upErr.message, true);
     }
-
-    async function saveOrder() {
-      let savedId = null;
-      const skad = document.getElementById('f-skad').value.trim();
-      const dokad = document.getElementById('f-dokad').value.trim();
-      if (!skad || !dokad) { showToast('Uzupełnij pola Skąd i Dokąd.', true); return; }
-      const payload = {
-        skad, dokad,
-        klient: document.getElementById('f-klient').value.trim(),
-        status: document.getElementById('f-status').value,
-        kierowca: document.getElementById('f-kierowca').value,
-        kierowca2: document.getElementById('f-kierowca2')?.value || '',
-        auto: document.getElementById('f-auto').value,
-        data_zaladunek: document.getElementById('f-zaladunek').value || null,
-        data_dostawa: document.getElementById('f-dostawa').value || null,
-        fracht: parseFloat(document.getElementById('f-fracht').value) || 0,
-        kilometry: parseFloat(document.getElementById('f-km').value) || 0,
-        prowizja_pct: parseFloat(document.getElementById('f-prowizja')?.value) || 4,
-        waluta: (document.getElementById('f-waluta') || { value: 'PLN' }).value,
-        ref: document.getElementById('f-ref').value.trim(),
-        uwagi: document.getElementById('f-uwagi').value.trim(),
-        numer: (document.getElementById('f-numer') || { value: '' }).value.trim() || undefined,
-
-      };
-      if (!editingId) {
-        delete payload.numer_wlasny;
-        const { data: insData, error } = await sb.from('zlecenia').insert(payload).select('id').single();
-        if (error) { showToast('Błąd zapisu: ' + error.message, true); return; }
-        savedId = insData?.id;
-        await sendNewOrderEmail(payload);
-      } else {
-        delete payload.numer_wlasny; const { error } = await sb.from('zlecenia').update(payload).eq('id', editingId);
-        if (error) { showToast('Błąd aktualizacji: ' + error.message, true); return; }
-        savedId = editingId;
-      }
-      // Upload pliku jeśli wybrany
-      const plikInput = document.getElementById('f-plik');
-      if (plikInput && plikInput.files && plikInput.files[0]) {
-        const plik = plikInput.files[0];
-        const ext = plik.name.split('.').pop();
-        const sciezka = 'zlecenia/' + (savedId || editingId) + '.' + ext;
-        const { error: upErr } = await sb.storage.from('zlecenia-pliki').upload(sciezka, plik, { upsert: true });
-        if (!upErr) {
-          const { data: urlData } = sb.storage.from('zlecenia-pliki').getPublicUrl(sciezka);
-          await sb.from('zlecenia').update({ plik_url: urlData.publicUrl }).eq('id', savedId || editingId);
-        } else {
-          showToast('Błąd uploadu: ' + upErr.message, true);
-        }
-      }
-      // Auto-update driver status based on order status
-      const orderStatus = payload.status;
-      const k1 = payload.kierowca;
-      const k2 = payload.kierowca2;
-      if (k1) {
-        const newDriverStatus = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępny' : null;
-        if (newDriverStatus) {
-          const d1 = drivers.find(d => d.nazwa === k1);
-          if (d1) await sb.from('kierowcy').update({ status: newDriverStatus }).eq('id', d1.id);
-        }
-      }
-      if (k2) {
-        const newDriverStatus2 = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępny' : null;
-        if (newDriverStatus2) {
-          const d2 = drivers.find(d => d.nazwa === k2);
-          if (d2) await sb.from('kierowcy').update({ status: newDriverStatus2 }).eq('id', d2.id);
-        }
-      }
-      // Auto-update car status
-      const autoVal = payload.auto;
-      if (autoVal) {
-        const newCarStatus = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępne' : null;
-        if (newCarStatus) {
-          const carParts = autoVal.split(' — ');
-          const carRej = carParts[0];
-          const car = cars.find(c => c.rejestracja === carRej);
-          if (car) await sb.from('flota').update({ status: newCarStatus }).eq('id', car.id);
-        }
-      }
-      closeModal();
-      showToast(editingId ? 'Zlecenie zaktualizowane ✓' : 'Zlecenie dodane ✓');
-      await loadAll(); renderView(currentView);
+  }
+  // Auto-update driver status based on order status
+  const orderStatus = payload.status;
+  const k1 = payload.kierowca;
+  const k2 = payload.kierowca2;
+  if (k1) {
+    const newDriverStatus = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępny' : null;
+    if (newDriverStatus) {
+      const d1 = drivers.find(d => d.nazwa === k1);
+      if (d1) await sb.from('kierowcy').update({ status: newDriverStatus }).eq('id', d1.id);
     }
-
-    async function deleteOrder(id) {
-      if (!confirm('Na pewno usunąć to zlecenie?')) return;
-      await sb.from('zlecenia').delete().eq('id', id);
-      closeModal(); showToast('Zlecenie usunięte');
-      await loadAll(); renderView(currentView);
+  }
+  if (k2) {
+    const newDriverStatus2 = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępny' : null;
+    if (newDriverStatus2) {
+      const d2 = drivers.find(d => d.nazwa === k2);
+      if (d2) await sb.from('kierowcy').update({ status: newDriverStatus2 }).eq('id', d2.id);
     }
+  }
+  // Auto-update car status
+  const autoVal = payload.auto;
+  if (autoVal) {
+    const newCarStatus = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępne' : null;
+    if (newCarStatus) {
+      const carParts = autoVal.split(' — ');
+      const carRej = carParts[0];
+      const car = cars.find(c => c.rejestracja === carRej);
+      if (car) await sb.from('flota').update({ status: newCarStatus }).eq('id', car.id);
+    }
+  }
+  closeModal();
+  showToast(editingId ? 'Zlecenie zaktualizowane ✓' : 'Zlecenie dodane ✓');
+  await loadAll(); renderView(currentView);
+}
 
-    function showDetail(id) {
-      const o = orders.find(x => x.id === id);
-      if (!o) return;
-      document.getElementById('modal-title').textContent = 'Zlecenie ' + (o.numer || '');
-      document.getElementById('modal-body').innerHTML = `<div class="detail-grid" style="grid-column:1/-1">
-    <div class="detail-row"><div class="detail-label">Skąd</div><div class="detail-val">${o.skad || '-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Dokąd</div><div class="detail-val">${o.dokad || '-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Klient</div><div class="detail-val">${o.klient || '-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Status</div><div class="detail-val"><span class="badge ${STATUS_MAP[o.status] || 'b-gray'}">${o.status}</span></div></div>
-    <div class="detail-row"><div class="detail-label">Kierowca</div><div class="detail-val">${o.kierowca || '-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Auto</div><div class="detail-val">${o.auto || '-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Data załadunku</div><div class="detail-val">${o.data_zaladunek || '-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Data dostawy</div><div class="detail-val">${o.data_dostawa || '-'}</div></div>
-    <div class="detail-row" style="background:var(--blue-bg);cursor:pointer" onclick="navigator.clipboard.writeText('${o.numer || ''}').then(()=>showToast('Skopiowano numer ✓'))"><div class="detail-label" style="color:var(--blue-text)">Nr zlecenia — kliknij aby skopiować</div><div class="detail-val" style="color:var(--blue-text);font-size:15px">${o.numer || 'brak'}</div></div>
-    <div class="detail-row"><div class="detail-label">Fracht</div><div class="detail-val">${(+o.fracht || 0).toLocaleString('pl-PL')} ${o.waluta || 'PLN'}</div></div>
-    <div class="detail-row"><div class="detail-label">Nr ref.</div><div class="detail-val">${o.ref || '-'}</div></div>
-    ${o.uwagi ? `<div class="detail-row full"><div class="detail-label">Uwagi</div><div class="detail-val" style="font-weight:400">${o.uwagi}</div></div>` : ''}
-    ${o.plik_url ? `<div class="detail-row full" style="background:var(--green-bg)"><div class="detail-label" style="color:var(--green-text)">Plik zlecenia</div><div class="detail-val"><a href="${o.plik_url}" target="_blank" style="color:var(--green-text);text-decoration:underline">Otwórz / pobierz plik</a></div></div>` : ''}
+async function deleteOrder(id) {
+  if (!confirm('Na pewno usunąć to zlecenie?')) return;
+  await sb.from('zlecenia').delete().eq('id', id);
+  closeModal(); showToast('Zlecenie usunięte');
+  await loadAll(); renderView(currentView);
+}
+
+function showDetail(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  document.getElementById('modal-title').textContent = 'Zlecenie ' + (o.numer || '');
+  document.getElementById('modal-body').innerHTML = `<div class="detail-grid" style="grid-column:1/-1">
+    <div class="detail-row"><div class="detail-label">Skąd</div><div class="detail-val">${o.skad||'-'}</div></div>
+    <div class="detail-row"><div class="detail-label">Dokąd</div><div class="detail-val">${o.dokad||'-'}</div></div>
+    <div class="detail-row"><div class="detail-label">Klient</div><div class="detail-val">${o.klient||'-'}</div></div>
+    <div class="detail-row"><div class="detail-label">Status</div><div class="detail-val"><span class="badge ${STATUS_MAP[o.status]||'b-gray'}">${o.status}</span></div></div>
+    <div class="detail-row"><div class="detail-label">Kierowca</div><div class="detail-val">${o.kierowca||'-'}</div></div>
+    <div class="detail-row"><div class="detail-label">Auto</div><div class="detail-val">${o.auto||'-'}</div></div>
+    <div class="detail-row"><div class="detail-label">Data załadunku</div><div class="detail-val">${o.data_zaladunek||'-'}</div></div>
+    <div class="detail-row"><div class="detail-label">Data dostawy</div><div class="detail-val">${o.data_dostawa||'-'}</div></div>
+    <div class="detail-row" style="background:var(--blue-bg);cursor:pointer" onclick="navigator.clipboard.writeText('${o.numer||''}').then(()=>showToast('Skopiowano numer ✓'))"><div class="detail-label" style="color:var(--blue-text)">Nr zlecenia — kliknij aby skopiować</div><div class="detail-val" style="color:var(--blue-text);font-size:15px">${o.numer||'brak'}</div></div>
+    <div class="detail-row"><div class="detail-label">Fracht</div><div class="detail-val">${(+o.fracht||0).toLocaleString('pl-PL')} ${o.waluta||'PLN'}</div></div>
+    <div class="detail-row"><div class="detail-label">Nr ref.</div><div class="detail-val">${o.ref||'-'}</div></div>
+    ${o.uwagi?`<div class="detail-row full"><div class="detail-label">Uwagi</div><div class="detail-val" style="font-weight:400">${o.uwagi}</div></div>`:''}
+    ${o.plik_url?`<div class="detail-row full" style="background:var(--green-bg)"><div class="detail-label" style="color:var(--green-text)">Plik zlecenia</div><div class="detail-val"><a href="${o.plik_url}" target="_blank" style="color:var(--green-text);text-decoration:underline">Otwórz / pobierz plik</a></div></div>`:''}
   </div>`;
-      document.getElementById('modal-foot').innerHTML = `
+  document.getElementById('modal-foot').innerHTML = `
     <button class="btn" onclick="closeModal()">Zamknij</button>
     <button class="btn" onclick="exportPDF('${id}')">Eksport PDF</button>
     <button class="btn btn-primary" onclick="openOrderModal('${id}')">Edytuj</button>
   `;
-      openModal();
-    }
+  openModal();
+}
 
-    function openDriverModal(id = null) {
-      editingId = id;
-      const d = id ? drivers.find(x => x.id === id) : {};
-      document.getElementById('modal-title').textContent = id ? 'Edytuj kierowcę' : 'Nowy kierowca';
-      document.getElementById('modal-body').innerHTML = `
-    <div class="field full"><label>Imię i nazwisko</label><input id="d-nazwa" value="${d.nazwa || ''}" placeholder="Jan Kowalski"></div>
-    <div class="field"><label>Telefon</label><input id="d-telefon" value="${d.telefon || ''}" placeholder="+48 500 000 000"></div>
-    <div class="field"><label>Status</label><select id="d-status">${['Dostępny', 'W trasie', 'Urlop', 'Zwolnienie'].map(s => `<option ${d.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
-    <div class="field full"><label>Uwagi</label><textarea id="d-uwagi">${d.uwagi || ''}</textarea></div>
+function openDriverModal(id=null) {
+  editingId = id;
+  const d = id ? drivers.find(x=>x.id===id) : {};
+  document.getElementById('modal-title').textContent = id ? 'Edytuj kierowcę' : 'Nowy kierowca';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="field full"><label>Imię i nazwisko</label><input id="d-nazwa" value="${d.nazwa||''}" placeholder="Jan Kowalski"></div>
+    <div class="field"><label>Telefon</label><input id="d-telefon" value="${d.telefon||''}" placeholder="+48 500 000 000"></div>
+    <div class="field"><label>Status</label><select id="d-status">${['Dostępny','W trasie','Urlop','Zwolnienie'].map(s=>`<option ${d.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="field full"><label>Uwagi</label><textarea id="d-uwagi">${d.uwagi||''}</textarea></div>
   `;
-      document.getElementById('modal-foot').innerHTML = `
-    ${id ? `<button class="btn btn-danger" onclick="deleteDriver('${id}')">Usuń</button>` : ''}
+  document.getElementById('modal-foot').innerHTML = `
+    ${id?`<button class="btn btn-danger" onclick="deleteDriver('${id}')">Usuń</button>`:''}
     <button class="btn" onclick="closeModal()">Anuluj</button>
     <button class="btn btn-primary" onclick="saveDriver()">Zapisz</button>
   `;
-      openModal();
-    }
+  openModal();
+}
 
-    async function saveDriver() {
-      const nazwa = document.getElementById('d-nazwa').value.trim();
-      if (!nazwa) { showToast('Podaj imię i nazwisko.', true); return; }
-      const payload = { nazwa, telefon: document.getElementById('d-telefon').value.trim(), status: document.getElementById('d-status').value, uwagi: document.getElementById('d-uwagi').value.trim() };
-      let err;
-      if (!editingId) { const r = await sb.from('kierowcy').insert(payload); err = r.error; }
-      else { const r = await sb.from('kierowcy').update(payload).eq('id', editingId); err = r.error; }
-      if (err) { showToast('Błąd: ' + err.message, true); return; }
-      closeModal(); showToast('Zapisano ✓');
-      await loadAll(); renderView('kierowcy');
-    }
+async function saveDriver() {
+  const nazwa = document.getElementById('d-nazwa').value.trim();
+  if (!nazwa) { showToast('Podaj imię i nazwisko.', true); return; }
+  const payload = { nazwa, telefon: document.getElementById('d-telefon').value.trim(), status: document.getElementById('d-status').value, uwagi: document.getElementById('d-uwagi').value.trim() };
+  let err;
+  if (!editingId) { const r = await sb.from('kierowcy').insert(payload); err = r.error; }
+  else { const r = await sb.from('kierowcy').update(payload).eq('id', editingId); err = r.error; }
+  if (err) { showToast('Błąd: ' + err.message, true); return; }
+  closeModal(); showToast('Zapisano ✓');
+  await loadAll(); renderView('kierowcy');
+}
 
-    async function deleteDriver(id) {
-      if (!confirm('Usunąć kierowcę?')) return;
-      await sb.from('kierowcy').delete().eq('id', id);
-      closeModal(); showToast('Kierowca usunięty');
-      await loadAll(); renderView('kierowcy');
-    }
+async function deleteDriver(id) {
+  if (!confirm('Usunąć kierowcę?')) return;
+  await sb.from('kierowcy').delete().eq('id', id);
+  closeModal(); showToast('Kierowca usunięty');
+  await loadAll(); renderView('kierowcy');
+}
 
-    function openCarModal(id = null) {
-      editingId = id;
-      const car = id ? cars.find(x => x.id === id) : {};
-      document.getElementById('modal-title').textContent = id ? 'Edytuj auto' : 'Nowe auto';
-      document.getElementById('modal-body').innerHTML = `
-    <div class="field"><label>Rejestracja</label><input id="c-reg" value="${car.rejestracja || ''}" placeholder="WA 1234X"></div>
-    <div class="field"><label>Marka i model</label><input id="c-model" value="${car.model || ''}" placeholder="Volvo FH 500"></div>
-    <div class="field"><label>Rok produkcji</label><input id="c-rok" type="number" value="${car.rok || ''}" placeholder="2020"></div>
-    <div class="field"><label>Status</label><select id="c-status">${['Dostępne', 'W trasie', 'Serwis'].map(s => `<option ${car.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
-    <div class="field"><label>Data przeglądu</label><input type="date" id="c-przeglad" value="${car.data_przegladu || ''}" ></div>
-    <div class="field"><label>Data ubezpieczenia</label><input type="date" id="c-ubezp" value="${car.data_ubezpieczenia || ''}" ></div>
-    <div class="field full"><label>Uwagi</label><textarea id="c-uwagi">${car.uwagi || ''}</textarea></div>
+function openCarModal(id=null) {
+  editingId = id;
+  const car = id ? cars.find(x=>x.id===id) : {};
+  document.getElementById('modal-title').textContent = id ? 'Edytuj auto' : 'Nowe auto';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="field"><label>Rejestracja</label><input id="c-reg" value="${car.rejestracja||''}" placeholder="WA 1234X"></div>
+    <div class="field"><label>Marka i model</label><input id="c-model" value="${car.model||''}" placeholder="Volvo FH 500"></div>
+    <div class="field"><label>Rok produkcji</label><input id="c-rok" type="number" value="${car.rok||''}" placeholder="2020"></div>
+    <div class="field"><label>Status</label><select id="c-status">${['Dostępne','W trasie','Serwis'].map(s=>`<option ${car.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="field"><label>Data przeglądu</label><input type="date" id="c-przeglad" value="${car.data_przegladu||''}" ></div>
+    <div class="field"><label>Data ubezpieczenia</label><input type="date" id="c-ubezp" value="${car.data_ubezpieczenia||''}" ></div>
+    <div class="field full"><label>Uwagi</label><textarea id="c-uwagi">${car.uwagi||''}</textarea></div>
   `;
-      document.getElementById('modal-foot').innerHTML = `
-    ${id ? `<button class="btn btn-danger" onclick="deleteCar('${id}')">Usuń</button>` : ''}
+  document.getElementById('modal-foot').innerHTML = `
+    ${id?`<button class="btn btn-danger" onclick="deleteCar('${id}')">Usuń</button>`:''}
     <button class="btn" onclick="closeModal()">Anuluj</button>
     <button class="btn btn-primary" onclick="saveCar()">Zapisz</button>
   `;
-      openModal();
-    }
+  openModal();
+}
 
-    async function saveCar() {
-      const reg = document.getElementById('c-reg').value.trim();
-      const model = document.getElementById('c-model').value.trim();
-      if (!reg || !model) { showToast('Uzupełnij rejestrację i model.', true); return; }
-      const payload = { rejestracja: reg, model, rok: parseInt(document.getElementById('c-rok').value) || null, status: document.getElementById('c-status').value, uwagi: document.getElementById('c-uwagi').value.trim(), data_przegladu: document.getElementById('c-przeglad').value || null, data_ubezpieczenia: document.getElementById('c-ubezp').value || null };
-      let err2;
-      if (!editingId) { const r = await sb.from('flota').insert(payload); err2 = r.error; }
-      else { const r = await sb.from('flota').update(payload).eq('id', editingId); err2 = r.error; }
-      if (err2) { showToast('Błąd: ' + err2.message, true); return; }
-      closeModal(); showToast('Zapisano ✓');
-      await loadAll(); renderView('flota');
-    }
+async function saveCar() {
+  const reg   = document.getElementById('c-reg').value.trim();
+  const model = document.getElementById('c-model').value.trim();
+  if (!reg || !model) { showToast('Uzupełnij rejestrację i model.', true); return; }
+  const payload = { rejestracja: reg, model, rok: parseInt(document.getElementById('c-rok').value)||null, status: document.getElementById('c-status').value, uwagi: document.getElementById('c-uwagi').value.trim(), data_przegladu: document.getElementById('c-przeglad').value||null, data_ubezpieczenia: document.getElementById('c-ubezp').value||null };
+  let err2;
+  if (!editingId) { const r = await sb.from('flota').insert(payload); err2 = r.error; }
+  else { const r = await sb.from('flota').update(payload).eq('id', editingId); err2 = r.error; }
+  if (err2) { showToast('Błąd: ' + err2.message, true); return; }
+  closeModal(); showToast('Zapisano ✓');
+  await loadAll(); renderView('flota');
+}
 
-    async function deleteCar(id) {
-      if (!confirm('Usunąć auto?')) return;
-      await sb.from('flota').delete().eq('id', id);
-      closeModal(); showToast('Auto usunięte');
-      await loadAll(); renderView('flota');
-    }
+async function deleteCar(id) {
+  if (!confirm('Usunąć auto?')) return;
+  await sb.from('flota').delete().eq('id', id);
+  closeModal(); showToast('Auto usunięte');
+  await loadAll(); renderView('flota');
+}
 
-    function openDocModal(id = null) {
-      editingId = id;
-      const d = id ? docs.find(x => x.id === id) : {};
-      document.getElementById('modal-title').textContent = id ? 'Edytuj dokument' : 'Nowy dokument';
-      document.getElementById('modal-body').innerHTML = `
-    <div class="field full"><label>Nazwa dokumentu</label><input id="doc-nazwa" value="${d.nazwa || ''}" placeholder="Faktura FV/2026/04/001"></div>
-    <div class="field"><label>Typ</label><select id="doc-typ">${['Faktura', 'Umowa', 'CMR', 'Inne'].map(s => `<option ${d.typ === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
-    <div class="field"><label>Data</label><input type="date" id="doc-data" value="${d.data || new Date().toISOString().slice(0, 10)}"></div>
-    <div class="field full"><label>Uwagi</label><textarea id="doc-uwagi">${d.uwagi || ''}</textarea></div>
+function openDocModal(id=null) {
+  editingId = id;
+  const d = id ? docs.find(x=>x.id===id) : {};
+  document.getElementById('modal-title').textContent = id ? 'Edytuj dokument' : 'Nowy dokument';
+  document.getElementById('modal-body').innerHTML = `
+    <div class="field full"><label>Nazwa dokumentu</label><input id="doc-nazwa" value="${d.nazwa||''}" placeholder="Faktura FV/2026/04/001"></div>
+    <div class="field"><label>Typ</label><select id="doc-typ">${['Faktura','Umowa','CMR','Inne'].map(s=>`<option ${d.typ===s?'selected':''}>${s}</option>`).join('')}</select></div>
+    <div class="field"><label>Data</label><input type="date" id="doc-data" value="${d.data||new Date().toISOString().slice(0,10)}"></div>
+    <div class="field full"><label>Uwagi</label><textarea id="doc-uwagi">${d.uwagi||''}</textarea></div>
     <div class="field full">
       <label>Plik dokumentu <span style="font-weight:400;color:var(--text3)">(PDF, JPG, PNG — max 10MB)</span></label>
       <input type="file" id="doc-plik" accept=".pdf,.jpg,.jpeg,.png" style="padding:6px 0;border:none;background:transparent">
@@ -1888,263 +1042,97 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
       </div>` : ''}
     </div>
   `;
-      document.getElementById('modal-foot').innerHTML = `
-    ${id ? `<button class="btn btn-danger" onclick="deleteDoc('${id}')">Usuń</button>` : ''}
+  document.getElementById('modal-foot').innerHTML = `
+    ${id?`<button class="btn btn-danger" onclick="deleteDoc('${id}')">Usuń</button>`:''}
     <button class="btn" onclick="closeModal()">Anuluj</button>
     <button class="btn btn-primary" onclick="saveDoc()">Zapisz</button>
   `;
-      openModal();
+  openModal();
+}
+
+async function saveDoc() {
+  const nazwa = document.getElementById('doc-nazwa').value.trim();
+  if (!nazwa) { showToast('Podaj nazwę dokumentu.', true); return; }
+  const payload = { nazwa, typ: document.getElementById('doc-typ').value, data: document.getElementById('doc-data').value, uwagi: document.getElementById('doc-uwagi').value.trim(),  };
+  let err3, savedDocId = null;
+  if (!editingId) {
+    const r = await sb.from('dokumenty').insert(payload).select('id').single();
+    err3 = r.error; savedDocId = r.data?.id;
+  } else {
+    const r = await sb.from('dokumenty').update(payload).eq('id', editingId);
+    err3 = r.error; savedDocId = editingId;
+  }
+  if (err3) { showToast('Błąd: ' + err3.message, true); return; }
+
+  const docPlik = document.getElementById('doc-plik');
+  if (docPlik && docPlik.files && docPlik.files[0]) {
+    const plik = docPlik.files[0];
+    const ext = plik.name.split('.').pop();
+    const sciezka = 'dokumenty/' + savedDocId + '.' + ext;
+    const { error: upErr } = await sb.storage.from('zlecenia-pliki').upload(sciezka, plik, { upsert: true });
+    if (!upErr) {
+      const { data: urlData } = sb.storage.from('zlecenia-pliki').getPublicUrl(sciezka);
+      await sb.from('dokumenty').update({ plik_url: urlData.publicUrl }).eq('id', savedDocId);
+    } else {
+      showToast('Błąd uploadu: ' + upErr.message, true);
     }
+  }
+  closeModal(); showToast('Dokument zapisany ✓');
+  await loadAll(); renderView('dokumenty');
+}
 
-    async function saveDoc() {
-      const nazwa = document.getElementById('doc-nazwa').value.trim();
-      if (!nazwa) { showToast('Podaj nazwę dokumentu.', true); return; }
-      const payload = { nazwa, typ: document.getElementById('doc-typ').value, data: document.getElementById('doc-data').value, uwagi: document.getElementById('doc-uwagi').value.trim(), };
-      let err3, savedDocId = null;
-      if (!editingId) {
-        const r = await sb.from('dokumenty').insert(payload).select('id').single();
-        err3 = r.error; savedDocId = r.data?.id;
-      } else {
-        const r = await sb.from('dokumenty').update(payload).eq('id', editingId);
-        err3 = r.error; savedDocId = editingId;
-      }
-      if (err3) { showToast('Błąd: ' + err3.message, true); return; }
+async function deleteDoc(id) {
+  if (!confirm('Usunąć dokument?')) return;
+  await sb.from('dokumenty').delete().eq('id', id);
+  closeModal(); showToast('Dokument usunięty');
+  await loadAll(); renderView('dokumenty');
+}
 
-      const docPlik = document.getElementById('doc-plik');
-      if (docPlik && docPlik.files && docPlik.files[0]) {
-        const plik = docPlik.files[0];
-        const ext = plik.name.split('.').pop();
-        const sciezka = 'dokumenty/' + savedDocId + '.' + ext;
-        const { error: upErr } = await sb.storage.from('zlecenia-pliki').upload(sciezka, plik, { upsert: true });
-        if (!upErr) {
-          const { data: urlData } = sb.storage.from('zlecenia-pliki').getPublicUrl(sciezka);
-          await sb.from('dokumenty').update({ plik_url: urlData.publicUrl }).eq('id', savedDocId);
-        } else {
-          showToast('Błąd uploadu: ' + upErr.message, true);
-        }
-      }
-      closeModal(); showToast('Dokument zapisany ✓');
-      await loadAll(); renderView('dokumenty');
-    }
+function openModal()  { document.getElementById('modal-overlay').classList.add('open'); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId = null; }
 
-    async function deleteDoc(id) {
-      if (!confirm('Usunąć dokument?')) return;
-      await sb.from('dokumenty').delete().eq('id', id);
-      closeModal(); showToast('Dokument usunięty');
-      await loadAll(); renderView('dokumenty');
-    }
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) closeModal(); });
 
-    // ── MODALS PODWYKONAWCY ────────────────────────────────────
-    function openPodwModal(id = null) {
-      editingId = id;
-      const p = id ? podw.find(x => x.id === id) : {};
-      document.getElementById('modal-title').textContent = id ? 'Edytuj zlecenie zewnętrzne' : 'Nowe zlecenie zewnętrzne';
-      document.getElementById('modal-body').innerHTML = `
-        <div class="field"><label>Firma podwykonawcy</label><input id="p-firma" value="${p.podwykonawca || ''}" placeholder="Nazwa przewoźnika"></div>
-        <div class="field"><label>Status</label><select id="p-status">${['Nowe', 'Oczekuje', 'W trasie', 'Dostarczone', 'Anulowane'].map(s => `<option ${p.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
-        <div class="field"><label>Załadunek (Skąd)</label><input id="p-skad" value="${p.skad || ''}" placeholder="Miasto załadunku"></div>
-        <div class="field"><label>Rozładunek (Dokąd)</label><input id="p-dokad" value="${p.dokad || ''}" placeholder="Miasto rozładunku"></div>
-        <div class="field"><label>Data załadunku</label><input type="date" id="p-skad-data" value="${p.skad_data || ''}"></div>
-        <div class="field"><label>Data rozładunku</label><input type="date" id="p-dokad-data" value="${p.dokad_data || ''}"></div>
-        <div class="field"><label>Fracht (Koszty)</label><input type="number" id="p-fracht" value="${p.fracht || ''}" placeholder="0"></div>
-        <div class="field"><label>Waluta</label><select id="p-waluta">${'PLN,EUR,USD,GBP'.split(',').map(w => `<option ${(p.waluta || 'PLN') === w ? 'selected' : ''}>${w}</option>`).join('')}</select></div>
-        <div class="field full"><label>Uwagi</label><textarea id="p-uwagi">${p.uwagi || ''}</textarea></div>
-      `;
-      document.getElementById('modal-foot').innerHTML = `
-        ${id ? `<button class="btn btn-danger" onclick="deletePodw('${id}')">Usuń</button>` : ''}
-        <button class="btn" onclick="closeModal()">Anuluj</button>
-        ${id ? `<button class="btn" onclick="exportPDFPodw('${id}')">Eksport PDF</button>` : ''}
-        <button class="btn btn-primary" onclick="savePodw()">Zapisz</button>
-      `;
-      openModal();
-    }
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError?' error':'');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
 
-    async function savePodw() {
-      const skad = document.getElementById('p-skad').value.trim();
-      const dokad = document.getElementById('p-dokad').value.trim();
-      if (!skad || !dokad) { showToast('Uzupełnij załadunek i rozładunek.', true); return; }
+function initials(name) {
+  return (name||'').split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+}
 
-      const payload = {
-        podwykonawca: document.getElementById('p-firma').value.trim(),
-        status: document.getElementById('p-status').value,
-        skad: skad,
-        dokad: dokad,
-        skad_data: document.getElementById('p-skad-data').value || null,
-        dokad_data: document.getElementById('p-dokad-data').value || null,
-        fracht: parseFloat(document.getElementById('p-fracht').value) || 0,
-        waluta: document.getElementById('p-waluta').value,
-        uwagi: document.getElementById('p-uwagi').value.trim()
-      };
+// ── CONFIG ─────────────────────────────────────────────────
+const NOTIFY_EMAIL = ''; // wpisz swoj email np. jan@firma.pl
+const RESEND_API_KEY = ''; // wpisz klucz z resend.com
 
-      let err;
-      if (!editingId) {
-        const r = await sb.from('podwykonawcy_zlecenia').insert(payload); err = r.error;
-      } else {
-        const r = await sb.from('podwykonawcy_zlecenia').update(payload).eq('id', editingId); err = r.error;
-      }
+// ── PDF EXPORT ─────────────────────────────────────────────
 
-      if (err) { showToast('Błąd: ' + err.message, true); return; }
-      closeModal(); showToast('Zapisano pomyślnie ✓');
-      await loadAll(); renderView('podwykonawcy');
-    }
-
-    async function deletePodw(id) {
-      if (!confirm('Usunąć zlecenie zewnętrzne?')) return;
-      await sb.from('podwykonawcy_zlecenia').delete().eq('id', id);
-      closeModal(); showToast('Zlecenie usunięte ✓');
-      await loadAll(); renderView('podwykonawcy');
-    }
-
-    function exportPDFPodw(id) {
-      var o = podw.find(function (x) { return x.id === id; });
-      if (!o) return;
-      var f = (+o.fracht || 0).toLocaleString('pl-PL');
-      var w = o.waluta || 'PLN';
-      var win = window.open('', '_blank', 'width=900,height=700');
-      win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>Zlecenie Zewnętrzne ${o.podwykonawca || ''}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    body{font-family:'Roboto', Arial, sans-serif;font-size:12pt;color:#111;margin:40px;line-height:1.4}
-    h1{font-size:18pt;color:#0C447C;border-bottom:2px solid #378ADD;padding-bottom:10px;margin-bottom:30px;letter-spacing:-0.5px}
-    .header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px}
-    .date{font-size:10pt;color:#666;margin-bottom:5px}
-    .num{font-size:14pt;font-weight:bold;color:#378ADD}
-    .section{margin-bottom:25px;background:#f9f9f9;padding:15px;border-radius:8px;border:1px solid #eee}
-    .section-title{font-size:9pt;font-weight:bold;color:#185FA5;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
-    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-    .col-label{font-size:8.5pt;color:#666;margin-bottom:3px;text-transform:uppercase}
-    .col-val{font-size:11.5pt;font-weight:bold}
-    .btn-print{position:fixed;bottom:20px;right:20px;padding:12px 24px;background:#378ADD;color:#fff;border:none;border-radius:30px;font-size:11pt;cursor:pointer;box-shadow:0 4px 12px rgba(55,138,221,0.3)}
-    @media print{ .btn-print{display:none} body{margin:0;background:#fff} .section{background:#fff;border:1px solid #ddd;padding:10px} }
-  </style></head><body>
-  <button class="btn-print" onclick="window.print()">Drukuj / Zapisz PDF</button>
-  <div class="header">
-    <div><div class="date">Data wydruku: ${new Date().toLocaleDateString('pl-PL')}</div><h1>ZLECENIE PODWYKONAWCZE</h1></div>
-  </div>
-  <div class="section"><div class="section-title">PODWYKONAWCA</div><div class="two-col"><div class="col"><div class="col-label">Nazwa przewoźnika</div><div class="col-val">${o.podwykonawca || '-'}</div></div></div></div>
-  <div class="section"><div class="section-title">TRASA</div><div class="two-col"><div class="col"><div class="col-label">Załadunek</div><div class="col-val">${o.skad || '-'}</div></div><div class="col"><div class="col-label">Rozładunek</div><div class="col-val">${o.dokad || '-'}</div></div></div></div>
-  <div class="section"><div class="section-title">TERMINY</div><div class="two-col"><div class="col"><div class="col-label">Data załadunku</div><div class="col-val">${o.skad_data || '-'}</div></div><div class="col"><div class="col-label">Data dostawy</div><div class="col-val">${o.dokad_data || '-'}</div></div></div></div>
-  <div class="section" style="background:#E6F1FB;border-color:#baddf9"><div style="font-size:7.5pt;color:#185FA5;margin-bottom:1mm">WYNAGRODZENIE</div><div style="font-size:22pt;font-weight:bold;color:#0C447C">${f} ${w}</div><div style="font-size:10pt;color:#378ADD;margin-top:5px">Status realizacji: ${o.status || '-'}</div></div>
-  ${o.uwagi ? `<div class="section"><div class="section-title">UWAGI</div><div style="font-size:11pt;white-space:pre-wrap">${o.uwagi}</div></div>` : ''}
-  </body></html>`);
-      win.document.close();
-    }
-
-    function openModal() { document.getElementById('modal-overlay').classList.add('open'); }
-    function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId = null; }
-
-    document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) closeModal(); });
-
-    function showToast(msg, isError = false) {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = 'toast' + (isError ? ' error' : '');
-      t.classList.add('show');
-      setTimeout(() => t.classList.remove('show'), 3000);
-    }
-
-    function initials(name) {
-      return (name || '').split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase();
-    }
-
-    // ── CONFIG ─────────────────────────────────────────────────
-    const NOTIFY_EMAIL = ''; // wpisz swoj email np. jan@firma.pl
-    const RESEND_API_KEY = ''; // wpisz klucz z resend.com
-
-    // ── PDF EXPORT ─────────────────────────────────────────────
-    function exportPDF(id) {
-      var o = orders.find(function (x) { return x.id === id; });
-      if (!o) return;
-      var f = (+o.fracht || 0).toLocaleString('pl-PL');
-      var w = o.waluta || 'PLN';
-      var win = window.open('', '_blank', 'width=900,height=700');
-      win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>Zlecenie ${o.numer || ''}</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box}
-    body{font-family:'Roboto',Arial,sans-serif;font-size:9pt;color:#111;padding:12mm 15mm}
-    .header{background:#378ADD;color:#fff;padding:6mm 8mm;margin:-12mm -15mm 6mm;display:flex;justify-content:space-between;align-items:center}
-    .header h1{font-size:14pt;font-weight:bold}
-    .header .num{font-size:10pt}
-    .header .date{font-size:8pt;opacity:.85}
-    .section{margin:3mm 0}
-    .section-title{background:#f0f0f5;color:#185FA5;font-weight:bold;font-size:8pt;padding:1.5mm 3mm;margin-bottom:0;letter-spacing:.04em}
-    .two-col{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ddd}
-    .col{padding:2.5mm 3mm;border-right:1px solid #ddd;word-break:break-word;overflow-wrap:anywhere}
-    .col:last-child{border-right:none}
-    .col-label{font-size:7.5pt;color:#888;margin-bottom:0.5mm;text-transform:uppercase}
-    .col-val{font-size:9pt;font-weight:bold}
-    .fracht-box{background:#E6F1FB;border:1px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between;align-items:center}
-    .fracht-val{font-size:16pt;font-weight:bold;color:#185FA5}
-    .fracht-meta{font-size:8pt;color:#666;text-align:right}
-    .uwagi-box{border:1px solid #FAC775;background:#FAEEDA;padding:2.5mm 3mm;margin:3mm 0;word-break:break-word}
-    .uwagi-label{font-size:7.5pt;color:#633806;font-weight:bold;margin-bottom:1mm}
-    .uwagi-val{font-size:8.5pt;color:#333;line-height:1.5}
-    .podpisy{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-top:12mm}
-    .podpis{border-top:1px solid #111;padding-top:2mm;font-size:7.5pt;color:#888}
-    .footer{margin-top:8mm;padding-top:3mm;border-top:1px solid #ddd;font-size:7pt;color:#aaa;text-align:center}
-    .btn-print{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.2)}
-    @media print{.btn-print{display:none}body{padding:10mm 15mm}.header{margin:-10mm -15mm 6mm}}
-  </style>
-</head><body>
-  <button class="btn-print" onclick="window.print()">Drukuj / Zapisz PDF</button>
-  <div class="header">
-    <div><div class="date">Data wydruku: ${new Date().toLocaleDateString('pl-PL')}</div><h1>ZLECENIE TRANSPORTOWE</h1></div>
-    <div class="num">${o.numer || ''}</div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">TRASA</div>
-    <div class="two-col">
-      <div class="col"><div class="col-label">Załadunek</div><div class="col-val">${o.skad || '-'}</div></div>
-      <div class="col"><div class="col-label">Rozładunek</div><div class="col-val">${o.dokad || '-'}</div></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">TERMINY</div>
-    <div class="two-col">
-      <div class="col"><div class="col-label">Data załadunku</div><div class="col-val">${o.data_zaladunek || '-'}</div></div>
-      <div class="col"><div class="col-label">Data dostawy</div><div class="col-val">${o.data_dostawa || '-'}</div></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">ZLECENIODAWCA</div>
-    <div class="two-col">
-      <div class="col"><div class="col-label">Klient / firma</div><div class="col-val">${o.klient || '-'}</div></div>
-      <div class="col"><div class="col-label">Nr ref. klienta</div><div class="col-val">${o.ref || '-'}</div></div>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">REALIZACJA</div>
-    <div class="two-col">
-      <div class="col"><div class="col-label">Kierowca</div><div class="col-val">${(o.kierowca || '-') + (o.kierowca2 ? ' + ' + o.kierowca2 : '')}</div></div>
-      <div class="col"><div class="col-label">Auto</div><div class="col-val">${o.auto || '-'}</div></div>
-    </div>
-  </div>
-
-  <div class="fracht-box">
-    <div><div style="font-size:7.5pt;color:#185FA5;margin-bottom:1mm">WYNAGRODZENIE</div><div class="fracht-val">${f} ${w}</div></div>
-    <div class="fracht-meta">Status: ${o.status || '-'}<br>${o.kilometry ? o.kilometry + ' km' : ''}${o.kilometry && o.fracht ? ' | ' + ((+o.fracht / +o.kilometry).toFixed(2)) + ' ' + w + '/km' : ''}</div>
-  </div>
-
-  ${o.uwagi ? `<div class="uwagi-box"><div class="uwagi-label">UWAGI</div><div class="uwagi-val">${o.uwagi}</div></div>` : ''}
-
-  <div class="podpisy">
-    <div class="podpis">Podpis zleceniodawcy<br><br><br></div>
-    <div class="podpis">Podpis kierowcy<br><br><br></div>
-  </div>
-  <div class="footer">Wygenerowano przez TransPort — system zarządzania flotą</div>
-  </body></html>`);
-      win.document.close();
-    }
-  </script>
+function exportPDF(id) {
+  var o = orders.find(function(x){return x.id===id;});
+  if (!o) return;
+  var f = (+o.fracht||0).toLocaleString('pl-PL');
+  var w = o.waluta||'PLN';
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Zlecenie</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:12mm 15mm}.header{background:#378ADD;color:#fff;padding:6mm 8mm;margin:-12mm -15mm 6mm;display:flex;justify-content:space-between;align-items:center}.header h1{font-size:14pt;font-weight:bold}.header .num{font-size:10pt}.header .date{font-size:8pt;opacity:.85}.section{margin:3mm 0}.section-title{background:#f0f0f5;color:#185FA5;font-weight:bold;font-size:8pt;padding:1.5mm 3mm;letter-spacing:.04em}.two-col{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ddd}.col{padding:2.5mm 3mm;border-right:1px solid #ddd;word-break:break-word;overflow-wrap:anywhere}.col:last-child{border-right:none}.col-label{font-size:7.5pt;color:#888;margin-bottom:0.5mm;text-transform:uppercase}.col-val{font-size:9pt;font-weight:bold}.fracht-box{background:#E6F1FB;border:1px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between;align-items:center}.fracht-val{font-size:16pt;font-weight:bold;color:#185FA5}.fracht-meta{font-size:8pt;color:#666;text-align:right}.uwagi-box{border:1px solid #FAC775;background:#FAEEDA;padding:2.5mm 3mm;margin:3mm 0;word-break:break-word}.uwagi-label{font-size:7.5pt;color:#633806;font-weight:bold;margin-bottom:1mm}.uwagi-val{font-size:8.5pt;color:#333;line-height:1.5}.podpisy{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-top:12mm}.podpis{border-top:1px solid #111;padding-top:2mm;font-size:7.5pt;color:#888}.footer{margin-top:8mm;padding-top:3mm;border-top:1px solid #ddd;font-size:7pt;color:#aaa;text-align:center}.btn-print{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}@media print{.btn-print{display:none}body{padding:10mm 15mm}.header{margin:-10mm -15mm 6mm}}</style></head><body>';
+  html += '<button class="btn-print" onclick="window.print()">Drukuj / Zapisz PDF</button>';
+  html += '<div class="header"><div><div class="date">Data wydruku: ' + new Date().toLocaleDateString('pl-PL') + '</div><h1>ZLECENIE TRANSPORTOWE</h1></div><div class="num">' + (o.numer||'') + '</div></div>';
+  html += '<div class="section"><div class="section-title">TRASA</div><div class="two-col"><div class="col"><div class="col-label">Załadunek</div><div class="col-val">' + (o.skad||'-') + '</div></div><div class="col"><div class="col-label">Rozładunek</div><div class="col-val">' + (o.dokad||'-') + '</div></div></div></div>';
+  html += '<div class="section"><div class="section-title">TERMINY</div><div class="two-col"><div class="col"><div class="col-label">Data załadunku</div><div class="col-val">' + (o.data_zaladunek||'-') + '</div></div><div class="col"><div class="col-label">Data dostawy</div><div class="col-val">' + (o.data_dostawa||'-') + '</div></div></div></div>';
+  html += '<div class="section"><div class="section-title">ZLECENIODAWCA</div><div class="two-col"><div class="col"><div class="col-label">Klient / firma</div><div class="col-val">' + (o.klient||'-') + '</div></div><div class="col"><div class="col-label">Nr ref. klienta</div><div class="col-val">' + (o.ref||'-') + '</div></div></div></div>';
+  html += '<div class="section"><div class="section-title">REALIZACJA</div><div class="two-col"><div class="col"><div class="col-label">Kierowca</div><div class="col-val">' + ((o.kierowca||'-') + (o.kierowca2?' + '+o.kierowca2:'')) + '</div></div><div class="col"><div class="col-label">Auto</div><div class="col-val">' + (o.auto||'-') + '</div></div></div></div>';
+  html += '<div class="fracht-box"><div><div style="font-size:7.5pt;color:#185FA5;margin-bottom:1mm">WYNAGRODZENIE</div><div class="fracht-val">' + f + ' ' + w + '</div></div><div class="fracht-meta">Status: ' + (o.status||'-') + '</div></div>';
+  if(o.uwagi) html += '<div class="uwagi-box"><div class="uwagi-label">UWAGI</div><div class="uwagi-val">' + o.uwagi + '</div></div>';
+  html += '<div class="podpisy"><div class="podpis">Podpis zleceniodawcy<br><br><br></div><div class="podpis">Podpis kierowcy<br><br><br></div></div>';
+  html += '<div class="footer">Wygenerowano przez TransPort</div>';
+  html += '</body></html>';
+  var win = window.open('','_blank','width=900,height=700');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(function(){ win.focus(); }, 300);
+}
+</script>
 </body>
-
 </html>
