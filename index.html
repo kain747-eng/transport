@@ -1547,19 +1547,47 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
       return { prowizja: fracht * (prowizja_pct / 100) };
     }
 
+    // ── ZLECENIA ZEWNĘTRZNE (PODWYKONAWCY) ──────────────────────
     function renderPodwykonawcy() {
-      return `<div class="card"><div class="card-title">Zlecenia zewnętrzne (Podwykonawcy)</div>
-        <div style="overflow-x:auto"><table>
-          <thead><tr><th>Status</th><th>Załadunek</th><th>Rozładunek</th><th>Data załadunku</th><th>Fracht</th></tr></thead>
-          <tbody>${podw.length ? podw.map(p => `<tr onclick="openPodwModal('${p.id}')" style="cursor:pointer">
-            <td><span class="badge ${STATUS_MAP[p.status] || 'b-gray'}">${p.status || '-'}</span></td>
-            <td>${p.skad || '-'}</td>
-            <td>${p.dokad || '-'}</td>
-            <td>${p.skad_data || '-'}</td>
-            <td style="font-weight:500">${(+p.fracht || 0).toLocaleString('pl-PL')} ${p.waluta || 'PLN'}</td>
-          </tr>`).join('') : '<tr><td colspan="5" class="empty">Brak zleceń zewnętrznych.</td></tr>'}</tbody>
-        </table></div>
-      </div>`;
+      return `
+  <div class="filter-row">
+    <input placeholder="Szukaj przewoźnika, trasy..." id="p-search-input" oninput="filterPodw()" style="width:220px">
+    <select id="p-filter-status" onchange="filterPodw()">
+      <option value="">Wszystkie statusy</option>
+      <option>Nowe</option><option>W trasie</option><option>Oczekuje</option><option>Dostarczone</option><option>Anulowane</option>
+    </select>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <div style="overflow-x:auto"><table id="podw-table">
+      <thead><tr><th style="width:80px">Nr</th><th style="width:180px">Trasa</th><th style="width:130px">Przewoźnik</th><th style="width:90px">Załadunek</th><th style="width:90px" class="hide-mobile">Dostawa</th><th style="width:80px">Fracht</th><th style="width:90px">Status</th></tr></thead>
+      <tbody id="podw-tbody">${podw.map(p => podwRow(p)).join('')}</tbody>
+    </table></div>
+    ${!podw.length ? '<div class="empty">Brak zleceń zewnętrznych.</div>' : ''}
+  </div>`;
+    }
+
+    function podwRow(p) {
+      return `<tr onclick="openPodwModal('${p.id}')" style="cursor:pointer">
+    <td style="font-family:monospace;color:var(--text3);font-size:12px">${p.id?.slice(0, 8) || '-'}</td>
+    <td>${p.skad || ''} → ${p.dokad || ''}</td>
+    <td style="font-weight:500">${p.podwykonawca || '-'}</td>
+    <td>${p.skad_data || '-'}</td>
+    <td class="hide-mobile">${p.dokad_data || '-'}</td>
+    <td style="font-weight:500">${(+p.fracht || 0).toLocaleString('pl-PL')} ${p.waluta || 'PLN'}</td>
+    <td><span class="badge ${STATUS_MAP[p.status] || 'b-gray'}">${p.status || '-'}</span></td>
+  </tr>`;
+    }
+
+    function filterPodw() {
+      const q = (document.getElementById('p-search-input')?.value || '').toLowerCase();
+      const st = document.getElementById('p-filter-status')?.value || '';
+      const filtered = podw.filter(p => {
+        const match = !q || [p.skad, p.dokad, p.podwykonawca].some(v => (v || '').toLowerCase().includes(q));
+        const statusMatch = !st || p.status === st;
+        return match && statusMatch;
+      });
+      const tbody = document.getElementById('podw-tbody');
+      if (tbody) tbody.innerHTML = filtered.map(p => podwRow(p)).join('');
     }
 
     function renderRozliczenia() {
@@ -1643,6 +1671,8 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
     <button class="btn btn-primary" onclick="saveOrder()">Zapisz</button>
   `;
       openModal();
+    } function czytajPDFOrder() {
+      showToast('Narzędzie do skanowania PDF jest niedostępne (brak odpowiednich bibliotek w uciętych fragmentach). Proszę użyć standardowego uploaddokumentu poniżej formularza.', false);
     }
 
     async function saveOrder() {
