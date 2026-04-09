@@ -1063,31 +1063,112 @@ function kalPrev() { kalMonth--; if(kalMonth<0){kalMonth=11;kalYear--;} renderVi
 function kalNext() { kalMonth++; if(kalMonth>11){kalMonth=0;kalYear++;} renderView('kalendarz'); }
 
 function openKalModal(dateStr, eventId) {
-  var ev = eventId ? kalEvents.find(function(e){return e.id===eventId}) : null;
-  editingId = ev ? ev.id : null;
-  document.getElementById('modal-title').textContent = ev ? 'Edytuj wydarzenie' : 'Nowe wydarzenie';
-  var typOpts = ['notatka','zaladunek','dostawa','serwis'].map(function(t){return '<option value="'+t+'"'+((ev&&ev.typ===t)?' selected':'')+'>'+t.charAt(0).toUpperCase()+t.slice(1)+'</option>'}).join('');
-  document.getElementById('modal-body').innerHTML =
-    '<div class="field"><label>Data</label><input type="date" id="kal-d" value="'+(ev?ev.data:dateStr||today.toISOString().slice(0,10))+'"></div>' +
-    '<div class="field"><label>Tytuł</label><input id="kal-t" value="'+(ev?ev.tytul||'':'')+'" placeholder="np. Spotkanie z klientem"></div>' +
-    '<div class="field"><label>Typ</label><select id="kal-typ">'+typOpts+'</select></div>' +
-    '<div class="field full"><label>Notatka</label><textarea id="kal-n" rows="4">'+(ev?ev.notatka||'':'')+'</textarea></div>';
+  // If eventId given - edit that event directly
+  if (eventId) {
+    _openKalEditModal(dateStr, eventId);
+    return;
+  }
+  // Show events for this day + option to add new
+  var dayEvents = kalEvents.filter(function(e){ return e.data===dateStr; });
+  var dayOrders = [];
+  orders.forEach(function(o){
+    if(o.data_zaladunek===dateStr) dayOrders.push({tytul:(o.skad||'Zaladunek')+' → '+(o.dokad||''), typ:'zaladunek', _ro:true});
+    if(o.data_dostawa===dateStr) dayOrders.push({tytul:'Dostawa: '+(o.dokad||''), typ:'dostawa', _ro:true});
+  });
+  podw.forEach(function(p){
+    if(p.skad_data===dateStr) dayOrders.push({tytul:(p.skad||'Zal. zew.')+' → '+(p.dokad||''), typ:'zaladunek', _ro:true});
+    if(p.dokad_data===dateStr) dayOrders.push({tytul:'Dostawa zew.: '+(p.dokad||''), typ:'dostawa', _ro:true});
+  });
+  var allEvents = dayEvents.concat(dayOrders);
+
+  document.getElementById('modal-title').textContent = 'Dzien: '+dateStr;
+  var html = '';
+  if (allEvents.length > 0) {
+    html += '<div style="grid-column:1/-1;margin-bottom:8px">';
+    html += '<div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px">Wydarzenia w tym dniu:</div>';
+    allEvents.forEach(function(e) {
+      if (e._ro) {
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--radius);margin-bottom:6px">';
+        html += '<span class="badge typ-'+e.typ+' kal-event" style="flex-shrink:0">'+e.typ+'</span>';
+        html += '<span style="font-size:13px">'+e.tytul+'</span>';
+        html += '</div>';
+      } else {
+        html += '<div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--bg2);border-radius:var(--radius);margin-bottom:6px;cursor:pointer" id="kal-ev-'+e.id+'">';
+        html += '<span class="badge kal-event typ-'+(e.typ||'notatka')+'" style="flex-shrink:0">'+(e.typ||'notatka')+'</span>';
+        html += '<span style="flex:1;font-size:13px">'+e.tytul+'</span>';
+        if(e.notatka) html += '<span style="font-size:11px;color:var(--text3)">'+e.notatka.slice(0,30)+(e.notatka.length>30?'...':'')+'</span>';
+        html += '<button class="btn btn-sm kal-edit-btn" data-id="'+e.id+'" data-ds="'+dateStr+'">Edytuj</button>';
+        html += '</div>';
+      }
+    });
+    html += '</div>';
+  } else {
+    html += '<div style="grid-column:1/-1;color:var(--text3);font-size:13px;margin-bottom:8px">Brak wydarzen w tym dniu.</div>';
+  }
+  html += '<div style="grid-column:1/-1"><div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">Dodaj nowe wydarzenie:</div></div>';
+  html += '<div class="field"><label>Tytul</label><input id="kal-t" placeholder="np. Spotkanie z klientem"></div>';
+  html += '<div class="field"><label>Typ</label><select id="kal-typ"><option value="notatka">Notatka</option><option value="zaladunek">Zaladunek</option><option value="dostawa">Dostawa</option><option value="serwis">Serwis</option></select></div>';
+  html += '<div class="field full"><label>Notatka</label><textarea id="kal-n" rows="3"></textarea></div>';
+
+  document.getElementById('modal-body').innerHTML = html;
   document.getElementById('modal-foot').innerHTML =
-    (ev?'<button class="btn btn-danger" onclick="deleteKalEvent()">Usuń</button>':'') +
-    '<button class="btn" onclick="closeModal()">Anuluj</button>' +
-    '<button class="btn btn-primary" onclick="saveKalEvent()">Zapisz</button>';
+    '<button class="btn" onclick="closeModal()">Zamknij</button>' +
+    '<button class="btn btn-primary" id="kal-save-btn">Dodaj wydarzenie</button>';
+
+  setTimeout(function() {
+    var sb2 = document.getElementById('kal-save-btn');
+    if(sb2) sb2.onclick = function(){ saveKalEvent(dateStr); };
+    document.querySelectorAll('.kal-edit-btn').forEach(function(btn) {
+      btn.onclick = function() {
+        closeModal();
+        _openKalEditModal(this.getAttribute('data-ds'), this.getAttribute('data-id'));
+      };
+    });
+  }, 0);
   openModal();
 }
 
-async function saveKalEvent() {
-  var data=document.getElementById('kal-d').value, tytul=document.getElementById('kal-t').value.trim();
-  if(!data||!tytul) { showToast('Wypełnij datę i tytuł', true); return; }
-  var payload={data, tytul, typ:document.getElementById('kal-typ').value, notatka:document.getElementById('kal-n').value.trim()};
-  if(editingId) await sb.from('kalendarz').update(payload).eq('id',editingId);
-  else await sb.from('kalendarz').insert(payload);
-  closeModal(); showToast('Zapisano ✓');
+function _openKalEditModal(dateStr, eventId) {
+  var ev = kalEvents.find(function(e){return e.id===eventId});
+  if (!ev) return;
+  editingId = ev.id;
+  document.getElementById('modal-title').textContent = 'Edytuj wydarzenie';
+  var typOpts = ['notatka','zaladunek','dostawa','serwis'].map(function(t){
+    return '<option value="'+t+'"'+(ev.typ===t?' selected':'')+'>'+t.charAt(0).toUpperCase()+t.slice(1)+'</option>';
+  }).join('');
+  document.getElementById('modal-body').innerHTML =
+    '<div class="field"><label>Data</label><input type="date" id="kal-d" value="'+(ev.data||dateStr||'')+'"></div>' +
+    '<div class="field"><label>Tytul</label><input id="kal-t2" value="'+(ev.tytul||'')+'"></div>' +
+    '<div class="field"><label>Typ</label><select id="kal-typ2">'+typOpts+'</select></div>' +
+    '<div class="field full"><label>Notatka</label><textarea id="kal-n2" rows="4">'+(ev.notatka||'')+'</textarea></div>';
+  document.getElementById('modal-foot').innerHTML =
+    '<button class="btn btn-danger" id="kal-del-btn">Usun</button>' +
+    '<button class="btn" onclick="closeModal()">Anuluj</button>' +
+    '<button class="btn btn-primary" onclick="updateKalEvent()">Zapisz</button>';
+  setTimeout(function() {
+    var db = document.getElementById('kal-del-btn');
+    if(db) db.onclick = function() { deleteKalEvent(); };
+  }, 0);
+  openModal();
+}
+
+async function saveKalEvent(dateStr) {
+  var tytul = document.getElementById('kal-t').value.trim();
+  if (!tytul) { showToast('Podaj tytul', true); return; }
+  var payload = {
+    data: dateStr,
+    tytul: tytul,
+    typ: document.getElementById('kal-typ').value,
+    notatka: document.getElementById('kal-n').value.trim()
+  };
+  await sb.from('kalendarz').insert(payload);
+  closeModal(); showToast('Dodano wydarzenie');
   await loadAll(); renderView('kalendarz');
 }
+
+
+
+
 
 async function deleteKalEvent() {
   if(!confirm('Usunąć wydarzenie?')) return;
