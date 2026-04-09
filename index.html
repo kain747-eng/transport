@@ -2,6 +2,9 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>TransPort</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1141,7 +1144,10 @@ function exportOrderPDF(id) {
   var o=orders.find(function(x){return x.id===id}); if(!o) return;
   var f=(+o.fracht||0).toLocaleString('pl-PL');
   var w=o.waluta||'PLN';
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Zlecenie</title>';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0"><title>Zlecenie</title>';
   html+='<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:12mm 15mm}.hdr{background:#378ADD;color:#fff;padding:6mm 8mm;margin:-12mm -15mm 6mm;display:flex;justify-content:space-between}.hdr h1{font-size:13pt;font-weight:bold}.sec-t{background:#f0f0f5;color:#185FA5;font-weight:bold;font-size:8pt;padding:2mm 3mm;margin:3mm 0 0}.tc{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ddd}.tc-c{padding:2.5mm 3mm;border-right:1px solid #ddd;word-break:break-word}.tc-c:last-child{border-right:none}.lbl{font-size:7pt;color:#888;text-transform:uppercase}.val{font-size:9pt;font-weight:bold}.frcht{background:#E6F1FB;border:1px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between}.frcht-v{font-size:16pt;font-weight:bold;color:#185FA5}.uwagi{border:1px solid #fac775;background:#faeeda;padding:2.5mm 3mm;margin:3mm 0;word-break:break-word}.pdp{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-top:12mm}.pdp-l{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#888}.ftr{margin-top:8mm;padding-top:3mm;border-top:1px solid #ddd;font-size:7pt;color:#aaa;text-align:center}.btn-p{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}@media print{.btn-p{display:none}body{padding:10mm 15mm}.hdr{margin:-10mm -15mm 6mm}}</style>';
   html+='</head><body>';
   html+='<button class="btn-p" onclick="window.print()">Drukuj / Zapisz PDF</button>';
@@ -1163,7 +1169,10 @@ function exportOrderPDF(id) {
 function printPodwPDF(id) {
   var p=podw.find(function(x){return x.id===id}); if(!p) return;
   var f=(+p.fracht||0).toLocaleString('pl-PL');
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Zlecenie zewnętrzne</title>';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0"><title>Zlecenie zewnętrzne</title>';
   html+='<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:10mm 15mm}.hdr{background:#378ADD;color:#fff;padding:5mm 8mm;margin:-10mm -15mm 5mm;display:flex;justify-content:space-between;align-items:center}.hdr h1{font-size:13pt;font-weight:bold}.tc{display:table;width:100%;border-collapse:collapse;margin:3mm 0}.tc-c{display:table-cell;width:50%;border:1px solid #ddd;padding:2.5mm 3mm;vertical-align:top;word-break:break-word}.tc-hdr{font-weight:bold;font-size:8pt;border-bottom:1px solid #ddd;margin-bottom:1.5mm;padding-bottom:1mm;color:#185FA5}.lbl{font-size:7pt;color:#888}.val{font-size:9pt;font-weight:bold}.frcht{background:#E6F1FB;border:1px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between}.frcht-v{font-size:14pt;font-weight:bold;color:#185FA5}.uwagi{border:1px solid #fac775;background:#faeeda;padding:2.5mm 3mm;margin:3mm 0}.warunki{font-size:8pt;color:#444;line-height:1.4;margin:2mm 0}.pdp{display:grid;grid-template-columns:1fr 1fr;gap:15mm;margin-top:10mm}.pdp-l{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#888}.btn-p{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}@media print{.btn-p{display:none}}</style>';
   html+='</head><body>';
   html+='<button class="btn-p" onclick="window.print()">Drukuj / Zapisz PDF</button>';
