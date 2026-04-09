@@ -757,13 +757,30 @@ async function deleteDoc(id) {
 
 // ── PODWYKONAWCY ──────────────────────────────────────────
 function renderPodwykonawcy() {
-  var html = '<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Nr zlecenia</th><th>Zleceniobiorca</th><th>Trasa</th><th>Kierowca</th><th>Załadunek</th><th>Dostawa</th><th>Fracht</th><th>Status</th></tr></thead><tbody>';
+  var html = '<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Nr zlecenia</th><th>Zleceniobiorca</th><th>Trasa</th><th>Załadunek</th><th>Dostawa</th><th>Fracht</th><th>Status</th><th style="width:120px">Akcje</th></tr></thead><tbody>';
   podw.forEach(function(p) {
-    html += '<tr data-did=""+p.id+"" class="podw-row"><td style="font-family:monospace;font-size:11px;color:var(--text3)">'+(p.numer||p.id.slice(0,8))+'</td><td>'+(p.zleceniobiorca_nazwa||'-')+'</td><td>'+(p.skad||'')+' → '+(p.dokad||'')+'</td><td>'+(p.kierowca||'-')+'</td><td>'+(p.skad_data||'-')+'</td><td>'+(p.dokad_data||'-')+'</td><td>'+(+p.fracht||0).toLocaleString('pl-PL')+' '+(p.waluta||'EUR')+'</td><td><span class="badge '+(STATUS_MAP[p.status]||'b-gray')+'">'+(p.status||'-')+'</span></td></tr>';
+    html += '<tr>';
+    html += '<td style="font-family:monospace;font-size:11px;color:var(--text3)">'+(p.numer||p.id.slice(0,8))+'</td>';
+    html += '<td>'+(p.zleceniobiorca_nazwa||'-')+'</td>';
+    html += '<td>'+(p.skad||'')+' → '+(p.dokad||'')+'</td>';
+    html += '<td>'+(p.skad_data||'-')+'</td>';
+    html += '<td>'+(p.dokad_data||'-')+'</td>';
+    html += '<td>'+(+p.fracht||0).toLocaleString('pl-PL')+' '+(p.waluta||'EUR')+'</td>';
+    html += '<td><span class="badge '+(STATUS_MAP[p.status]||'b-gray')+'">'+(p.status||'-')+'</span></td>';
+    html += '<td style="white-space:nowrap"><button class="btn btn-sm podw-edit-btn" data-pid="'+p.id+'" style="margin-right:4px">Edytuj</button><button class="btn btn-sm podw-pdf-btn" data-pid="'+p.id+'" style="color:var(--blue-text)">PDF</button></td>';
+    html += '</tr>';
   });
   html += '</tbody></table>';
   if (!podw.length) html += '<div class="empty">Brak zleceń zewnętrznych</div>';
   html += '</div></div>';
+  setTimeout(function() {
+    document.querySelectorAll('.podw-edit-btn').forEach(function(btn) {
+      btn.onclick = function(e) { e.stopPropagation(); openPodwModal(this.getAttribute('data-pid')); };
+    });
+    document.querySelectorAll('.podw-pdf-btn').forEach(function(btn) {
+      btn.onclick = function(e) { e.stopPropagation(); printPodwPDF(this.getAttribute('data-pid')); };
+    });
+  }, 0);
   return html;
 }
 
@@ -799,10 +816,18 @@ function openPodwModal(id) {
     '<div class="field"><label>Referencje</label><input id="pw-ref" value="'+(p.referencje||'')+'"></div>' +
     '<div class="field full"><label>Uwagi</label><textarea id="pw-uwagi">'+(p.uwagi||'')+'</textarea></div>';
   document.getElementById('modal-foot').innerHTML =
-    (id?'<button class="btn btn-danger" onclick="deletePodw(editingId)">Usuń</button>':'') +
+    (id ? '<button class="btn btn-danger" id="pw-del-btn">Usuń</button>' : '') +
     '<button class="btn" onclick="closeModal()">Anuluj</button>' +
-    (id?'<button class="btn" onclick="closeModal();printPodwPDF(editingId)">Eksport PDF</button>':'') +
+    (id ? '<button class="btn" id="pw-pdf-btn2">Eksport PDF</button>' : '') +
     '<button class="btn btn-primary" onclick="savePodw()">Zapisz</button>';
+  if (id) {
+    setTimeout(function() {
+      var db = document.getElementById('pw-del-btn');
+      if (db) db.onclick = function() { deletePodw(editingId); };
+      var pb = document.getElementById('pw-pdf-btn2');
+      if (pb) pb.onclick = function() { closeModal(); printPodwPDF(editingId); };
+    }, 0);
+  }
   openModal();
 }
 
