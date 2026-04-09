@@ -109,12 +109,12 @@ tr:hover td{background:var(--bg2);cursor:pointer}
 @media (max-width: 900px) {
   .app { flex-direction:column; height:auto; min-height:100vh; }
   .sidebar {
-    position:fixed; left:-210px; top:0; bottom:0; z-index:50;
-    width:210px; transition:left .25s ease; overflow-y:auto;
+    position:fixed !important; left:-210px; top:0; bottom:0; z-index:50;
+    width:210px !important; transition:left .25s ease; overflow-y:auto;
     box-shadow:2px 0 12px rgba(0,0,0,0.15);
-    background:var(--bg); flex-direction:column;
+    background:var(--bg); flex-direction:column; display:flex;
   }
-  .sidebar.open { left:0; }
+  .sidebar.open { left:0 !important; }
   .sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:40; }
   .sidebar-overlay.open { display:block; }
   .main { width:100%; height:auto; overflow:visible; }
@@ -136,8 +136,7 @@ tr:hover td{background:var(--bg2);cursor:pointer}
   .btn { padding:6px 10px; font-size:11px; }
   .topbar-right > span { display:none; }
   .hide-mobile { display:none !important; }
-  .nav-sec { display:none; }
-  .logo small { display:none; }
+  .nav-sec { font-size:9px; padding:10px 14px 2px; }
 }
 @media (max-width: 500px) {
   .metrics { grid-template-columns:1fr 1fr; }
