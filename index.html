@@ -1551,7 +1551,7 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
       return `<div class="card"><div class="card-title">Zlecenia zewnętrzne (Podwykonawcy)</div>
         <div style="overflow-x:auto"><table>
           <thead><tr><th>Status</th><th>Załadunek</th><th>Rozładunek</th><th>Data załadunku</th><th>Fracht</th></tr></thead>
-          <tbody>${podw.length ? podw.map(p => `<tr>
+          <tbody>${podw.length ? podw.map(p => `<tr onclick="openPodwModal('${p.id}')" style="cursor:pointer">
             <td><span class="badge ${STATUS_MAP[p.status] || 'b-gray'}">${p.status || '-'}</span></td>
             <td>${p.skad || '-'}</td>
             <td>${p.dokad || '-'}</td>
@@ -1572,7 +1572,7 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
     }
 
     function kalkuluj() {
-       // Funkcja pomocnicza do kalkulatora (pusta zapobiega błędom w setTimeout)
+      // Funkcja pomocnicza do kalkulatora (pusta zapobiega błędom w setTimeout)
     }
 
     function renderKalkulator() {
@@ -1902,6 +1902,103 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
       await sb.from('dokumenty').delete().eq('id', id);
       closeModal(); showToast('Dokument usunięty');
       await loadAll(); renderView('dokumenty');
+    }
+
+    // ── MODALS PODWYKONAWCY ────────────────────────────────────
+    function openPodwModal(id = null) {
+      editingId = id;
+      const p = id ? podw.find(x => x.id === id) : {};
+      document.getElementById('modal-title').textContent = id ? 'Edytuj zlecenie zewnętrzne' : 'Nowe zlecenie zewnętrzne';
+      document.getElementById('modal-body').innerHTML = `
+        <div class="field"><label>Firma podwykonawcy</label><input id="p-firma" value="${p.podwykonawca || ''}" placeholder="Nazwa przewoźnika"></div>
+        <div class="field"><label>Status</label><select id="p-status">${['Nowe', 'Oczekuje', 'W trasie', 'Dostarczone', 'Anulowane'].map(s => `<option ${p.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+        <div class="field"><label>Załadunek (Skąd)</label><input id="p-skad" value="${p.skad || ''}" placeholder="Miasto załadunku"></div>
+        <div class="field"><label>Rozładunek (Dokąd)</label><input id="p-dokad" value="${p.dokad || ''}" placeholder="Miasto rozładunku"></div>
+        <div class="field"><label>Data załadunku</label><input type="date" id="p-skad-data" value="${p.skad_data || ''}"></div>
+        <div class="field"><label>Data rozładunku</label><input type="date" id="p-dokad-data" value="${p.dokad_data || ''}"></div>
+        <div class="field"><label>Fracht (Koszty)</label><input type="number" id="p-fracht" value="${p.fracht || ''}" placeholder="0"></div>
+        <div class="field"><label>Waluta</label><select id="p-waluta">${'PLN,EUR,USD,GBP'.split(',').map(w => `<option ${(p.waluta || 'PLN') === w ? 'selected' : ''}>${w}</option>`).join('')}</select></div>
+        <div class="field full"><label>Uwagi</label><textarea id="p-uwagi">${p.uwagi || ''}</textarea></div>
+      `;
+      document.getElementById('modal-foot').innerHTML = `
+        ${id ? `<button class="btn btn-danger" onclick="deletePodw('${id}')">Usuń</button>` : ''}
+        <button class="btn" onclick="closeModal()">Anuluj</button>
+        ${id ? `<button class="btn" onclick="exportPDFPodw('${id}')">Eksport PDF</button>` : ''}
+        <button class="btn btn-primary" onclick="savePodw()">Zapisz</button>
+      `;
+      openModal();
+    }
+
+    async function savePodw() {
+      const skad = document.getElementById('p-skad').value.trim();
+      const dokad = document.getElementById('p-dokad').value.trim();
+      if (!skad || !dokad) { showToast('Uzupełnij załadunek i rozładunek.', true); return; }
+
+      const payload = {
+        podwykonawca: document.getElementById('p-firma').value.trim(),
+        status: document.getElementById('p-status').value,
+        skad: skad,
+        dokad: dokad,
+        skad_data: document.getElementById('p-skad-data').value || null,
+        dokad_data: document.getElementById('p-dokad-data').value || null,
+        fracht: parseFloat(document.getElementById('p-fracht').value) || 0,
+        waluta: document.getElementById('p-waluta').value,
+        uwagi: document.getElementById('p-uwagi').value.trim()
+      };
+
+      let err;
+      if (!editingId) {
+        const r = await sb.from('podwykonawcy_zlecenia').insert(payload); err = r.error;
+      } else {
+        const r = await sb.from('podwykonawcy_zlecenia').update(payload).eq('id', editingId); err = r.error;
+      }
+
+      if (err) { showToast('Błąd: ' + err.message, true); return; }
+      closeModal(); showToast('Zapisano pomyślnie ✓');
+      await loadAll(); renderView('podwykonawcy');
+    }
+
+    async function deletePodw(id) {
+      if (!confirm('Usunąć zlecenie zewnętrzne?')) return;
+      await sb.from('podwykonawcy_zlecenia').delete().eq('id', id);
+      closeModal(); showToast('Zlecenie usunięte ✓');
+      await loadAll(); renderView('podwykonawcy');
+    }
+
+    function exportPDFPodw(id) {
+      var o = podw.find(function (x) { return x.id === id; });
+      if (!o) return;
+      var f = (+o.fracht || 0).toLocaleString('pl-PL');
+      var w = o.waluta || 'PLN';
+      var win = window.open('', '_blank', 'width=900,height=700');
+      win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Zlecenie Zewnętrzne ${o.podwykonawca || ''}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body{font-family:'Roboto', Arial, sans-serif;font-size:12pt;color:#111;margin:40px;line-height:1.4}
+    h1{font-size:18pt;color:#0C447C;border-bottom:2px solid #378ADD;padding-bottom:10px;margin-bottom:30px;letter-spacing:-0.5px}
+    .header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:40px}
+    .date{font-size:10pt;color:#666;margin-bottom:5px}
+    .num{font-size:14pt;font-weight:bold;color:#378ADD}
+    .section{margin-bottom:25px;background:#f9f9f9;padding:15px;border-radius:8px;border:1px solid #eee}
+    .section-title{font-size:9pt;font-weight:bold;color:#185FA5;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    .col-label{font-size:8.5pt;color:#666;margin-bottom:3px;text-transform:uppercase}
+    .col-val{font-size:11.5pt;font-weight:bold}
+    .btn-print{position:fixed;bottom:20px;right:20px;padding:12px 24px;background:#378ADD;color:#fff;border:none;border-radius:30px;font-size:11pt;cursor:pointer;box-shadow:0 4px 12px rgba(55,138,221,0.3)}
+    @media print{ .btn-print{display:none} body{margin:0;background:#fff} .section{background:#fff;border:1px solid #ddd;padding:10px} }
+  </style></head><body>
+  <button class="btn-print" onclick="window.print()">Drukuj / Zapisz PDF</button>
+  <div class="header">
+    <div><div class="date">Data wydruku: ${new Date().toLocaleDateString('pl-PL')}</div><h1>ZLECENIE PODWYKONAWCZE</h1></div>
+  </div>
+  <div class="section"><div class="section-title">PODWYKONAWCA</div><div class="two-col"><div class="col"><div class="col-label">Nazwa przewoźnika</div><div class="col-val">${o.podwykonawca || '-'}</div></div></div></div>
+  <div class="section"><div class="section-title">TRASA</div><div class="two-col"><div class="col"><div class="col-label">Załadunek</div><div class="col-val">${o.skad || '-'}</div></div><div class="col"><div class="col-label">Rozładunek</div><div class="col-val">${o.dokad || '-'}</div></div></div></div>
+  <div class="section"><div class="section-title">TERMINY</div><div class="two-col"><div class="col"><div class="col-label">Data załadunku</div><div class="col-val">${o.skad_data || '-'}</div></div><div class="col"><div class="col-label">Data dostawy</div><div class="col-val">${o.dokad_data || '-'}</div></div></div></div>
+  <div class="section" style="background:#E6F1FB;border-color:#baddf9"><div style="font-size:7.5pt;color:#185FA5;margin-bottom:1mm">WYNAGRODZENIE</div><div style="font-size:22pt;font-weight:bold;color:#0C447C">${f} ${w}</div><div style="font-size:10pt;color:#378ADD;margin-top:5px">Status realizacji: ${o.status || '-'}</div></div>
+  ${o.uwagi ? `<div class="section"><div class="section-title">UWAGI</div><div style="font-size:11pt;white-space:pre-wrap">${o.uwagi}</div></div>` : ''}
+  </body></html>`);
+      win.document.close();
     }
 
     function openModal() { document.getElementById('modal-overlay').classList.add('open'); }
