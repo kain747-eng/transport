@@ -1,51 +1,46 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>TransPort</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TransPort">
 <meta name="theme-color" content="#378ADD">
 <link rel="manifest" id="pwa-manifest">
-<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#ffffff;--bg2:#f8f8f6;--bg3:#f1f0eb;
+  --bg:#fff;--bg2:#f8f8f6;--bg3:#f1f0eb;
   --text:#1a1a18;--text2:#6b6a65;--text3:#9e9d98;
   --border:#e0dfd9;--border2:#c8c7c0;
   --blue:#378ADD;--blue-bg:#E6F1FB;--blue-text:#0C447C;
   --green-bg:#EAF3DE;--green-text:#27500A;
   --amber-bg:#FAEEDA;--amber-text:#633806;
   --red-bg:#FCEBEB;--red-text:#791F1F;
-  --gray-bg:#F1EFE8;--gray-text:#444441;
-  --radius:8px;--radius-lg:12px;
+  --radius:8px;--radius-lg:14px;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:14px;min-height:100vh}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);font-size:14px}
 .app{display:flex;height:100vh;overflow:hidden}
-.sidebar{width:200px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
-.logo{padding:18px 16px 14px;border-bottom:1px solid var(--border)}
-.logo-title{font-size:16px;font-weight:600;color:var(--text)}
+.sidebar{width:210px;background:var(--bg);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+.logo{padding:16px;border-bottom:1px solid var(--border)}
+.logo-title{font-size:15px;font-weight:700;color:var(--text)}
 .logo-sub{font-size:11px;color:var(--text2);margin-top:2px}
-.nav-sec{font-size:10px;color:var(--text3);padding:14px 16px 4px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
-.nav{display:flex;align-items:center;gap:9px;padding:9px 16px;font-size:13px;cursor:pointer;color:var(--text2);border-left:2px solid transparent;transition:background .15s;user-select:none}
+.nav-sec{font-size:10px;color:var(--text3);padding:12px 16px 4px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.nav{display:flex;align-items:center;gap:9px;padding:8px 16px;font-size:13px;cursor:pointer;color:var(--text2);border-left:2px solid transparent;transition:background .15s;user-select:none}
 .nav:hover{background:var(--bg2);color:var(--text)}
 .nav.active{color:var(--blue-text);background:var(--blue-bg);border-left-color:var(--blue);font-weight:500}
 .nav svg{width:15px;height:15px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 22px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--bg);flex-shrink:0}
 .topbar h2{font-size:15px;font-weight:600}
-.topbar-right{display:flex;align-items:center;gap:10px}
-.user-badge{font-size:12px;color:var(--text2);background:var(--bg2);padding:4px 10px;border-radius:20px;border:1px solid var(--border)}
-.content{flex:1;overflow-y:auto;padding:20px 22px;background:var(--bg3)}
-.btn{font-size:12px;padding:7px 14px;border:1px solid var(--border2);border-radius:var(--radius);cursor:pointer;background:var(--bg);color:var(--text);transition:background .15s;font-family:inherit}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.content{flex:1;overflow-y:auto;padding:20px;background:var(--bg3)}
+.btn{font-size:12px;padding:7px 14px;border:1px solid var(--border2);border-radius:var(--radius);cursor:pointer;background:var(--bg);color:var(--text);transition:background .15s;font-family:inherit;white-space:nowrap}
 .btn:hover{background:var(--bg2)}
 .btn-primary{background:var(--blue);color:#fff;border-color:#185FA5}
 .btn-primary:hover{background:#185FA5}
@@ -59,187 +54,104 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .metric-val.blue{color:var(--blue-text)}
 .metric-val.green{color:var(--green-text)}
 .metric-val.amber{color:var(--amber-text)}
-.card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px}
-.card-title{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--bg);border-radius:var(--radius-lg);border:1px solid var(--border);padding:16px;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:8px 10px;color:var(--text3);font-weight:500;font-size:11px;border-bottom:1px solid var(--border);background:var(--bg2)}
-td{padding:10px 10px;border-bottom:1px solid var(--border);color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+th{font-size:11px;font-weight:600;color:var(--text2);text-align:left;padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--bg2);cursor:pointer}
-.badge{display:inline-block;font-size:10px;padding:3px 8px;border-radius:10px;font-weight:600;white-space:nowrap}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px}
 .b-blue{background:var(--blue-bg);color:var(--blue-text)}
 .b-green{background:var(--green-bg);color:var(--green-text)}
 .b-amber{background:var(--amber-bg);color:var(--amber-text)}
-.b-gray{background:var(--gray-bg);color:var(--gray-text)}
 .b-red{background:var(--red-bg);color:var(--red-text)}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;align-items:flex-start;justify-content:center;padding-top:50px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.b-gray{background:var(--bg2);color:var(--text2)}
+.filter-row{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.filter-row input,.filter-row select{padding:7px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;background:var(--bg);color:var(--text)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
-.modal{background:var(--bg);border-radius:var(--radius-lg);border:1px solid var(--border);width:560px;max-width:95vw}
+.modal{background:var(--bg);border-radius:var(--radius-lg);width:100%;max-width:720px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.2)}
 .modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
 .modal-head h3{font-size:15px;font-weight:600}
-.modal-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.modal-body{padding:20px;overflow-y:auto;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
 .field{display:flex;flex-direction:column;gap:5px}
 .field.full{grid-column:1/-1}
-.field label{font-size:11px;color:var(--text2);font-weight:500}
-.field input,.field select,.field textarea{font-size:13px;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);color:var(--text);width:100%;font-family:inherit;transition:border-color .15s}
-.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--blue)}
-.field textarea{resize:vertical;min-height:70px}
-.modal-foot{padding:14px 20px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px}
-.toast{position:fixed;bottom:24px;right:24px;background:#27500A;color:#EAF3DE;font-size:13px;padding:10px 18px;border-radius:var(--radius);z-index:200;opacity:0;transform:translateY(8px);transition:all .3s;pointer-events:none}
-.toast.show{opacity:1;transform:translateY(0)}
-.toast.error{background:#791F1F;color:#FCEBEB}
-.loader{text-align:center;padding:40px;color:var(--text2);font-size:13px}
-.empty{text-align:center;padding:50px;color:var(--text3);font-size:13px}
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.driver-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+.field label{font-size:12px;font-weight:500;color:var(--text2)}
+.field input,.field select,.field textarea{padding:8px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);width:100%}
+.field textarea{resize:vertical;min-height:72px}
+.driver-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
 .driver-row:last-child{border-bottom:none}
-.avatar{width:30px;height:30px;border-radius:50%;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:var(--blue-text);flex-shrink:0}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.detail-row{background:var(--bg2);border-radius:var(--radius);padding:10px 12px}
+.avatar{width:28px;height:28px;border-radius:50%;background:var(--blue-bg);color:var(--blue-text);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.toast{position:fixed;bottom:24px;right:24px;background:#222;color:#fff;padding:12px 18px;border-radius:var(--radius);font-size:13px;z-index:999;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.error{background:var(--red-text)}
+.empty{padding:32px;text-align:center;color:var(--text3);font-size:13px}
+.sync-indicator{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green-text);margin-right:5px}
+.sync-indicator.offline{background:var(--amber-text)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.detail-row{padding:10px 14px;border-bottom:1px solid var(--border)}
 .detail-row.full{grid-column:1/-1}
-.detail-label{font-size:10px;color:var(--text3);margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.detail-label{font-size:11px;color:var(--text2);margin-bottom:3px}
 .detail-val{font-size:13px;font-weight:500}
-.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg3)}
-.login-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:36px;width:360px}
-.login-box h2{font-size:20px;font-weight:600;margin-bottom:6px}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:var(--bg3)}
+.login-box{background:var(--bg);border-radius:var(--radius-lg);border:1px solid var(--border);padding:40px;width:100%;max-width:360px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.login-box h2{font-size:20px;font-weight:700;margin-bottom:6px}
 .login-box p{font-size:13px;color:var(--text2);margin-bottom:24px}
-.login-box .field{margin-bottom:14px}
-.login-box .field label{display:block;margin-bottom:5px;font-size:12px;color:var(--text2);font-weight:500}
-.login-box .field input{width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--radius);font-size:14px;font-family:inherit}
-.login-box .btn{width:100%;padding:10px;font-size:14px}
-.login-hint{font-size:12px;color:var(--text3);text-align:center;margin-top:14px}
-.sync-indicator{width:7px;height:7px;border-radius:50%;background:#639922;display:inline-block;margin-right:6px}
-.sync-indicator.offline{background:#E24B4A}
-.filter-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
-.filter-row select,.filter-row input{font-size:12px;padding:5px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--bg);color:var(--text);font-family:inherit}
-
-
-
-/* ── MOBILE TAB BAR ── */
-.tab-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--border);z-index:100;padding:0 0 env(safe-area-inset-bottom,0)}
-.tab-bar-inner{display:flex;justify-content:space-around;align-items:stretch}
-.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 4px 6px;cursor:pointer;color:var(--text2);font-size:9px;gap:3px;border:none;background:none;font-family:inherit}
-.tab-item.active{color:var(--blue)}
-.tab-item svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.tab-more-menu{display:none;position:fixed;bottom:60px;right:0;left:0;background:var(--bg);border-top:1px solid var(--border);z-index:99;padding:8px 0}
-.tab-more-menu.open{display:block}
-.tab-more-item{display:flex;align-items:center;gap:12px;padding:12px 20px;cursor:pointer;color:var(--text);font-size:14px}
-.tab-more-item:active{background:var(--bg2)}
-.tab-more-item svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.5}
-
-@media (max-width:900px){
-  .app{flex-direction:row;height:100vh;overflow:hidden}
-  .sidebar{display:none !important}
-  .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
-  .content{flex:1;overflow-y:auto;padding:12px 14px;padding-bottom:70px}
-  .tab-bar{display:block}
-  .hamburger{display:none !important}
-  .topbar{padding:10px 14px}
-  .topbar h2{font-size:14px}
-  .topbar-right>span{display:none}
+/* Kalkulator */
+.kal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px}
+.kal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px}
+.kal-day-name{text-align:center;font-size:11px;font-weight:600;color:var(--text2);padding:4px 0}
+.kal-day{min-height:75px;background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:4px;cursor:pointer;transition:background .15s}
+.kal-day:hover{background:var(--blue-bg)}
+.kal-day.today{border-color:var(--blue);border-width:2px}
+.kal-day.other-month{background:var(--bg3);opacity:.6}
+.kal-day-num{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:2px}
+.kal-day.today .kal-day-num{background:var(--blue);color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px}
+.kal-event{font-size:10px;padding:1px 4px;border-radius:3px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kal-event.typ-notatka{background:var(--blue-bg);color:var(--blue-text)}
+.kal-event.typ-zaladunek{background:var(--green-bg);color:var(--green-text)}
+.kal-event.typ-dostawa{background:var(--amber-bg);color:var(--amber-text)}
+.kal-event.typ-serwis{background:var(--red-bg);color:var(--red-text)}
+/* Mobile */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;flex-direction:column;gap:5px}
+.hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:49}
+.sidebar-overlay.open{display:block}
+@media(max-width:900px){
+  .app{flex-direction:column;height:auto;min-height:100vh;overflow:visible}
+  .sidebar{position:fixed;left:-220px;top:0;bottom:0;z-index:50;width:210px;transition:left .25s;overflow-y:auto}
+  .sidebar.open{left:0}
+  .main{width:100%;overflow:visible;display:block}
+  .content{overflow-y:visible;padding:12px;min-height:calc(100vh - 60px)}
+  .topbar{padding:10px 14px;position:sticky;top:0;z-index:10}
+  .hamburger{display:flex!important}
   .metrics{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
-  .metric{padding:10px}
   .metric-val{font-size:18px}
-  table{font-size:11px}
-  th,td{padding:6px 5px}
   .two-col{grid-template-columns:1fr}
-  .modal-overlay{padding-top:0;align-items:flex-end}
+  table{font-size:11px}
+  th,td{padding:6px 6px}
   .modal{width:100%;max-width:100%;border-radius:var(--radius-lg) var(--radius-lg) 0 0;max-height:90vh;overflow-y:auto}
+  .modal-overlay{padding:0;align-items:flex-end}
   .modal-body{grid-template-columns:1fr;padding:14px;gap:10px}
   .field.full{grid-column:1}
-  .filter-row{flex-wrap:wrap;gap:6px}
-  .filter-row select,.filter-row input{width:100%}
-  .card{padding:12px;margin-bottom:10px}
-  .btn{padding:7px 10px;font-size:11px}
-  .hide-mobile{display:none !important}
+  .btn{padding:6px 10px;font-size:11px}
+  .kal-day{min-height:50px}
+  .kal-event{display:none}
+  .kal-day-num{font-size:12px}
+  #sync-text{display:none}
 }
-@media (max-width:500px){
+@media(max-width:500px){
   .metrics{grid-template-columns:1fr 1fr}
-  .content{padding:10px;padding-bottom:70px}
+  .content{padding:10px}
 }
 </style>
-
-<script>
-// PWA Manifest
-const manifest = {
-  name: 'TransPort — zarządzanie flotą',
-  short_name: 'TransPort',
-  description: 'System zarządzania zleceniami transportowymi',
-  start_url: '.',
-  display: 'standalone',
-  background_color: '#f1f0eb',
-  theme_color: '#378ADD',
-  orientation: 'any',
-  icons: [
-    {
-      src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23378ADD'/><text y='360' x='256' font-size='300' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>T</text></svg>",
-      sizes: '512x512',
-      type: 'image/svg+xml',
-      purpose: 'any maskable'
-    }
-  ]
-};
-const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
-const url = URL.createObjectURL(blob);
-document.getElementById('pwa-manifest').setAttribute('href', url);
-
-// Service Worker for offline support
-if ('serviceWorker' in navigator) {
-  const swCode = `
-    const CACHE = 'transport-v1';
-    const ASSETS = ['/transport/', '/transport/index.html'];
-    self.addEventListener('install', e => {
-      e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(()=>{})));
-      self.skipWaiting();
-    });
-    self.addEventListener('activate', e => {
-      e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
-      self.clients.claim();
-    });
-    self.addEventListener('fetch', e => {
-      if (e.request.method !== 'GET') return;
-      e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
-    });
-  `;
-  const swBlob = new Blob([swCode], {type:'application/javascript'});
-  const swUrl = URL.createObjectURL(swBlob);
-  navigator.serviceWorker.register(swUrl, {scope: '/transport/'}).catch(()=>{});
-}
-</script>
-<script>
-(function(){
-  // Inline manifest
-  var manifest = {
-    name: 'TransPort',
-    short_name: 'TransPort',
-    start_url: '/transport/',
-    display: 'standalone',
-    background_color: '#f1f0eb',
-    theme_color: '#378ADD',
-    icons: [{src:'https://kain747-eng.github.io/transport/icon.png',sizes:'192x192',type:'image/png'}]
-  };
-  var blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
-  document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
-
-  // Service Worker
-  if('serviceWorker' in navigator){
-    var sw = [
-      'var C="tp-v2";',
-      'self.addEventListener("install",function(e){self.skipWaiting();});',
-      'self.addEventListener("activate",function(e){e.waitUntil(clients.claim());});',
-      'self.addEventListener("fetch",function(e){',
-      '  if(e.request.method!=="GET")return;',
-      '  e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));',
-      '});'
-    ].join('\n');
-    var swBlob = new Blob([sw],{type:'application/javascript'});
-    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
-  }
-})();
-</script>
 </head>
 <body>
 
-<div id="login-screen" class="login-wrap">
+<div class="login-wrap" id="login-screen">
   <div class="login-box">
     <h2>TransPort</h2>
     <p>Wpisz hasło dostępu do systemu</p>
@@ -247,8 +159,8 @@ if ('serviceWorker' in navigator) {
       <label>Hasło</label>
       <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')checkPassword()">
     </div>
-    <button class="btn btn-primary" onclick="checkPassword()">Wejdź</button>
-    <div id="login-error" style="color:#791F1F;font-size:12px;margin-top:10px;text-align:center"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="checkPassword()">Wejdź</button>
+    <div id="login-error" style="color:var(--red-text);font-size:12px;margin-top:10px;text-align:center"></div>
   </div>
 </div>
 
@@ -266,18 +178,18 @@ if ('serviceWorker' in navigator) {
     <div class="nav" onclick="showView('zlecenia')">
       <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h7"/></svg>Zlecenia
     </div>
+    <div class="nav" onclick="showView('podwykonawcy')">
+      <svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14"/></svg>Zlecenia zewnętrzne
+    </div>
+    <div class="nav-sec">Zasoby</div>
     <div class="nav" onclick="showView('kierowcy')">
       <svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>Kierowcy
     </div>
     <div class="nav" onclick="showView('flota')">
       <svg viewBox="0 0 16 16"><rect x="1" y="5" width="14" height="8" rx="1"/><path d="M4 5V3a1 1 0 011-1h6a1 1 0 011 1v2"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="11.5" cy="13" r="1.5"/></svg>Flota
     </div>
-    <div class="nav-sec">Dokumenty</div>
     <div class="nav" onclick="showView('dokumenty')">
       <svg viewBox="0 0 16 16"><path d="M4 2h6l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M10 2v4h4M6 9h4M6 12h3"/></svg>Dokumenty
-    </div>
-    <div class="nav" onclick="showView('podwykonawcy')">
-      <svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14"/></svg>Zlecenia zewnętrzne
     </div>
     <div class="nav-sec">Analizy</div>
     <div class="nav" onclick="showView('raporty')">
@@ -293,7 +205,7 @@ if ('serviceWorker' in navigator) {
       <svg viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="13" rx="1"/><path d="M1 6h14M5 1v2M11 1v2"/></svg>Kalendarz
     </div>
     <div style="flex:1"></div>
-    <div class="sidebar-bottom" style="padding:14px 16px;border-top:1px solid var(--border)">
+    <div style="padding:14px 16px;border-top:1px solid var(--border)">
       <button class="btn btn-sm" onclick="logout()">Wyloguj</button>
     </div>
   </div>
@@ -301,62 +213,16 @@ if ('serviceWorker' in navigator) {
   <div class="main">
     <div class="topbar" id="main-topbar">
       <div style="display:flex;align-items:center;gap:10px">
-        <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu"><span></span><span></span><span></span></button>
+        <button class="hamburger" onclick="toggleSidebar()"><span></span><span></span><span></span></button>
         <h2 id="view-title">Dashboard</h2>
       </div>
       <div class="topbar-right">
-        <span><span class="sync-indicator" id="sync-dot"></span><span id="sync-text" style="font-size:11px;color:var(--text3)">połączono</span></span>
+        <span style="font-size:11px;color:var(--text3)"><span class="sync-indicator" id="sync-dot"></span><span id="sync-text">połączono</span></span>
         <div id="topbar-actions"></div>
       </div>
     </div>
     <div class="content" id="main-content">
-      <div class="loader">Ładowanie danych...</div>
-    </div>
-  </div>
-  <!-- Mobile Tab Bar -->
-  <div class="tab-bar">
-    <div class="tab-bar-inner">
-      <button class="tab-item active" id="tab-dashboard" onclick="tabNav('dashboard')">
-        <svg viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-        Dashboard
-      </button>
-      <button class="tab-item" id="tab-zlecenia" onclick="tabNav('zlecenia')">
-        <svg viewBox="0 0 16 16"><path d="M2 4h12M2 8h12M2 12h7"/></svg>
-        Zlecenia
-      </button>
-      <button class="tab-item" id="tab-kierowcy" onclick="tabNav('kierowcy')">
-        <svg viewBox="0 0 16 16"><circle cx="8" cy="6" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
-        Kierowcy
-      </button>
-      <button class="tab-item" id="tab-flota" onclick="tabNav('flota')">
-        <svg viewBox="0 0 16 16"><rect x="1" y="5" width="14" height="8" rx="1"/><path d="M4 5V3a1 1 0 011-1h6a1 1 0 011 1v2"/><circle cx="4.5" cy="13" r="1.5"/><circle cx="11.5" cy="13" r="1.5"/></svg>
-        Flota
-      </button>
-      <button class="tab-item" id="tab-more" onclick="toggleMoreMenu()">
-        <svg viewBox="0 0 16 16"><circle cx="4" cy="8" r="1.5" fill="currentColor"/><circle cx="8" cy="8" r="1.5" fill="currentColor"/><circle cx="12" cy="8" r="1.5" fill="currentColor"/></svg>
-        Więcej
-      </button>
-    </div>
-  </div>
-  <!-- More Menu -->
-  <div class="tab-more-menu" id="tab-more-menu">
-    <div class="tab-more-item" onclick="tabNav('podwykonawcy');toggleMoreMenu()">
-      <svg viewBox="0 0 16 16"><path d="M8 1v14M1 8h14"/></svg>Zlecenia zewnętrzne
-    </div>
-    <div class="tab-more-item" onclick="tabNav('dokumenty');toggleMoreMenu()">
-      <svg viewBox="0 0 16 16"><path d="M4 2h6l4 4v9a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z"/></svg>Dokumenty
-    </div>
-    <div class="tab-more-item" onclick="tabNav('raporty');toggleMoreMenu()">
-      <svg viewBox="0 0 16 16"><path d="M2 12l4-4 3 3 5-7"/></svg>Raporty
-    </div>
-    <div class="tab-more-item" onclick="tabNav('rozliczenia');toggleMoreMenu()">
-      <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>Prowizja spedytora
-    </div>
-    <div class="tab-more-item" onclick="tabNav('kalkulator');toggleMoreMenu()">
-      <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4"/></svg>Kalkulator paliwa
-    </div>
-    <div class="tab-more-item" style="color:var(--text2);border-top:1px solid var(--border);margin-top:4px" onclick="logout()">
-      <svg viewBox="0 0 16 16"><path d="M10 8H3M6 5l-3 3 3 3M10 3h3a1 1 0 011 1v8a1 1 0 01-1 1h-3"/></svg>Wyloguj
+      <div class="empty">Ładowanie...</div>
     </div>
   </div>
 </div>
@@ -364,7 +230,7 @@ if ('serviceWorker' in navigator) {
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <div class="modal-head">
-      <h3 id="modal-title">Nowe zlecenie</h3>
+      <h3 id="modal-title">Modal</h3>
       <button class="btn btn-sm" onclick="closeModal()">✕</button>
     </div>
     <div class="modal-body" id="modal-body"></div>
@@ -375,764 +241,982 @@ if ('serviceWorker' in navigator) {
 <div class="toast" id="toast"></div>
 
 <script>
-
 const SUPABASE_URL = 'https://lpvxzokrntzvpqjkudyf.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxwdnh6b2tybnR6dnBxamt1ZHlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NzA5NTIsImV4cCI6MjA5MTE0Njk1Mn0.8kCHA9nUsy9W6H92lVKW4yV-xNSwPhoNO2uJ_cphiss';
-
+const CLAUDE_PROXY = 'https://lpvxzokrntzvpqjkudyf.supabase.co/functions/v1/claude-proxy';
+const APP_PASSWORD = 'transport2024';
 const { createClient } = supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: { persistSession: false, autoRefreshToken: false }
-});
-
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:false,autoRefreshToken:false}});
 const STATUS_MAP = {'Nowe':'b-gray','W trasie':'b-blue','Oczekuje':'b-amber','Dostarczone':'b-green','Anulowane':'b-red'};
 let currentView = 'dashboard';
-let currentUser = null;
-let orders = [], drivers = [], cars = [], docs = [], podw = [], kalEvents = [];
+let orders=[], drivers=[], cars=[], docs=[], podw=[], kalEvents=[];
 let editingId = null;
+let kalYear = new Date().getFullYear(), kalMonth = new Date().getMonth();
 
-// ── AUTH — proste hasło, bez Supabase auth ─────────────────
-const APP_PASSWORD = 'transport2024';
- // zmień na własne hasło
-
+// ── AUTH ──────────────────────────────────────────────────
 function checkPassword() {
   const pass = document.getElementById('login-password').value;
-  const err  = document.getElementById('login-error');
+  const err = document.getElementById('login-error');
   if (pass === APP_PASSWORD) {
-    sessionStorage.setItem('transport-logged', '1');
+    sessionStorage.setItem('tp-logged','1');
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display  = 'flex';
+    document.getElementById('app-screen').style.display = 'flex';
     initApp();
   } else {
     err.textContent = 'Nieprawidłowe hasło.';
   }
 }
-
 function logout() {
-  sessionStorage.removeItem('transport-logged');
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app-screen').style.display  = 'none';
+  sessionStorage.removeItem('tp-logged');
+  location.reload();
 }
-
-// Sprawdź czy już zalogowany
 document.addEventListener('DOMContentLoaded', function() {
-  if (sessionStorage.getItem('transport-logged') === '1') {
+  if (sessionStorage.getItem('tp-logged') === '1') {
     document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-screen').style.display  = 'flex';
+    document.getElementById('app-screen').style.display = 'flex';
     initApp();
   }
 });
 
-// ── DB INIT ───────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────
 async function initApp() {
-  await ensureTables();
   await loadAll();
   showView('dashboard');
-  setupRealtime();
-}
-
-async function ensureTables() {
-  // no-op
+  setInterval(async function() { await loadAll(); renderView(currentView); }, 30000);
+  document.addEventListener('visibilitychange', async function() {
+    if (document.visibilityState === 'visible') { await loadAll(); renderView(currentView); }
+  });
 }
 
 async function loadAll() {
   setSync(true);
   try {
-    const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
-
-    const fetchData = Promise.all([
-      sb.from('zlecenia').select('*').order('created_at', { ascending: false }),
+    const [z,k,f,d,pw,ke] = await Promise.all([
+      sb.from('zlecenia').select('*').order('created_at',{ascending:false}),
       sb.from('kierowcy').select('*').order('nazwa'),
       sb.from('flota').select('*').order('rejestracja'),
-      sb.from('dokumenty').select('*').order('created_at', { ascending: false }),
-      sb.from('podwykonawcy_zlecenia').select('*').order('created_at', { ascending: false }),
-      sb.from('kalendarz').select('*').order('data', { ascending: true }),
+      sb.from('dokumenty').select('*').order('created_at',{ascending:false}),
+      sb.from('podwykonawcy_zlecenia').select('*').order('created_at',{ascending:false}),
+      sb.from('kalendarz').select('*').order('data',{ascending:true})
     ]);
-
-    const [z, k, f, d, pw, ke] = await Promise.race([fetchData, timeout(8000)]);
-
-    if (z.error) throw new Error('zlecenia: ' + z.error.message);
-    if (k.error) throw new Error('kierowcy: ' + k.error.message);
-    if (f.error) throw new Error('flota: ' + f.error.message);
-    if (d.error) throw new Error('dokumenty: ' + d.error.message);
-    if (pw.error) throw new Error('podwykonawcy: ' + pw.error.message);
-
-    orders  = z.data || [];
-    drivers = k.data || [];
-    cars    = f.data || [];
-    docs    = d.data || [];
-    podw    = pw.data || [];
-    kalEvents = ke.data || [];
+    if (z.error) throw new Error(z.error.message);
+    orders = z.data||[]; drivers = k.data||[]; cars = f.data||[];
+    docs = d.data||[]; podw = pw.data||[]; kalEvents = ke.data||[];
   } catch(e) {
-    document.getElementById('main-content').innerHTML = `
-      <div style="background:#FCEBEB;border:1px solid #f09595;border-radius:12px;padding:24px;margin-bottom:16px;color:#791F1F">
-        <div style="font-size:15px;font-weight:600;margin-bottom:8px">Błąd połączenia z bazą danych</div>
-        <div style="font-size:13px;margin-bottom:12px">${e.message}</div>
-        <div style="font-size:12px;opacity:.8">Sprawdź czy uruchomiłeś SQL z politykami dostępu w Supabase → SQL Editor</div>
-      </div>
-      <div style="background:#EAF3DE;border:1px solid #97C459;border-radius:12px;padding:20px;font-size:13px">
-        <div style="font-weight:600;margin-bottom:10px">Uruchom ten SQL w Supabase → SQL Editor:</div>
-        <pre style="background:#fff;padding:12px;border-radius:8px;font-size:12px;overflow-x:auto">drop policy if exists "dostep" on zlecenia;
-drop policy if exists "dostep" on kierowcy;
-drop policy if exists "dostep" on flota;
-drop policy if exists "dostep" on dokumenty;
-
-create policy "dostep" on zlecenia for all to anon, authenticated using (true) with check (true);
-create policy "dostep" on kierowcy for all to anon, authenticated using (true) with check (true);
-create policy "dostep" on flota for all to anon, authenticated using (true) with check (true);
-create policy "dostep" on dokumenty for all to anon, authenticated using (true) with check (true);</pre>
-        <button class="btn btn-primary" style="margin-top:12px" onclick="location.reload()">Odśwież po uruchomieniu SQL</button>
-      </div>`;
-    setSync(false);
-    return;
+    showToast('Błąd połączenia: ' + e.message, true);
   }
   setSync(false);
 }
 
-function setupRealtime() {
-  // Realtime przez polling co 30 sekund
-  setInterval(async () => {
-    await loadAll();
-    renderView(currentView);
-  }, 30000);
-
-  // Odświeżaj też gdy użytkownik wraca do karty
-  document.addEventListener('visibilitychange', async () => {
-    if (document.visibilityState === 'visible') {
-      await loadAll();
-      renderView(currentView);
-    }
-  });
-}
-
 function setSync(loading) {
-  const dot  = document.getElementById('sync-dot');
-  const text = document.getElementById('sync-text');
-  if (loading) { dot.className = 'sync-indicator offline'; text.textContent = 'synchronizacja...'; }
-  else         { dot.className = 'sync-indicator';          text.textContent = 'połączono'; }
+  const dot = document.getElementById('sync-dot');
+  const txt = document.getElementById('sync-text');
+  if (dot) { dot.className = 'sync-indicator' + (loading?' offline':''); }
+  if (txt) { txt.textContent = loading ? 'sync...' : 'połączono'; }
 }
 
 // ── NAVIGATION ────────────────────────────────────────────
 function showView(v) {
   currentView = v;
-  document.querySelectorAll('.nav').forEach(n => n.classList.remove('active'));
-  document.querySelectorAll('.nav').forEach(n => {
-    if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + v + "'")) n.classList.add('active');
+  document.querySelectorAll('.nav').forEach(function(n) {
+    n.classList.toggle('active', n.getAttribute('onclick') && n.getAttribute('onclick').includes("'" + v + "'"));
   });
-  // sync mobile action button
-  const mobileActs = document.getElementById('topbar-actions-mobile');
-  if (mobileActs) mobileActs.innerHTML = document.getElementById('topbar-actions').innerHTML;
-  const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne', rozliczenia:'Prowizja spedytora', kalkulator:'Kalkulator dodatku paliwowego', kalendarz:'Kalendarz' };
+  const titles = {dashboard:'Dashboard',zlecenia:'Zlecenia',podwykonawcy:'Zlecenia zewnętrzne',kierowcy:'Kierowcy',flota:'Flota',dokumenty:'Dokumenty',raporty:'Raporty',rozliczenia:'Prowizja spedytora',kalkulator:'Kalkulator paliwa',kalendarz:'Kalendarz'};
   document.getElementById('view-title').textContent = titles[v] || v;
-  const acts = document.getElementById('topbar-actions');
   const btns = {
-    zlecenia:  '<button class="btn" onclick="exportExcel()">Export Excel</button><button class="btn btn-primary" onclick="openOrderModal()">+ Nowe zlecenie</button>',
+    zlecenia: '<button class="btn" onclick="exportExcelZlecenia()">Excel</button><button class="btn btn-primary" onclick="openOrderModal()">+ Nowe zlecenie</button>',
     dashboard: '<button class="btn btn-primary" onclick="openOrderModal()">+ Nowe zlecenie</button>',
-    kierowcy:  '<button class="btn btn-primary" onclick="openDriverModal()">+ Kierowca</button>',
-    flota:     '<button class="btn btn-primary" onclick="openCarModal()">+ Auto</button>',
-    dokumenty: '<button class="btn btn-primary" onclick="openDocModal()">+ Dokument</button>',
     podwykonawcy: '<button class="btn btn-primary" onclick="openPodwModal()">+ Nowe zlecenie zewnętrzne</button>',
-    raporty: '<button class="btn" onclick="exportExcelRaport()">Export Excel</button><button class="btn" onclick="exportExcelProwizja()">Export prowizji</button>',
-    kalkulator: '',
-    kalendarz: '<button class="btn btn-primary" onclick="openKalModal(null, null)">+ Notatka / Wydarzenie</button>',
-    rozliczenia: '',
+    kierowcy: '<button class="btn btn-primary" onclick="openDriverModal()">+ Kierowca</button>',
+    flota: '<button class="btn btn-primary" onclick="openCarModal()">+ Auto</button>',
+    dokumenty: '<button class="btn btn-primary" onclick="openDocModal()">+ Dokument</button>',
+    raporty: '<button class="btn" onclick="exportExcelRaport()">Excel</button><button class="btn" onclick="exportExcelProwizja()">Excel prowizji</button>',
+    kalendarz: '<button class="btn btn-primary" onclick="openKalModal(null,null)">+ Wydarzenie</button>',
+    rozliczenia: '', kalkulator: ''
   };
-  acts.innerHTML = btns[v] || '';
+  document.getElementById('topbar-actions').innerHTML = btns[v] || '';
+  closeSidebar();
   renderView(v);
 }
 
 function renderView(v) {
   const c = document.getElementById('main-content');
-  if      (v === 'dashboard') c.innerHTML = renderDashboard();
-  else if (v === 'zlecenia')  c.innerHTML = renderZlecenia();
-  else if (v === 'kierowcy')  c.innerHTML = renderKierowcy();
-  else if (v === 'flota')     c.innerHTML = renderFlota();
-  else if (v === 'dokumenty') c.innerHTML = renderDokumenty();
-  else if (v === 'raporty') { c.innerHTML = renderRaporty(); var cb=document.getElementById('r-clear-btn'); if(cb) cb.onclick=function(){document.getElementById('r-month').value='';renderView('raporty');}; }
-  else if (v === 'podwykonawcy') c.innerHTML = renderPodwykonawcy();
-  else if (v === 'rozliczenia') c.innerHTML = renderRozliczenia();
-  else if (v === 'kalkulator') { c.innerHTML = renderKalkulator(); setTimeout(kalkuluj, 0); }
-  else if (v === 'kalendarz') c.innerHTML = renderKalendarz();
+  if (v==='dashboard') { c.innerHTML = renderDashboard(); setTimeout(function(){ document.querySelectorAll('.ord-row').forEach(function(tr){tr.style.cursor='pointer';tr.onclick=function(){showOrderDetail(this.getAttribute('data-oid'));};}); },0); }
+  else if (v==='zlecenia') { c.innerHTML = renderZlecenia(); setTimeout(function(){ document.querySelectorAll('.ord-row').forEach(function(tr){tr.style.cursor='pointer';tr.onclick=function(){showOrderDetail(this.getAttribute('data-oid'));};}); },0); }
+  else if (v==='podwykonawcy') c.innerHTML = renderPodwykonawcy();
+  else if (v==='kierowcy') c.innerHTML = renderKierowcy();
+  else if (v==='flota') c.innerHTML = renderFlota();
+  else if (v==='dokumenty') c.innerHTML = renderDokumenty();
+  else if (v==='raporty') c.innerHTML = renderRaporty();
+  else if (v==='rozliczenia') c.innerHTML = renderRozliczenia();
+  else if (v==='kalkulator') { c.innerHTML = renderKalkulator(); setTimeout(kalkuluj,0); }
+  else if (v==='kalendarz') c.innerHTML = renderKalendarz();
 }
 
-// ── VIEWS ─────────────────────────────────────────────────
+// ── SIDEBAR MOBILE ────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('main-sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('main-sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ── HELPERS ───────────────────────────────────────────────
+function initials(name) { return (name||'').split(' ').map(function(w){return w[0]||''}).join('').slice(0,2).toUpperCase(); }
+function showToast(msg, isError) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast' + (isError?' error':'');
+  t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')}, 3000);
+}
+function openModal() { document.getElementById('modal-overlay').classList.add('open'); }
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId = null; }
+document.addEventListener('click', function(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+});
+
+// ── DASHBOARD ─────────────────────────────────────────────
 function renderDashboard() {
-  const wT  = orders.filter(o => o.status === 'W trasie').length;
-  const dst = orders.filter(o => o.status === 'Dostarczone').length;
-  const last = orders.slice(0, 8);
-  const przychodyWg = {};
-  orders.forEach(o => {
-    const w = o.waluta || 'PLN';
-    przychodyWg[w] = (przychodyWg[w] || 0) + (+o.fracht || 0);
-  });
-  const przychodyHtml = Object.entries(przychodyWg).length
-    ? Object.entries(przychodyWg).map(([w,v]) =>
-        `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-top:4px">
-          <span style="font-size:11px;color:var(--text3)">${w}</span>
-          <span style="font-size:16px;font-weight:600;color:var(--amber-text)">${v.toLocaleString('pl-PL')}</span>
-        </div>`
-      ).join('')
-    : '<span style="font-size:20px;font-weight:600">0</span>';
-  return `
-  <div class="metrics">
-    <div class="metric"><div class="metric-label">Wszystkie zlecenia</div><div class="metric-val">${orders.length}</div></div>
-    <div class="metric"><div class="metric-label">W trasie</div><div class="metric-val blue">${wT}</div></div>
-    <div class="metric"><div class="metric-label">Dostarczone</div><div class="metric-val green">${dst}</div></div>
-    <div class="metric"><div class="metric-label">Łączny przychód</div>${przychodyHtml}</div>
-  </div>
-  <div class="card">
-    <div class="card-title">Ostatnie zlecenia</div>
-    ${last.length ? `<div style="overflow-x:auto"><table>
-      <thead><tr><th style="width:80px">Nr</th><th style="width:180px">Trasa</th><th style="width:130px">Klient</th><th style="width:110px">Kierowca</th><th style="width:90px">Załadunek</th><th style="width:80px">Fracht</th><th style="width:90px">Status</th></tr></thead>
-      <tbody>${last.map(o => orderRow(o)).join('')}</tbody>
-    </table></div>` : '<div class="empty">Brak zleceń</div>'}
-  </div>
-  <div class="two-col">
-    <div class="card">
-      <div class="card-title">Kierowcy — dostępność</div>
-      ${drivers.length ? drivers.map(d => `<div class="driver-row">
-        <div class="avatar">${initials(d.nazwa)}</div>
-        <div style="flex:1;font-size:13px">${d.nazwa}</div>
-        <span class="badge ${d.status==='W trasie'?'b-blue':d.status==='Urlop'?'b-amber':'b-green'}">${d.status}</span>
-      </div>`).join('') : '<div class="empty">Brak kierowców</div>'}
-    </div>
-    <div class="card">
-      <div class="card-title">Flota — status</div>
-      ${cars.length ? cars.map(c => `<div class="driver-row">
-        <div style="flex:1;font-size:13px">${c.rejestracja} — ${c.model}</div>
-        <span class="badge ${c.status==='W trasie'?'b-blue':c.status==='Serwis'?'b-amber':'b-green'}">${c.status}</span>
-      </div>`).join('') : '<div class="empty">Brak aut</div>'}
-    </div>
-  </div>`;
-}
-
-function renderZlecenia() {
-  return `
-  <div class="filter-row">
-    <input placeholder="Szukaj trasy, klienta..." id="search-input" oninput="filterOrders()" style="width:220px">
-    <select id="filter-status" onchange="filterOrders()">
-      <option value="">Wszystkie statusy</option>
-      <option>Nowe</option><option>W trasie</option><option>Oczekuje</option><option>Dostarczone</option><option>Anulowane</option>
-    </select>
-  </div>
-  <div class="card" style="padding:0;overflow:hidden">
-    <div style="overflow-x:auto"><table id="orders-table">
-      <thead><tr><th style="width:80px">Nr</th><th style="width:180px">Trasa</th><th style="width:130px">Klient</th><th style="width:110px">Kierowca</th><th style="width:90px">Załadunek</th><th style="width:90px" class="hide-mobile">Dostawa</th><th style="width:80px">Fracht</th><th style="width:90px">Status</th></tr></thead>
-      <tbody id="orders-tbody">${orders.map(o => orderRow(o, true)).join('')}</tbody>
-    </table></div>
-    ${!orders.length ? '<div class="empty">Brak zleceń. Dodaj pierwsze zlecenie.</div>' : ''}
-  </div>`;
-}
-
-function orderRow(o, showDostawa=false) {
-  return `<tr onclick="showDetail('${o.id}')">
-    <td style="font-family:monospace;color:var(--text3);font-size:12px">${o.numer||o.id?.slice(0,8)}</td>
-    <td>${o.skad||''} → ${o.dokad||''}</td>
-    <td>${o.klient||'-'}</td>
-    <td>${o.kierowca||'-'}</td>
-    <td>${o.data_zaladunek||'-'}</td>
-    ${showDostawa ? `<td>${o.data_dostawa||'-'}</td>` : ''}
-    <td>${(+o.fracht||0).toLocaleString('pl-PL')} ${o.waluta||'PLN'}</td>
-    <td><span class="badge ${STATUS_MAP[o.status]||'b-gray'}">${o.status||'-'}</span></td>
-  </tr>`;
-}
-
-function filterOrders() {
-  const q = (document.getElementById('search-input')?.value||'').toLowerCase();
-  const st = document.getElementById('filter-status')?.value||'';
-  const filtered = orders.filter(o => {
-    const match = !q || [o.skad,o.dokad,o.klient,o.kierowca].some(v => (v||'').toLowerCase().includes(q));
-    const statusMatch = !st || o.status === st;
-    return match && statusMatch;
-  });
-  const tbody = document.getElementById('orders-tbody');
-  if (tbody) tbody.innerHTML = filtered.map(o => orderRow(o, true)).join('');
-}
-
-function renderKierowcy() {
-  return `<div class="card" style="padding:0;overflow:hidden"><table>
-    <thead><tr><th>Imię i nazwisko</th><th style="width:130px">Telefon</th><th style="width:100px">Status</th><th style="width:70px">Zlecenia</th></tr></thead>
-    <tbody>${drivers.map(d => {
-      const cnt = orders.filter(o => o.kierowca === d.nazwa).length;
-      return `<tr onclick="openDriverModal('${d.id}')"><td><div style="display:flex;align-items:center;gap:9px"><div class="avatar">${initials(d.nazwa)}</div>${d.nazwa}</div></td>
-        <td style="color:var(--text2)">${d.telefon||'-'}</td>
-        <td><span class="badge ${d.status==='W trasie'?'b-blue':d.status==='Urlop'?'b-amber':'b-green'}">${d.status}</span></td>
-        <td>${cnt}</td></tr>`;
-    }).join('')}</tbody>
-  </table>${!drivers.length?'<div class="empty">Brak kierowców</div>':''}</div>`;
-}
-
-function renderFlota() {
-  var today = new Date();
-  var warn30 = new Date(); warn30.setDate(today.getDate() + 30);
-  function dateStatus(ds) {
-    if (!ds) return null;
-    var d = new Date(ds);
-    if (d < today) return 'expired';
-    if (d <= warn30) return 'soon';
-    return 'ok';
-  }
-  function dateFmt(ds) { return ds ? new Date(ds).toLocaleDateString('pl-PL') : '-'; }
-  function dateBadge(ds) {
-    if (!ds) return '-';
-    var s = dateStatus(ds), f = dateFmt(ds);
-    if (s === 'expired') return '<span class="badge b-red">' + f + ' PRZETERMINOWANY</span>';
-    if (s === 'soon') return '<span class="badge b-amber">' + f + ' wkrotce</span>';
-    return '<span style="font-size:12px;color:var(--text2)">' + f + '</span>';
-  }
-  var alertHtml = '';
-  var alertCars = cars.filter(function(x) {
-    var p=dateStatus(x.data_przegladu), u=dateStatus(x.data_ubezpieczenia);
-    return p==='expired'||p==='soon'||u==='expired'||u==='soon';
-  });
-  if (alertCars.length) {
-    var msgs = alertCars.map(function(x) {
-      var parts=[], p=dateStatus(x.data_przegladu), u=dateStatus(x.data_ubezpieczenia);
-      if(p==='expired') parts.push(x.rejestracja+': przeglad PRZETERMINOWANY');
-      else if(p==='soon') parts.push(x.rejestracja+': przeglad '+dateFmt(x.data_przegladu));
-      if(u==='expired') parts.push(x.rejestracja+': ubezp. PRZETERMINOWANE');
-      else if(u==='soon') parts.push(x.rejestracja+': ubezp. '+dateFmt(x.data_ubezpieczenia));
-      return parts.join(', ');
-    }).join(' | ');
-    alertHtml='<div style="background:var(--color-background-warning);border:1px solid var(--color-border-warning);border-radius:var(--border-radius-md);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--color-text-warning)"><strong>Uwaga!</strong> '+msgs+'</div>';
-  }
-  var rows='';
-  for(var i=0;i<cars.length;i++){
-    var car=cars[i];
-    var cnt=orders.filter(function(o){return o.auto===car.rejestracja+' — '+car.model;}).length;
-    var ps=dateStatus(car.data_przegladu), us=dateStatus(car.data_ubezpieczenia);
-    var rowBg=(ps==='expired'||us==='expired')?'background:var(--red-bg)':(ps==='soon'||us==='soon')?'background:var(--amber-bg)':'';
-    var sb=car.status==='W trasie'?'b-blue':car.status==='Serwis'?'b-amber':'b-green';
-    rows+='<tr data-id="'+car.id+'" style="'+rowBg+';cursor:pointer"><td><strong>'+car.rejestracja+'</strong></td><td>'+car.model+'</td><td style="color:var(--text2)">'+(car.rok||'-')+'</td><td><span class="badge '+sb+'">'+car.status+'</span></td><td>'+dateBadge(car.data_przegladu)+'</td><td>'+dateBadge(car.data_ubezpieczenia)+'</td><td>'+cnt+'</td></tr>';
-  }
-  var html=alertHtml+'<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table id="flota-table"><thead><tr><th>Rejestracja</th><th>Marka i model</th><th style="width:60px">Rok</th><th style="width:90px">Status</th><th style="width:130px">Przeglad</th><th style="width:130px">Ubezpieczenie</th><th style="width:60px">Zlecenia</th></tr></thead><tbody>'+rows+'</tbody></table>'+(!cars.length?'<div class="empty">Brak aut we flocie</div>':'')+'</div></div>';
-  setTimeout(function(){
-    var tbl=document.getElementById('flota-table');
-    if(tbl) tbl.addEventListener('click',function(e){
-      var tr=e.target.closest('tr[data-id]');
-      if(tr) openCarModal(tr.getAttribute('data-id'));
-    });
-  },50);
-  return html;
-}
-
-function renderDokumenty() {
-  return `<div class="card" style="padding:0;overflow:hidden"><table>
-    <thead><tr><th>Nazwa dokumentu</th><th style="width:100px">Typ</th><th style="width:110px">Data</th><th>Uwagi</th><th style="width:70px">Plik</th></tr></thead>
-    <tbody>${docs.map(d => `<tr onclick="openDocModal('${d.id}')">
-      <td>${d.nazwa}</td>
-      <td><span class="badge b-gray">${d.typ}</span></td>
-      <td style="color:var(--text2)">${d.data||'-'}</td>
-      <td style="color:var(--text2)">${d.uwagi||'-'}</td>
-      <td>${d.plik_url ? `<a href="${d.plik_url}" target="_blank" onclick="event.stopPropagation()" style="font-size:12px;color:var(--blue-text)">Otwórz</a>` : '-'}</td>
-    </tr>`).join('')}</tbody>
-  </table>${!docs.length?'<div class="empty">Brak dokumentów</div>':''}</div>`;
-}
-
-function renderRaporty() {
-  var fm = document.getElementById('r-month') ? document.getElementById('r-month').value : '';
-  function matchMonth(ds) { return !fm || (ds||'').startsWith(fm); }
-  var ownAll = orders.filter(function(o){ return o.status!=='Anulowane' && matchMonth(o.data_zaladunek); });
-  var extAll = podw.filter(function(p){ return p.status!=='Anulowane' && matchMonth(p.skad_data); });
-  var allZl = ownAll.concat(extAll.map(function(p){ return Object.assign({},p,{waluta:p.waluta||'EUR'}); }));
-  var przychodyWg = {};
-  allZl.forEach(function(o){ var w=o.waluta||'PLN'; przychodyWg[w]=(przychodyWg[w]||0)+(+o.fracht||0); });
-  var przHtml = Object.entries(przychodyWg).map(function(e){
-    return '<span style="margin-right:12px"><span style="font-size:18px;font-weight:600;color:var(--green-text)">'+e[1].toLocaleString('pl-PL')+'</span> <span style="font-size:11px;color:var(--text3)">'+e[0]+'</span></span>';
-  }).join('') || '0';
-  var prowizjaWg = {};
-  allZl.filter(function(o){return o.kilometry>0&&o.fracht>0;}).forEach(function(o){
-    var w=o.waluta||'EUR';
-    var r=calcProwizja(+o.fracht,+o.kilometry,w,+o.prowizja_pct||4);
-    if(r) prowizjaWg[w]=(prowizjaWg[w]||0)+r.prowizja;
-  });
-  var prowizjaHtml = Object.entries(prowizjaWg).map(function(e){
-    return '<span style="margin-right:12px"><span style="font-size:18px;font-weight:600;color:var(--amber-text)">'+e[1].toFixed(2)+'</span> <span style="font-size:11px;color:var(--text3)">'+e[0]+'</span></span>';
-  }).join('') || '<span style="color:var(--text3)">brak zlecen z km</span>';
-  var dst = ownAll.filter(function(o){return o.status==='Dostarczone';}).length;
-  var eff = ownAll.length ? Math.round(dst/ownAll.length*100) : 0;
-  var onchange = 'renderView(' + String.fromCharCode(39) + 'raporty' + String.fromCharCode(39) + ')';
-  var clearOnclick = 'document.getElementById(' + String.fromCharCode(39) + 'r-month' + String.fromCharCode(39) + ').value=' + String.fromCharCode(39,39) + ';renderView(' + String.fromCharCode(39) + 'raporty' + String.fromCharCode(39) + ')';
-  var html = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap">';
-  html += '<div style="font-size:13px;font-weight:500">Filtruj miesiac:</div>';
-  html += '<input type="month" id="r-month" value="'+fm+'" onchange="'+onchange+'" style="padding:6px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;background:var(--bg);color:var(--text)">';
-  if(fm) html += '<button class="btn" onclick="'+clearOnclick+'">Wyczysc</button>';
+  var wT = orders.filter(function(o){return o.status==='W trasie'}).length;
+  var dst = orders.filter(function(o){return o.status==='Dostarczone'}).length;
+  var przychody = {};
+  orders.forEach(function(o){ var w=o.waluta||'PLN'; przychody[w]=(przychody[w]||0)+(+o.fracht||0); });
+  var przHtml = Object.entries(przychody).map(function(e){
+    return '<div style="display:flex;justify-content:space-between;margin-top:4px"><span style="font-size:11px;color:var(--text3)">'+e[0]+'</span><span style="font-size:16px;font-weight:600;color:var(--amber-text)">'+e[1].toLocaleString('pl-PL')+'</span></div>';
+  }).join('') || '<span style="font-size:20px;font-weight:600">0</span>';
+  var last = orders.slice(0,8);
+  var html = '<div class="metrics">';
+  html += '<div class="metric"><div class="metric-label">Wszystkie zlecenia</div><div class="metric-val">'+orders.length+'</div></div>';
+  html += '<div class="metric"><div class="metric-label">W trasie</div><div class="metric-val blue">'+wT+'</div></div>';
+  html += '<div class="metric"><div class="metric-label">Dostarczone</div><div class="metric-val green">'+dst+'</div></div>';
+  html += '<div class="metric"><div class="metric-label">Łączny przychód</div>'+przHtml+'</div>';
   html += '</div>';
-  html += '<div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:12px">';
-  html += '<div class="metric"><div class="metric-label">Wlasne zlecenia</div><div class="metric-val">'+ownAll.length+'</div></div>';
-  html += '<div class="metric"><div class="metric-label">Zewnetrzne zlecenia</div><div class="metric-val blue">'+extAll.length+'</div></div>';
-  html += '<div class="metric"><div class="metric-label">Skutecznosc dostaw</div><div class="metric-val amber">'+eff+'%</div></div>';
+  html += '<div class="card"><div class="card-title">Ostatnie zlecenia</div>';
+  if (last.length) {
+    html += '<div style="overflow-x:auto"><table><thead><tr><th>Nr</th><th>Trasa</th><th>Klient</th><th>Kierowca</th><th>Załadunek</th><th>Fracht</th><th>Status</th></tr></thead><tbody>';
+    last.forEach(function(o) { html += orderRow(o, false); });
+    html += '</tbody></table></div>';
+  } else html += '<div class="empty">Brak zleceń</div>';
   html += '</div>';
-  html += '<div class="metric" style="margin-bottom:10px"><div class="metric-label">Laczny przychod</div><div style="margin-top:4px">'+przHtml+'</div></div>';
-  html += '<div class="metric" style="margin-bottom:16px"><div class="metric-label">Prowizja spedytora</div><div style="margin-top:4px">'+prowizjaHtml+'</div></div>';
   html += '<div class="two-col">';
-  html += '<div class="card"><div class="card-title">Statusy wlasnych zlecen</div>';
-  ['Nowe','W trasie','Oczekuje','Dostarczone','Anulowane'].forEach(function(s){
-    var n=orders.filter(function(o){return o.status===s&&matchMonth(o.data_zaladunek);}).length;
-    var total=orders.filter(function(o){return matchMonth(o.data_zaladunek);}).length;
-    var pct=total?Math.round(n/total*100):0;
-    html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="badge '+(STATUS_MAP[s]||'b-gray')+'" style="width:90px;text-align:center">'+s+'</span><div style="flex:1;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:12px;font-weight:600;min-width:20px;text-align:right">'+n+'</span></div>';
-  });
-  html += '</div><div class="card"><div class="card-title">Top kierowcy</div>';
-  drivers.map(function(d){return Object.assign({},d,{cnt:orders.filter(function(o){return o.kierowca===d.nazwa&&matchMonth(o.data_zaladunek);}).length});})
-    .sort(function(a,b){return b.cnt-a.cnt;}).slice(0,7).forEach(function(d){
-    html+='<div class="driver-row"><div class="avatar">'+initials(d.nazwa)+'</div><div style="flex:1;font-size:13px">'+d.nazwa+'</div><span style="font-size:14px;font-weight:600">'+d.cnt+'</span></div>';
-  });
+  html += '<div class="card"><div class="card-title">Kierowcy</div>';
+  if (drivers.length) drivers.forEach(function(d) {
+    html += '<div class="driver-row"><div class="avatar">'+initials(d.nazwa)+'</div><div style="flex:1;font-size:13px">'+d.nazwa+'</div><span class="badge '+(d.status==='W trasie'?'b-blue':d.status==='Urlop'?'b-amber':'b-green')+'">'+d.status+'</span></div>';
+  }); else html += '<div class="empty">Brak kierowców</div>';
+  html += '</div>';
+  html += '<div class="card"><div class="card-title">Flota</div>';
+  if (cars.length) cars.forEach(function(c) {
+    html += '<div class="driver-row"><div style="flex:1;font-size:13px">'+c.rejestracja+' — '+c.model+'</div><span class="badge '+(c.status==='W trasie'?'b-blue':c.status==='Serwis'?'b-amber':'b-green')+'">'+c.status+'</span></div>';
+  }); else html += '<div class="empty">Brak aut</div>';
   html += '</div></div>';
   return html;
 }
 
-// ── MODALS ─────────────────────────────────────────────────
-function openOrderModal(id=null) {
-  editingId = id;
-  const o = id ? orders.find(x=>x.id===id) : {};
+// ── ZLECENIA ──────────────────────────────────────────────
+function orderRow(o, showDostawa) {
+  var tr = '<tr data-oid="'+o.id+'" class="ord-row" style="cursor:pointer">';
+  tr += '<td style="font-family:monospace;font-size:11px;color:var(--text3)">'+(o.numer||o.id.slice(0,8))+'</td>';
+  tr += '<td>'+(o.skad||'')+' → '+(o.dokad||'')+'</td>';
+  tr += '<td>'+(o.klient||'-')+'</td>';
+  tr += '<td>'+(o.kierowca||'-')+(o.kierowca2?' +'+o.kierowca2:'')+'</td>';
+  tr += '<td>'+(o.data_zaladunek||'-')+'</td>';
+  if(showDostawa) tr += '<td>'+(o.data_dostawa||'-')+'</td>';
+  tr += '<td>'+(+o.fracht||0).toLocaleString('pl-PL')+' '+(o.waluta||'PLN')+'</td>';
+  tr += '<td><span class="badge '+(STATUS_MAP[o.status]||'b-gray')+'">'+(o.status||'-')+'</span></td>';
+  tr += '</tr>';
+  return tr;
+}
+
+function renderZlecenia() {
+  var html = '<div class="filter-row"><input placeholder="Szukaj..." id="s-q" oninput="filterOrders()" style="width:200px"><select id="s-st" onchange="filterOrders()"><option value="">Wszystkie statusy</option><option>Nowe</option><option>W trasie</option><option>Oczekuje</option><option>Dostarczone</option><option>Anulowane</option></select></div>';
+  html += '<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Nr</th><th>Trasa</th><th>Klient</th><th>Kierowca</th><th>Załadunek</th><th>Dostawa</th><th>Fracht</th><th>Status</th></tr></thead><tbody id="orders-tbody">';
+  orders.forEach(function(o) { html += orderRow(o, true); });
+  html += '</tbody></table></div>';
+  if (!orders.length) html += '<div class="empty">Brak zleceń. Dodaj pierwsze zlecenie.</div>';
+  html += '</div>';
+  return html;
+}
+
+function filterOrders() {
+  var q = (document.getElementById('s-q').value||'').toLowerCase();
+  var st = document.getElementById('s-st').value||'';
+  var filtered = orders.filter(function(o) {
+    var match = !q || [o.skad,o.dokad,o.klient,o.kierowca,o.numer].some(function(v){return (v||'').toLowerCase().includes(q)});
+    return match && (!st || o.status===st);
+  });
+  var tbody = document.getElementById('orders-tbody');
+  if (tbody) tbody.innerHTML = filtered.map(function(o){return orderRow(o,true)}).join('');
+}
+
+// ── ORDER MODAL ───────────────────────────────────────────
+function openOrderModal(id) {
+  editingId = id||null;
+  var o = id ? orders.find(function(x){return x.id===id}) : {};
   document.getElementById('modal-title').textContent = id ? 'Edytuj zlecenie' : 'Nowe zlecenie';
-  document.getElementById('modal-body').innerHTML = `
-    <div class="field full" style="background:var(--color-background-info);border-radius:var(--border-radius-md);padding:12px;border:1px solid var(--color-border-info)">
-      <label style="color:var(--color-text-info);font-weight:500">Wgraj PDF zlecenia — AI wypełni formularz automatycznie</label>
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <input type="file" id="f-pdf-input" accept=".pdf" style="flex:1;padding:4px 0;border:none;background:transparent">
-        <button type="button" id="f-pdf-btn" class="btn btn-primary" onclick="czytajPDFOrder()" style="white-space:nowrap">Czytaj PDF</button>
-      </div>
-      <div id="f-pdf-status" style="font-size:12px;color:var(--color-text-info);margin-top:6px"></div>
-    </div>
-    <div class="field"><label>Skąd</label><input id="f-skad" value="${o.skad||''}" placeholder="Miasto, adres załadunku"></div>
-    <div class="field"><label>Dokąd</label><input id="f-dokad" value="${o.dokad||''}" placeholder="Miasto, adres rozładunku"></div>
-    <div class="field full" style="position:relative"><label>Nr zlecenia <span style="font-weight:400;color:var(--text3)">(zostaw puste = auto)</span></label><div style="display:flex;gap:6px"><input id="f-numer" value="${o.numer||''}" placeholder="np. ZL-001 lub numer klienta" style="flex:1"><button type="button" onclick="copyNumer()" style="padding:7px 12px;border:1px solid var(--border2);border-radius:var(--radius);background:var(--bg);cursor:pointer;font-size:12px;color:var(--text2);white-space:nowrap">Kopiuj</button></div></div>
-    <div class="field"><label>Klient / zleceniodawca</label><input id="f-klient" value="${o.klient||''}" placeholder="Nazwa firmy"></div>
-    <div class="field"><label>Status</label><select id="f-status">${['Nowe','Oczekuje','W trasie','Dostarczone','Anulowane'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
-    <div class="field"><label>Kierowca 1</label><select id="f-kierowca"><option value="">— wybierz —</option>${drivers.map(d=>`<option ${o.kierowca===d.nazwa?'selected':''}>${d.nazwa}</option>`).join('')}</select></div>
-    <div class="field"><label>Kierowca 2 (opcjonalnie)</label><select id="f-kierowca2"><option value="">— brak —</option>${drivers.map(d=>`<option ${(o.kierowca2||'')=== d.nazwa?'selected':''}>${d.nazwa}</option>`).join('')}</select></div>
-    <div class="field"><label>Auto</label><select id="f-auto"><option value="">— wybierz —</option>${cars.map(c=>`<option value="${c.rejestracja} — ${c.model}" ${o.auto===c.rejestracja+' — '+c.model?'selected':''}>${c.rejestracja} — ${c.model}</option>`).join('')}</select></div>
-    <div class="field"><label>Data załadunku</label><input type="date" id="f-zaladunek" value="${o.data_zaladunek||''}"></div>
-    <div class="field"><label>Data dostawy</label><input type="date" id="f-dostawa" value="${o.data_dostawa||''}"></div>
-    <div class="field"><label>Fracht</label><input type="number" id="f-fracht" value="${o.fracht||''}" placeholder="0"></div>
-    <div class="field"><label>Kilometry (km)</label><input type="number" id="f-km" value="${o.kilometry||''}" placeholder="0"></div>
-    <div class="field"><label>Prowizja spedytora (%)</label><input type="number" id="f-prowizja" value="${o.prowizja_pct||4}" step="0.5" min="0" max="100" placeholder="4"></div>
-    <div class="field"><label>Waluta</label><select id="f-waluta">${'PLN,EUR,USD,GBP,CZK,HUF,RON,NOK,SEK,DKK,CHF'.split(',').map(w=>`<option ${(o.waluta||'PLN')===w?'selected':''}>${w}</option>`).join('')}</select></div>
-    <div class="field"><label>Nr ref. klienta</label><input id="f-ref" value="${o.ref||''}" placeholder="opcjonalnie"></div>
-    <div class="field full"><label>Uwagi</label><textarea id="f-uwagi">${o.uwagi||''}</textarea></div>
-    <div class="field full">
-      <label>Plik zlecenia od klienta <span style="font-weight:400;color:var(--text3)">(PDF, JPG, PNG — max 10MB)</span></label>
-      <input type="file" id="f-plik" accept=".pdf,.jpg,.jpeg,.png" style="padding:6px 0;border:none;background:transparent">
-      ${o.plik_url ? `<div style="margin-top:6px;display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;color:var(--text2)">Aktualny plik:</span>
-        <a href="${o.plik_url}" target="_blank" style="font-size:12px;color:var(--blue-text)">Otwórz plik</a>
-        <button type="button" onclick="usunPlik('${o.id}')" style="font-size:11px;color:var(--red-text);border:none;background:transparent;cursor:pointer">Usuń</button>
-      </div>` : ''}
-    </div>
-  `;
-  document.getElementById('modal-foot').innerHTML = `
-    ${id ? `<button class="btn btn-danger" onclick="deleteOrder('${id}')">Usuń zlecenie</button>` : ''}
-    <button class="btn" onclick="closeModal()">Anuluj</button>
-    <button class="btn btn-primary" onclick="saveOrder()">Zapisz</button>
-  `;
+  var driverOpts = '<option value="">— wybierz —</option>' + drivers.map(function(d){return '<option'+(o.kierowca===d.nazwa?' selected':'')+'>'+d.nazwa+'</option>'}).join('');
+  var driver2Opts = '<option value="">— brak —</option>' + drivers.map(function(d){return '<option'+((o.kierowca2||'')===d.nazwa?' selected':'')+'>'+d.nazwa+'</option>'}).join('');
+  var carOpts = '<option value="">— wybierz —</option>' + cars.map(function(c){return '<option value="'+c.rejestracja+' — '+c.model+'"'+(o.auto===c.rejestracja+' — '+c.model?' selected':'')+'>'+c.rejestracja+' — '+c.model+'</option>'}).join('');
+  var statusOpts = ['Nowe','Oczekuje','W trasie','Dostarczone','Anulowane'].map(function(s){return '<option'+(o.status===s?' selected':'')+'>'+s+'</option>'}).join('');
+  var walutyOpts = 'PLN,EUR,USD,GBP,CZK,HUF'.split(',').map(function(w){return '<option'+((o.waluta||'PLN')===w?' selected':'')+'>'+w+'</option>'}).join('');
+  document.getElementById('modal-body').innerHTML =
+    '<div class="field full" style="background:var(--blue-bg);border-radius:var(--radius);padding:12px;border:1px solid #b8d4f0"><label style="color:var(--blue-text);font-weight:600">Wgraj PDF zlecenia — AI wypełni formularz</label><div style="display:flex;gap:8px;margin-top:8px"><input type="file" id="f-pdf" accept=".pdf" style="flex:1;border:none;background:transparent"><button type="button" class="btn btn-primary" onclick="czytajPDFOrder()" id="f-pdf-btn">Czytaj PDF</button></div><div id="f-pdf-status" style="font-size:12px;color:var(--blue-text);margin-top:6px"></div></div>' +
+    '<div class="field"><label>Skąd</label><input id="f-skad" value="'+(o.skad||'')+'" placeholder="Miasto, adres załadunku"></div>' +
+    '<div class="field"><label>Dokąd</label><input id="f-dokad" value="'+(o.dokad||'')+'" placeholder="Miasto, adres rozładunku"></div>' +
+    '<div class="field"><label>Nr zlecenia</label><input id="f-numer" value="'+(o.numer||'')+'" placeholder="auto"></div>' +
+    '<div class="field"><label>Klient</label><input id="f-klient" value="'+(o.klient||'')+'" placeholder="Nazwa firmy"></div>' +
+    '<div class="field"><label>Status</label><select id="f-status">'+statusOpts+'</select></div>' +
+    '<div class="field"><label>Kierowca 1</label><select id="f-k1">'+driverOpts+'</select></div>' +
+    '<div class="field"><label>Kierowca 2</label><select id="f-k2">'+driver2Opts+'</select></div>' +
+    '<div class="field"><label>Auto</label><select id="f-auto">'+carOpts+'</select></div>' +
+    '<div class="field"><label>Data załadunku</label><input type="date" id="f-zal" value="'+(o.data_zaladunek||'')+'"></div>' +
+    '<div class="field"><label>Data dostawy</label><input type="date" id="f-dos" value="'+(o.data_dostawa||'')+'"></div>' +
+    '<div class="field"><label>Fracht</label><input type="number" id="f-fracht" value="'+(o.fracht||'')+'" placeholder="0"></div>' +
+    '<div class="field"><label>Waluta</label><select id="f-waluta">'+walutyOpts+'</select></div>' +
+    '<div class="field"><label>Kilometry (km)</label><input type="number" id="f-km" value="'+(o.kilometry||'')+'" placeholder="0"></div>' +
+    '<div class="field"><label>Prowizja (%)</label><input type="number" id="f-prow" value="'+(o.prowizja_pct||4)+'" step="0.5" min="0" max="100"></div>' +
+    '<div class="field"><label>Nr ref. klienta</label><input id="f-ref" value="'+(o.ref||'')+'" placeholder="opcjonalnie"></div>' +
+    '<div class="field full"><label>Uwagi</label><textarea id="f-uwagi">'+(o.uwagi||'')+'</textarea></div>';
+  document.getElementById('modal-foot').innerHTML =
+    (id ? '<button class="btn btn-danger" onclick="deleteOrder(''+id+'')">Usuń</button>' : '') +
+    '<button class="btn" onclick="closeModal()">Anuluj</button>' +
+    '<button class="btn btn-primary" onclick="saveOrder()">Zapisz</button>';
   openModal();
 }
 
 async function saveOrder() {
-  let savedId = null;
-  const skad  = document.getElementById('f-skad').value.trim();
-  const dokad = document.getElementById('f-dokad').value.trim();
-  if (!skad || !dokad) { showToast('Uzupełnij pola Skąd i Dokąd.', true); return; }
-  const payload = {
+  var skad = document.getElementById('f-skad').value.trim();
+  var dokad = document.getElementById('f-dokad').value.trim();
+  if (!skad||!dokad) { showToast('Uzupełnij Skąd i Dokąd', true); return; }
+  var payload = {
     skad, dokad,
-    klient:         document.getElementById('f-klient').value.trim(),
-    status:         document.getElementById('f-status').value,
-    kierowca:       document.getElementById('f-kierowca').value,
-    kierowca2:      document.getElementById('f-kierowca2')?.value||'',
-    auto:           document.getElementById('f-auto').value,
-    data_zaladunek: document.getElementById('f-zaladunek').value || null,
-    data_dostawa:   document.getElementById('f-dostawa').value || null,
-    fracht:         parseFloat(document.getElementById('f-fracht').value) || 0,
-    kilometry:      parseFloat(document.getElementById('f-km').value) || 0,
-    prowizja_pct:   parseFloat(document.getElementById('f-prowizja')?.value) || 4,
-    waluta:         (document.getElementById('f-waluta')||{value:'PLN'}).value,
-    ref:            document.getElementById('f-ref').value.trim(),
-    uwagi:          document.getElementById('f-uwagi').value.trim(),
-    numer:          (document.getElementById('f-numer')||{value:''}).value.trim() || undefined,
-    
+    numer: document.getElementById('f-numer').value.trim()||undefined,
+    klient: document.getElementById('f-klient').value.trim(),
+    status: document.getElementById('f-status').value,
+    kierowca: document.getElementById('f-k1').value,
+    kierowca2: document.getElementById('f-k2').value,
+    auto: document.getElementById('f-auto').value,
+    data_zaladunek: document.getElementById('f-zal').value||null,
+    data_dostawa: document.getElementById('f-dos').value||null,
+    fracht: parseFloat(document.getElementById('f-fracht').value)||0,
+    waluta: document.getElementById('f-waluta').value,
+    kilometry: parseFloat(document.getElementById('f-km').value)||0,
+    prowizja_pct: parseFloat(document.getElementById('f-prow').value)||4,
+    ref: document.getElementById('f-ref').value.trim(),
+    uwagi: document.getElementById('f-uwagi').value.trim()
   };
-  if (!editingId) {
-    delete payload.numer_wlasny;
-    const { data: insData, error } = await sb.from('zlecenia').insert(payload).select('id').single();
-    if (error) { showToast('Błąd zapisu: ' + error.message, true); return; }
-    savedId = insData?.id;
-    await sendNewOrderEmail(payload);
-  } else {
-    delete payload.numer_wlasny; const { error } = await sb.from('zlecenia').update(payload).eq('id', editingId);
-    if (error) { showToast('Błąd aktualizacji: ' + error.message, true); return; }
-    savedId = editingId;
-  }
-  // Upload pliku jeśli wybrany
-  const plikInput = document.getElementById('f-plik');
-  if (plikInput && plikInput.files && plikInput.files[0]) {
-    const plik = plikInput.files[0];
-    const ext = plik.name.split('.').pop();
-    const sciezka = 'zlecenia/' + (savedId || editingId) + '.' + ext;
-    const { error: upErr } = await sb.storage.from('zlecenia-pliki').upload(sciezka, plik, { upsert: true });
-    if (!upErr) {
-      const { data: urlData } = sb.storage.from('zlecenia-pliki').getPublicUrl(sciezka);
-      await sb.from('zlecenia').update({ plik_url: urlData.publicUrl }).eq('id', savedId || editingId);
-    } else {
-      showToast('Błąd uploadu: ' + upErr.message, true);
-    }
-  }
-  // Auto-update driver status based on order status
-  const orderStatus = payload.status;
-  const k1 = payload.kierowca;
-  const k2 = payload.kierowca2;
-  if (k1) {
-    const newDriverStatus = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępny' : null;
-    if (newDriverStatus) {
-      const d1 = drivers.find(d => d.nazwa === k1);
-      if (d1) await sb.from('kierowcy').update({ status: newDriverStatus }).eq('id', d1.id);
-    }
-  }
-  if (k2) {
-    const newDriverStatus2 = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępny' : null;
-    if (newDriverStatus2) {
-      const d2 = drivers.find(d => d.nazwa === k2);
-      if (d2) await sb.from('kierowcy').update({ status: newDriverStatus2 }).eq('id', d2.id);
-    }
-  }
-  // Auto-update car status
-  const autoVal = payload.auto;
-  if (autoVal) {
-    const newCarStatus = orderStatus === 'W trasie' ? 'W trasie' : orderStatus === 'Dostarczone' || orderStatus === 'Anulowane' ? 'Dostępne' : null;
-    if (newCarStatus) {
-      const carParts = autoVal.split(' — ');
-      const carRej = carParts[0];
-      const car = cars.find(c => c.rejestracja === carRej);
-      if (car) await sb.from('flota').update({ status: newCarStatus }).eq('id', car.id);
-    }
-  }
-  closeModal();
-  showToast(editingId ? 'Zlecenie zaktualizowane ✓' : 'Zlecenie dodane ✓');
+  var err;
+  if (!editingId) { var r = await sb.from('zlecenia').insert(payload); err=r.error; }
+  else { var r = await sb.from('zlecenia').update(payload).eq('id',editingId); err=r.error; }
+  if (err) { showToast('Błąd: '+err.message,true); return; }
+  // Auto-update driver/car status
+  var ns = payload.status==='W trasie'?'W trasie':payload.status==='Dostarczone'||payload.status==='Anulowane'?'Dostępny':null;
+  if (ns && payload.kierowca) { var d1=drivers.find(function(d){return d.nazwa===payload.kierowca}); if(d1) await sb.from('kierowcy').update({status:ns}).eq('id',d1.id); }
+  if (ns && payload.kierowca2) { var d2=drivers.find(function(d){return d.nazwa===payload.kierowca2}); if(d2) await sb.from('kierowcy').update({status:ns}).eq('id',d2.id); }
+  var nc = payload.status==='W trasie'?'W trasie':payload.status==='Dostarczone'||payload.status==='Anulowane'?'Dostępne':null;
+  if (nc && payload.auto) { var carRej=payload.auto.split(' — ')[0]; var car=cars.find(function(c){return c.rejestracja===carRej}); if(car) await sb.from('flota').update({status:nc}).eq('id',car.id); }
+  closeModal(); showToast(editingId?'Zaktualizowano ✓':'Dodano ✓');
   await loadAll(); renderView(currentView);
 }
 
 async function deleteOrder(id) {
-  if (!confirm('Na pewno usunąć to zlecenie?')) return;
-  await sb.from('zlecenia').delete().eq('id', id);
-  closeModal(); showToast('Zlecenie usunięte');
+  if (!confirm('Na pewno usunąć zlecenie?')) return;
+  await sb.from('zlecenia').delete().eq('id',id);
+  closeModal(); showToast('Usunięto');
   await loadAll(); renderView(currentView);
 }
 
-function showDetail(id) {
-  const o = orders.find(x => x.id === id);
+function showOrderDetail(id) {
+  var o = orders.find(function(x){return x.id===id});
   if (!o) return;
-  document.getElementById('modal-title').textContent = 'Zlecenie ' + (o.numer || '');
-  document.getElementById('modal-body').innerHTML = `<div class="detail-grid" style="grid-column:1/-1">
-    <div class="detail-row"><div class="detail-label">Skąd</div><div class="detail-val">${o.skad||'-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Dokąd</div><div class="detail-val">${o.dokad||'-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Klient</div><div class="detail-val">${o.klient||'-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Status</div><div class="detail-val"><span class="badge ${STATUS_MAP[o.status]||'b-gray'}">${o.status}</span></div></div>
-    <div class="detail-row"><div class="detail-label">Kierowca</div><div class="detail-val">${o.kierowca||'-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Auto</div><div class="detail-val">${o.auto||'-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Data załadunku</div><div class="detail-val">${o.data_zaladunek||'-'}</div></div>
-    <div class="detail-row"><div class="detail-label">Data dostawy</div><div class="detail-val">${o.data_dostawa||'-'}</div></div>
-    <div class="detail-row" style="background:var(--blue-bg);cursor:pointer" onclick="navigator.clipboard.writeText('${o.numer||''}').then(()=>showToast('Skopiowano numer ✓'))"><div class="detail-label" style="color:var(--blue-text)">Nr zlecenia — kliknij aby skopiować</div><div class="detail-val" style="color:var(--blue-text);font-size:15px">${o.numer||'brak'}</div></div>
-    <div class="detail-row"><div class="detail-label">Fracht</div><div class="detail-val">${(+o.fracht||0).toLocaleString('pl-PL')} ${o.waluta||'PLN'}</div></div>
-    <div class="detail-row"><div class="detail-label">Nr ref.</div><div class="detail-val">${o.ref||'-'}</div></div>
-    ${o.uwagi?`<div class="detail-row full"><div class="detail-label">Uwagi</div><div class="detail-val" style="font-weight:400">${o.uwagi}</div></div>`:''}
-    ${o.plik_url?`<div class="detail-row full" style="background:var(--green-bg)"><div class="detail-label" style="color:var(--green-text)">Plik zlecenia</div><div class="detail-val"><a href="${o.plik_url}" target="_blank" style="color:var(--green-text);text-decoration:underline">Otwórz / pobierz plik</a></div></div>`:''}
-  </div>`;
-  document.getElementById('modal-foot').innerHTML = `
-    <button class="btn" onclick="closeModal()">Zamknij</button>
-    <button class="btn" onclick="exportPDF('${id}')">Eksport PDF</button>
-    <button class="btn btn-primary" onclick="openOrderModal('${id}')">Edytuj</button>
-  `;
+  document.getElementById('modal-title').textContent = 'Zlecenie ' + (o.numer||'');
+  document.getElementById('modal-body').innerHTML =
+    '<div class="detail-grid" style="grid-column:1/-1">' +
+    '<div class="detail-row"><div class="detail-label">Skąd</div><div class="detail-val">'+(o.skad||'-')+'</div></div>' +
+    '<div class="detail-row"><div class="detail-label">Dokąd</div><div class="detail-val">'+(o.dokad||'-')+'</div></div>' +
+    '<div class="detail-row"><div class="detail-label">Klient</div><div class="detail-val">'+(o.klient||'-')+'</div></div>' +
+    '<div class="detail-row"><div class="detail-label">Status</div><div class="detail-val"><span class="badge '+(STATUS_MAP[o.status]||'b-gray')+'">'+o.status+'</span></div></div>' +
+    '<div class="detail-row"><div class="detail-label">Kierowca 1</div><div class="detail-val">'+(o.kierowca||'-')+'</div></div>' +
+    '<div class="detail-row"><div class="detail-label">Kierowca 2</div><div class="detail-val">'+(o.kierowca2||'-')+'</div></div>' +
+    '<div class="detail-row"><div class="detail-label">Auto</div><div class="detail-val">'+(o.auto||'-')+'</div></div>' +
+    '<div class="detail-row"><div class="detail-label">Data załadunku</div><div class="detail-val">'+(o.data_zaladunek||'-')+'</div></div>' +
+    '<div class="detail-row"><div class="detail-label">Data dostawy</div><div class="detail-val">'+(o.data_dostawa||'-')+'</div></div>' +
+    '<div class="detail-row" style="background:var(--blue-bg);cursor:pointer" onclick="navigator.clipboard.writeText(''+(o.numer||'')+'').then(function(){showToast('Skopiowano ✓')})"><div class="detail-label" style="color:var(--blue-text)">Nr zlecenia (kliknij aby skopiować)</div><div class="detail-val" style="color:var(--blue-text);font-size:15px">'+(o.numer||'brak')+'</div></div>' +
+    '<div class="detail-row"><div class="detail-label">Fracht</div><div class="detail-val">'+(+o.fracht||0).toLocaleString('pl-PL')+' '+(o.waluta||'PLN')+'</div></div>' +
+    '<div class="detail-row"><div class="detail-label">Kilometry</div><div class="detail-val">'+(o.kilometry||'-')+'</div></div>' +
+    (o.uwagi?'<div class="detail-row full"><div class="detail-label">Uwagi</div><div class="detail-val" style="font-weight:400">'+o.uwagi+'</div></div>':'') +
+    '</div>';
+  document.getElementById('modal-foot').innerHTML =
+    '<button class="btn" onclick="closeModal()">Zamknij</button>' +
+    '<button class="btn" onclick="exportOrderPDF(''+id+'')">Eksport PDF</button>' +
+    '<button class="btn btn-primary" onclick="closeModal();openOrderModal(''+id+'')">Edytuj</button>';
   openModal();
 }
 
-function openDriverModal(id=null) {
-  editingId = id;
-  const d = id ? drivers.find(x=>x.id===id) : {};
+// ── KIEROWCY ──────────────────────────────────────────────
+function renderKierowcy() {
+  var html = '<div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Imię i nazwisko</th><th>Telefon</th><th>Status</th><th>Zlecenia</th></tr></thead><tbody>';
+  drivers.forEach(function(d) {
+    var cnt = orders.filter(function(o){return o.kierowca===d.nazwa}).length;
+    html += '<tr onclick="openDriverModal(''+d.id+'')"><td><div style="display:flex;align-items:center;gap:9px"><div class="avatar">'+initials(d.nazwa)+'</div>'+d.nazwa+'</div></td><td style="color:var(--text2)">'+(d.telefon||'-')+'</td><td><span class="badge '+(d.status==='W trasie'?'b-blue':d.status==='Urlop'?'b-amber':'b-green')+'">'+d.status+'</span></td><td>'+cnt+'</td></tr>';
+  });
+  html += '</tbody></table>';
+  if (!drivers.length) html += '<div class="empty">Brak kierowców</div>';
+  html += '</div>';
+  return html;
+}
+
+function openDriverModal(id) {
+  editingId = id||null;
+  var d = id ? drivers.find(function(x){return x.id===id}) : {};
   document.getElementById('modal-title').textContent = id ? 'Edytuj kierowcę' : 'Nowy kierowca';
-  document.getElementById('modal-body').innerHTML = `
-    <div class="field full"><label>Imię i nazwisko</label><input id="d-nazwa" value="${d.nazwa||''}" placeholder="Jan Kowalski"></div>
-    <div class="field"><label>Telefon</label><input id="d-telefon" value="${d.telefon||''}" placeholder="+48 500 000 000"></div>
-    <div class="field"><label>Status</label><select id="d-status">${['Dostępny','W trasie','Urlop','Zwolnienie'].map(s=>`<option ${d.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
-    <div class="field full"><label>Uwagi</label><textarea id="d-uwagi">${d.uwagi||''}</textarea></div>
-  `;
-  document.getElementById('modal-foot').innerHTML = `
-    ${id?`<button class="btn btn-danger" onclick="deleteDriver('${id}')">Usuń</button>`:''}
-    <button class="btn" onclick="closeModal()">Anuluj</button>
-    <button class="btn btn-primary" onclick="saveDriver()">Zapisz</button>
-  `;
+  var statusOpts = ['Dostępny','W trasie','Urlop','Zwolnienie'].map(function(s){return '<option'+(d.status===s?' selected':'')+'>'+s+'</option>'}).join('');
+  document.getElementById('modal-body').innerHTML =
+    '<div class="field full"><label>Imię i nazwisko</label><input id="d-nazwa" value="'+(d.nazwa||'')+'" placeholder="Jan Kowalski"></div>' +
+    '<div class="field"><label>Telefon</label><input id="d-tel" value="'+(d.telefon||'')+'" placeholder="+48 500 000 000"></div>' +
+    '<div class="field"><label>Status</label><select id="d-status">'+statusOpts+'</select></div>' +
+    '<div class="field full"><label>Uwagi</label><textarea id="d-uwagi">'+(d.uwagi||'')+'</textarea></div>';
+  document.getElementById('modal-foot').innerHTML =
+    (id?'<button class="btn btn-danger" onclick="deleteDriver(''+id+'')">Usuń</button>':'') +
+    '<button class="btn" onclick="closeModal()">Anuluj</button>' +
+    '<button class="btn btn-primary" onclick="saveDriver()">Zapisz</button>';
   openModal();
 }
 
 async function saveDriver() {
-  const nazwa = document.getElementById('d-nazwa').value.trim();
-  if (!nazwa) { showToast('Podaj imię i nazwisko.', true); return; }
-  const payload = { nazwa, telefon: document.getElementById('d-telefon').value.trim(), status: document.getElementById('d-status').value, uwagi: document.getElementById('d-uwagi').value.trim() };
-  let err;
-  if (!editingId) { const r = await sb.from('kierowcy').insert(payload); err = r.error; }
-  else { const r = await sb.from('kierowcy').update(payload).eq('id', editingId); err = r.error; }
-  if (err) { showToast('Błąd: ' + err.message, true); return; }
+  var nazwa = document.getElementById('d-nazwa').value.trim();
+  if (!nazwa) { showToast('Podaj imię i nazwisko', true); return; }
+  var payload = {nazwa, telefon:document.getElementById('d-tel').value.trim(), status:document.getElementById('d-status').value, uwagi:document.getElementById('d-uwagi').value.trim()};
+  var err;
+  if (!editingId) { var r=await sb.from('kierowcy').insert(payload); err=r.error; }
+  else { var r=await sb.from('kierowcy').update(payload).eq('id',editingId); err=r.error; }
+  if (err) { showToast('Błąd: '+err.message,true); return; }
   closeModal(); showToast('Zapisano ✓');
   await loadAll(); renderView('kierowcy');
 }
 
 async function deleteDriver(id) {
   if (!confirm('Usunąć kierowcę?')) return;
-  await sb.from('kierowcy').delete().eq('id', id);
-  closeModal(); showToast('Kierowca usunięty');
+  await sb.from('kierowcy').delete().eq('id',id);
+  closeModal(); showToast('Usunięto');
   await loadAll(); renderView('kierowcy');
 }
 
-function openCarModal(id=null) {
-  editingId = id;
-  const car = id ? cars.find(x=>x.id===id) : {};
+// ── FLOTA ─────────────────────────────────────────────────
+function renderFlota() {
+  var today = new Date(), warn30 = new Date();
+  warn30.setDate(today.getDate()+30);
+  function dst(ds) { if(!ds) return null; var d=new Date(ds); return d<today?'exp':d<=warn30?'soon':'ok'; }
+  function dfmt(ds) { return ds?new Date(ds).toLocaleDateString('pl-PL'):'-'; }
+  function dbadge(ds) {
+    if(!ds) return '-';
+    var s=dst(ds),f=dfmt(ds);
+    if(s==='exp') return '<span class="badge b-red">'+f+' PRZETERMINOWANY</span>';
+    if(s==='soon') return '<span class="badge b-amber">'+f+' wkrótce</span>';
+    return '<span style="font-size:12px;color:var(--text2)">'+f+'</span>';
+  }
+  var alerts = cars.filter(function(c){ var p=dst(c.data_przegladu),u=dst(c.data_ubezpieczenia); return p==='exp'||p==='soon'||u==='exp'||u==='soon'; });
+  var alertHtml = '';
+  if (alerts.length) {
+    var msgs = alerts.map(function(c) {
+      var parts=[],p=dst(c.data_przegladu),u=dst(c.data_ubezpieczenia);
+      if(p==='exp') parts.push(c.rejestracja+': przegląd PRZETERMINOWANY');
+      else if(p==='soon') parts.push(c.rejestracja+': przegląd '+dfmt(c.data_przegladu));
+      if(u==='exp') parts.push(c.rejestracja+': ubezp. PRZETERMINOWANE');
+      else if(u==='soon') parts.push(c.rejestracja+': ubezp. '+dfmt(c.data_ubezpieczenia));
+      return parts.join(', ');
+    }).join(' | ');
+    alertHtml = '<div style="background:var(--amber-bg);border:1px solid #d4a017;border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--amber-text)"><strong>Uwaga!</strong> '+msgs+'</div>';
+  }
+  var rows = '';
+  cars.forEach(function(c) {
+    var cnt=orders.filter(function(o){return o.auto===c.rejestracja+' — '+c.model}).length;
+    var ps=dst(c.data_przegladu),us=dst(c.data_ubezpieczenia);
+    var rbg=(ps==='exp'||us==='exp')?'background:var(--red-bg)':(ps==='soon'||us==='soon')?'background:var(--amber-bg)':'';
+    var sb2=c.status==='W trasie'?'b-blue':c.status==='Serwis'?'b-amber':'b-green';
+    rows += '<tr data-carid="'+c.id+'" style="'+rbg+';cursor:pointer"><td><strong>'+c.rejestracja+'</strong></td><td>'+c.model+'</td><td style="color:var(--text2)">'+(c.rok||'-')+'</td><td><span class="badge '+sb2+'">'+c.status+'</span></td><td>'+dbadge(c.data_przegladu)+'</td><td>'+dbadge(c.data_ubezpieczenia)+'</td><td>'+cnt+'</td></tr>';
+  });
+  var html = alertHtml+'<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table id="flota-tbl"><thead><tr><th>Rejestracja</th><th>Marka i model</th><th>Rok</th><th>Status</th><th>Przegląd</th><th>Ubezpieczenie</th><th>Zlecenia</th></tr></thead><tbody>'+rows+'</tbody></table>';
+  if (!cars.length) html += '<div class="empty">Brak aut we flocie</div>';
+  html += '</div></div>';
+  setTimeout(function() {
+    var tbl = document.getElementById('flota-tbl');
+    if (tbl) tbl.addEventListener('click', function(e) {
+      var tr = e.target.closest('tr[data-carid]');
+      if (tr) openCarModal(tr.getAttribute('data-carid'));
+    });
+  }, 50);
+  return html;
+}
+
+function openCarModal(id) {
+  editingId = id||null;
+  var c = id ? cars.find(function(x){return x.id===id}) : {};
   document.getElementById('modal-title').textContent = id ? 'Edytuj auto' : 'Nowe auto';
-  document.getElementById('modal-body').innerHTML = `
-    <div class="field"><label>Rejestracja</label><input id="c-reg" value="${car.rejestracja||''}" placeholder="WA 1234X"></div>
-    <div class="field"><label>Marka i model</label><input id="c-model" value="${car.model||''}" placeholder="Volvo FH 500"></div>
-    <div class="field"><label>Rok produkcji</label><input id="c-rok" type="number" value="${car.rok||''}" placeholder="2020"></div>
-    <div class="field"><label>Status</label><select id="c-status">${['Dostępne','W trasie','Serwis'].map(s=>`<option ${car.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
-    <div class="field"><label>Data przeglądu</label><input type="date" id="c-przeglad" value="${car.data_przegladu||''}" ></div>
-    <div class="field"><label>Data ubezpieczenia</label><input type="date" id="c-ubezp" value="${car.data_ubezpieczenia||''}" ></div>
-    <div class="field full"><label>Uwagi</label><textarea id="c-uwagi">${car.uwagi||''}</textarea></div>
-  `;
-  document.getElementById('modal-foot').innerHTML = `
-    ${id?`<button class="btn btn-danger" onclick="deleteCar('${id}')">Usuń</button>`:''}
-    <button class="btn" onclick="closeModal()">Anuluj</button>
-    <button class="btn btn-primary" onclick="saveCar()">Zapisz</button>
-  `;
+  var statusOpts = ['Dostępne','W trasie','Serwis'].map(function(s){return '<option'+((c.status||'Dostępne')===s?' selected':'')+'>'+s+'</option>'}).join('');
+  document.getElementById('modal-body').innerHTML =
+    '<div class="field"><label>Rejestracja</label><input id="c-reg" value="'+(c.rejestracja||'')+'" placeholder="WA 1234X"></div>' +
+    '<div class="field"><label>Marka i model</label><input id="c-model" value="'+(c.model||'')+'" placeholder="Volvo FH 500"></div>' +
+    '<div class="field"><label>Rok produkcji</label><input type="number" id="c-rok" value="'+(c.rok||'')+'" placeholder="2020"></div>' +
+    '<div class="field"><label>Status</label><select id="c-status">'+statusOpts+'</select></div>' +
+    '<div class="field"><label>Data przeglądu</label><input type="date" id="c-prz" value="'+(c.data_przegladu||'')+'"></div>' +
+    '<div class="field"><label>Data ubezpieczenia</label><input type="date" id="c-ubz" value="'+(c.data_ubezpieczenia||'')+'"></div>' +
+    '<div class="field full"><label>Uwagi</label><textarea id="c-uwagi">'+(c.uwagi||'')+'</textarea></div>';
+  document.getElementById('modal-foot').innerHTML =
+    (id?'<button class="btn btn-danger" onclick="deleteCar(''+id+'')">Usuń</button>':'') +
+    '<button class="btn" onclick="closeModal()">Anuluj</button>' +
+    '<button class="btn btn-primary" onclick="saveCar()">Zapisz</button>';
   openModal();
 }
 
 async function saveCar() {
-  const reg   = document.getElementById('c-reg').value.trim();
-  const model = document.getElementById('c-model').value.trim();
-  if (!reg || !model) { showToast('Uzupełnij rejestrację i model.', true); return; }
-  const payload = { rejestracja: reg, model, rok: parseInt(document.getElementById('c-rok').value)||null, status: document.getElementById('c-status').value, uwagi: document.getElementById('c-uwagi').value.trim(), data_przegladu: document.getElementById('c-przeglad').value||null, data_ubezpieczenia: document.getElementById('c-ubezp').value||null };
-  let err2;
-  if (!editingId) { const r = await sb.from('flota').insert(payload); err2 = r.error; }
-  else { const r = await sb.from('flota').update(payload).eq('id', editingId); err2 = r.error; }
-  if (err2) { showToast('Błąd: ' + err2.message, true); return; }
+  var reg = document.getElementById('c-reg').value.trim();
+  var model = document.getElementById('c-model').value.trim();
+  if (!reg||!model) { showToast('Uzupełnij rejestrację i model', true); return; }
+  var payload = {rejestracja:reg, model, rok:parseInt(document.getElementById('c-rok').value)||null, status:document.getElementById('c-status').value, uwagi:document.getElementById('c-uwagi').value.trim(), data_przegladu:document.getElementById('c-prz').value||null, data_ubezpieczenia:document.getElementById('c-ubz').value||null};
+  var err;
+  if (!editingId) { var r=await sb.from('flota').insert(payload); err=r.error; }
+  else { var r=await sb.from('flota').update(payload).eq('id',editingId); err=r.error; }
+  if (err) { showToast('Błąd: '+err.message,true); return; }
   closeModal(); showToast('Zapisano ✓');
   await loadAll(); renderView('flota');
 }
 
 async function deleteCar(id) {
   if (!confirm('Usunąć auto?')) return;
-  await sb.from('flota').delete().eq('id', id);
-  closeModal(); showToast('Auto usunięte');
+  await sb.from('flota').delete().eq('id',id);
+  closeModal(); showToast('Usunięto');
   await loadAll(); renderView('flota');
 }
 
-function openDocModal(id=null) {
-  editingId = id;
-  const d = id ? docs.find(x=>x.id===id) : {};
+// ── DOKUMENTY ─────────────────────────────────────────────
+function renderDokumenty() {
+  var html = '<div class="card" style="padding:0;overflow:hidden"><table><thead><tr><th>Nazwa</th><th>Typ</th><th>Data</th><th>Uwagi</th><th>Plik</th></tr></thead><tbody>';
+  docs.forEach(function(d) {
+    html += '<tr onclick="openDocModal(''+d.id+'')"><td>'+d.nazwa+'</td><td><span class="badge b-gray">'+d.typ+'</span></td><td style="color:var(--text2)">'+(d.data||'-')+'</td><td style="color:var(--text2)">'+(d.uwagi||'-')+'</td><td>'+(d.plik_url?'<a href="'+d.plik_url+'" target="_blank" onclick="event.stopPropagation()" style="font-size:12px;color:var(--blue-text)">Otwórz</a>':'-')+'</td></tr>';
+  });
+  html += '</tbody></table>';
+  if (!docs.length) html += '<div class="empty">Brak dokumentów</div>';
+  html += '</div>';
+  return html;
+}
+
+function openDocModal(id) {
+  editingId = id||null;
+  var d = id ? docs.find(function(x){return x.id===id}) : {};
   document.getElementById('modal-title').textContent = id ? 'Edytuj dokument' : 'Nowy dokument';
-  document.getElementById('modal-body').innerHTML = `
-    <div class="field full"><label>Nazwa dokumentu</label><input id="doc-nazwa" value="${d.nazwa||''}" placeholder="Faktura FV/2026/04/001"></div>
-    <div class="field"><label>Typ</label><select id="doc-typ">${['Faktura','Umowa','CMR','Inne'].map(s=>`<option ${d.typ===s?'selected':''}>${s}</option>`).join('')}</select></div>
-    <div class="field"><label>Data</label><input type="date" id="doc-data" value="${d.data||new Date().toISOString().slice(0,10)}"></div>
-    <div class="field full"><label>Uwagi</label><textarea id="doc-uwagi">${d.uwagi||''}</textarea></div>
-    <div class="field full">
-      <label>Plik dokumentu <span style="font-weight:400;color:var(--text3)">(PDF, JPG, PNG — max 10MB)</span></label>
-      <input type="file" id="doc-plik" accept=".pdf,.jpg,.jpeg,.png" style="padding:6px 0;border:none;background:transparent">
-      ${d.plik_url ? `<div style="margin-top:6px;display:flex;align-items:center;gap:8px">
-        <span style="font-size:12px;color:var(--text2)">Aktualny plik:</span>
-        <a href="${d.plik_url}" target="_blank" style="font-size:12px;color:var(--blue-text)">Otwórz plik</a>
-        <button type="button" onclick="usunPlikDoc('${d.id}')" style="font-size:11px;color:var(--red-text);border:none;background:transparent;cursor:pointer">Usuń</button>
-      </div>` : ''}
-    </div>
-  `;
-  document.getElementById('modal-foot').innerHTML = `
-    ${id?`<button class="btn btn-danger" onclick="deleteDoc('${id}')">Usuń</button>`:''}
-    <button class="btn" onclick="closeModal()">Anuluj</button>
-    <button class="btn btn-primary" onclick="saveDoc()">Zapisz</button>
-  `;
+  var typOpts = ['Faktura','Umowa','CMR','Inne'].map(function(s){return '<option'+(d.typ===s?' selected':'')+'>'+s+'</option>'}).join('');
+  document.getElementById('modal-body').innerHTML =
+    '<div class="field full"><label>Nazwa</label><input id="doc-n" value="'+(d.nazwa||'')+'" placeholder="Faktura FV/2026/04/001"></div>' +
+    '<div class="field"><label>Typ</label><select id="doc-t">'+typOpts+'</select></div>' +
+    '<div class="field"><label>Data</label><input type="date" id="doc-d" value="'+(d.data||new Date().toISOString().slice(0,10))+'"></div>' +
+    '<div class="field full"><label>Uwagi</label><textarea id="doc-u">'+(d.uwagi||'')+'</textarea></div>' +
+    '<div class="field full"><label>Plik (PDF, JPG, PNG)</label><input type="file" id="doc-f" accept=".pdf,.jpg,.jpeg,.png" style="border:none;background:transparent;padding:6px 0">'+(d.plik_url?'<a href="'+d.plik_url+'" target="_blank" style="font-size:12px;color:var(--blue-text)">Aktualny plik</a>':'')+'</div>';
+  document.getElementById('modal-foot').innerHTML =
+    (id?'<button class="btn btn-danger" onclick="deleteDoc(''+id+'')">Usuń</button>':'') +
+    '<button class="btn" onclick="closeModal()">Anuluj</button>' +
+    '<button class="btn btn-primary" onclick="saveDoc()">Zapisz</button>';
   openModal();
 }
 
 async function saveDoc() {
-  const nazwa = document.getElementById('doc-nazwa').value.trim();
-  if (!nazwa) { showToast('Podaj nazwę dokumentu.', true); return; }
-  const payload = { nazwa, typ: document.getElementById('doc-typ').value, data: document.getElementById('doc-data').value, uwagi: document.getElementById('doc-uwagi').value.trim(),  };
-  let err3, savedDocId = null;
-  if (!editingId) {
-    const r = await sb.from('dokumenty').insert(payload).select('id').single();
-    err3 = r.error; savedDocId = r.data?.id;
-  } else {
-    const r = await sb.from('dokumenty').update(payload).eq('id', editingId);
-    err3 = r.error; savedDocId = editingId;
+  var nazwa = document.getElementById('doc-n').value.trim();
+  if (!nazwa) { showToast('Podaj nazwę', true); return; }
+  var payload = {nazwa, typ:document.getElementById('doc-t').value, data:document.getElementById('doc-d').value, uwagi:document.getElementById('doc-u').value.trim()};
+  var err, savedId;
+  if (!editingId) { var r=await sb.from('dokumenty').insert(payload).select('id').single(); err=r.error; savedId=r.data&&r.data.id; }
+  else { var r=await sb.from('dokumenty').update(payload).eq('id',editingId); err=r.error; savedId=editingId; }
+  if (err) { showToast('Błąd: '+err.message,true); return; }
+  var plik = document.getElementById('doc-f').files[0];
+  if (plik) {
+    var ext = plik.name.split('.').pop();
+    var path = 'dokumenty/'+savedId+'.'+ext;
+    var up = await sb.storage.from('zlecenia-pliki').upload(path, plik, {upsert:true});
+    if (!up.error) { var url=sb.storage.from('zlecenia-pliki').getPublicUrl(path); await sb.from('dokumenty').update({plik_url:url.data.publicUrl}).eq('id',savedId); }
   }
-  if (err3) { showToast('Błąd: ' + err3.message, true); return; }
-
-  const docPlik = document.getElementById('doc-plik');
-  if (docPlik && docPlik.files && docPlik.files[0]) {
-    const plik = docPlik.files[0];
-    const ext = plik.name.split('.').pop();
-    const sciezka = 'dokumenty/' + savedDocId + '.' + ext;
-    const { error: upErr } = await sb.storage.from('zlecenia-pliki').upload(sciezka, plik, { upsert: true });
-    if (!upErr) {
-      const { data: urlData } = sb.storage.from('zlecenia-pliki').getPublicUrl(sciezka);
-      await sb.from('dokumenty').update({ plik_url: urlData.publicUrl }).eq('id', savedDocId);
-    } else {
-      showToast('Błąd uploadu: ' + upErr.message, true);
-    }
-  }
-  closeModal(); showToast('Dokument zapisany ✓');
+  closeModal(); showToast('Zapisano ✓');
   await loadAll(); renderView('dokumenty');
 }
 
 async function deleteDoc(id) {
   if (!confirm('Usunąć dokument?')) return;
-  await sb.from('dokumenty').delete().eq('id', id);
-  closeModal(); showToast('Dokument usunięty');
+  await sb.from('dokumenty').delete().eq('id',id);
+  closeModal(); showToast('Usunięto');
   await loadAll(); renderView('dokumenty');
 }
 
-function openModal()  { document.getElementById('modal-overlay').classList.add('open'); }
-function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId = null; }
-
-document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) closeModal(); });
-
-function showToast(msg, isError=false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast' + (isError?' error':'');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+// ── PODWYKONAWCY ──────────────────────────────────────────
+function renderPodwykonawcy() {
+  var html = '<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Nr zlecenia</th><th>Zleceniobiorca</th><th>Trasa</th><th>Kierowca</th><th>Załadunek</th><th>Dostawa</th><th>Fracht</th><th>Status</th></tr></thead><tbody>';
+  podw.forEach(function(p) {
+    html += '<tr onclick="openPodwModal(''+p.id+'')"><td style="font-family:monospace;font-size:11px;color:var(--text3)">'+(p.numer||p.id.slice(0,8))+'</td><td>'+(p.zleceniobiorca_nazwa||'-')+'</td><td>'+(p.skad||'')+' → '+(p.dokad||'')+'</td><td>'+(p.kierowca||'-')+'</td><td>'+(p.skad_data||'-')+'</td><td>'+(p.dokad_data||'-')+'</td><td>'+(+p.fracht||0).toLocaleString('pl-PL')+' '+(p.waluta||'EUR')+'</td><td><span class="badge '+(STATUS_MAP[p.status]||'b-gray')+'">'+(p.status||'-')+'</span></td></tr>';
+  });
+  html += '</tbody></table>';
+  if (!podw.length) html += '<div class="empty">Brak zleceń zewnętrznych</div>';
+  html += '</div></div>';
+  return html;
 }
 
-function initials(name) {
-  return (name||'').split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+function openPodwModal(id) {
+  editingId = id||null;
+  var p = id ? podw.find(function(x){return x.id===id}) : {};
+  document.getElementById('modal-title').textContent = id ? 'Edytuj zlecenie zewnętrzne' : 'Nowe zlecenie zewnętrzne';
+  var statusOpts = ['Nowe','Oczekuje','W trasie','Dostarczone','Anulowane'].map(function(s){return '<option'+((p.status||'Nowe')===s?' selected':'')+'>'+s+'</option>'}).join('');
+  var walutyOpts = 'EUR,PLN,USD,GBP,CZK'.split(',').map(function(w){return '<option'+((p.waluta||'EUR')===w?' selected':'')+'>'+w+'</option>'}).join('');
+  document.getElementById('modal-body').innerHTML =
+    '<div class="field full" style="background:var(--blue-bg);border-radius:var(--radius);padding:12px;border:1px solid #b8d4f0"><label style="color:var(--blue-text);font-weight:600">Wgraj PDF zlecenia — AI wypełni formularz</label><div style="display:flex;gap:8px;margin-top:8px"><input type="file" id="pw-pdf" accept=".pdf" style="flex:1;border:none;background:transparent"><button type="button" class="btn btn-primary" onclick="czytajPDFPodw()" id="pw-pdf-btn">Czytaj PDF</button></div><div id="pw-pdf-status" style="font-size:12px;color:var(--blue-text);margin-top:6px"></div></div>' +
+    '<div class="field"><label>Nr zlecenia</label><input id="pw-nr" value="'+(p.numer||'')+'" placeholder="LTE 001/04/2026"></div>' +
+    '<div class="field"><label>Status</label><select id="pw-status">'+statusOpts+'</select></div>' +
+    '<div class="field full"><label>Zleceniobiorca (nazwa)</label><input id="pw-nazwa" value="'+(p.zleceniobiorca_nazwa||'')+'" placeholder="Firma Transport Sp. z o.o."></div>' +
+    '<div class="field"><label>Adres zleceniobiorcy</label><input id="pw-adres" value="'+(p.zleceniobiorca_adres||'')+'"></div>' +
+    '<div class="field"><label>NIP zleceniobiorcy</label><input id="pw-nip" value="'+(p.zleceniobiorca_nip||'')+'"></div>' +
+    '<div class="field"><label>Kierowca</label><input id="pw-kier" value="'+(p.kierowca||'')+'" placeholder="Jan Kowalski"></div>' +
+    '<div class="field"><label>Tel. kierowcy</label><input id="pw-tel" value="'+(p.kierowca_tel||'')+'"></div>' +
+    '<div class="field"><label>Auto/naczepy</label><input id="pw-auto" value="'+(p.auto||'')+'"></div>' +
+    '<div class="field"><label>Skąd</label><input id="pw-skad" value="'+(p.skad||'')+'"></div>' +
+    '<div class="field"><label>Adres załadunku</label><input id="pw-skad-adres" value="'+(p.skad_adres||'')+'"></div>' +
+    '<div class="field"><label>Data załadunku</label><input type="date" id="pw-skad-d" value="'+(p.skad_data||'')+'"></div>' +
+    '<div class="field"><label>Godz. załadunku</label><input id="pw-skad-g" value="'+(p.skad_godz||'')+'" placeholder="08:00"></div>' +
+    '<div class="field"><label>Dokąd</label><input id="pw-dokad" value="'+(p.dokad||'')+'"></div>' +
+    '<div class="field"><label>Adres rozładunku</label><input id="pw-dokad-adres" value="'+(p.dokad_adres||'')+'"></div>' +
+    '<div class="field"><label>Data rozładunku</label><input type="date" id="pw-dokad-d" value="'+(p.dokad_data||'')+'"></div>' +
+    '<div class="field"><label>Godz. rozładunku</label><input id="pw-dokad-g" value="'+(p.dokad_godz||'')+'" placeholder="14:00"></div>' +
+    '<div class="field"><label>Fracht</label><input type="number" id="pw-fracht" value="'+(p.fracht||'')+'" placeholder="0"></div>' +
+    '<div class="field"><label>Waluta</label><select id="pw-waluta">'+walutyOpts+'</select></div>' +
+    '<div class="field"><label>Kilometry (km)</label><input type="number" id="pw-km" value="'+(p.kilometry||'')+'" placeholder="0"></div>' +
+    '<div class="field"><label>Prowizja (%)</label><input type="number" id="pw-prow" value="'+(p.prowizja_pct||4)+'" step="0.5"></div>' +
+    '<div class="field"><label>Płatność (dni)</label><input type="number" id="pw-plat" value="'+(p.platnosc_dni||30)+'"></div>' +
+    '<div class="field"><label>Referencje</label><input id="pw-ref" value="'+(p.referencje||'')+'"></div>' +
+    '<div class="field full"><label>Uwagi</label><textarea id="pw-uwagi">'+(p.uwagi||'')+'</textarea></div>';
+  document.getElementById('modal-foot').innerHTML =
+    (id?'<button class="btn btn-danger" onclick="deletePodw(''+id+'')">Usuń</button>':'') +
+    '<button class="btn" onclick="closeModal()">Anuluj</button>' +
+    (id?'<button class="btn" onclick="closeModal();printPodwPDF(''+id+'')">Eksport PDF</button>':'') +
+    '<button class="btn btn-primary" onclick="savePodw()">Zapisz</button>';
+  openModal();
 }
 
-// ── CONFIG ─────────────────────────────────────────────────
-const NOTIFY_EMAIL = ''; // wpisz swoj email np. jan@firma.pl
-const RESEND_API_KEY = ''; // wpisz klucz z resend.com
+async function savePodw() {
+  var payload = {
+    numer: document.getElementById('pw-nr').value.trim()||undefined,
+    status: document.getElementById('pw-status').value,
+    zleceniobiorca_nazwa: document.getElementById('pw-nazwa').value.trim(),
+    zleceniobiorca_adres: document.getElementById('pw-adres').value.trim(),
+    zleceniobiorca_nip: document.getElementById('pw-nip').value.trim(),
+    kierowca: document.getElementById('pw-kier').value.trim(),
+    kierowca_tel: document.getElementById('pw-tel').value.trim(),
+    auto: document.getElementById('pw-auto').value.trim(),
+    skad: document.getElementById('pw-skad').value.trim(),
+    skad_adres: document.getElementById('pw-skad-adres').value.trim(),
+    skad_data: document.getElementById('pw-skad-d').value||null,
+    skad_godz: document.getElementById('pw-skad-g').value.trim(),
+    dokad: document.getElementById('pw-dokad').value.trim(),
+    dokad_adres: document.getElementById('pw-dokad-adres').value.trim(),
+    dokad_data: document.getElementById('pw-dokad-d').value||null,
+    dokad_godz: document.getElementById('pw-dokad-g').value.trim(),
+    fracht: parseFloat(document.getElementById('pw-fracht').value)||0,
+    waluta: document.getElementById('pw-waluta').value,
+    kilometry: parseFloat(document.getElementById('pw-km').value)||0,
+    prowizja_pct: parseFloat(document.getElementById('pw-prow').value)||4,
+    platnosc_dni: parseInt(document.getElementById('pw-plat').value)||30,
+    referencje: document.getElementById('pw-ref').value.trim(),
+    uwagi: document.getElementById('pw-uwagi').value.trim()
+  };
+  var err;
+  if (!editingId) { var r=await sb.from('podwykonawcy_zlecenia').insert(payload); err=r.error; }
+  else { var r=await sb.from('podwykonawcy_zlecenia').update(payload).eq('id',editingId); err=r.error; }
+  if (err) { showToast('Błąd: '+err.message,true); return; }
+  closeModal(); showToast('Zapisano ✓');
+  await loadAll(); renderView('podwykonawcy');
+}
+
+async function deletePodw(id) {
+  if (!confirm('Usunąć zlecenie?')) return;
+  await sb.from('podwykonawcy_zlecenia').delete().eq('id',id);
+  closeModal(); showToast('Usunięto');
+  await loadAll(); renderView('podwykonawcy');
+}
+
+// ── RAPORTY ───────────────────────────────────────────────
+function renderRaporty() {
+  var fm = document.getElementById('r-month') ? document.getElementById('r-month').value : '';
+  function mm(ds) { return !fm || (ds||'').startsWith(fm); }
+  var own = orders.filter(function(o){return o.status!=='Anulowane'&&mm(o.data_zaladunek)});
+  var ext = podw.filter(function(p){return p.status!=='Anulowane'&&mm(p.skad_data)});
+  var all = own.concat(ext.map(function(p){return Object.assign({},p,{waluta:p.waluta||'EUR'})}));
+  var prz={};
+  all.forEach(function(o){ var w=o.waluta||'PLN'; prz[w]=(prz[w]||0)+(+o.fracht||0); });
+  var przHtml = Object.entries(prz).map(function(e){return '<span style="margin-right:12px"><span style="font-size:18px;font-weight:600;color:var(--green-text)">'+e[1].toLocaleString('pl-PL')+'</span> <span style="font-size:11px;color:var(--text3)">'+e[0]+'</span></span>'}).join('')||'0';
+  var prow={};
+  all.filter(function(o){return o.kilometry>0&&o.fracht>0}).forEach(function(o){
+    var w=o.waluta||'EUR'; var r=calcProwizja(+o.fracht,+o.kilometry,w,+o.prowizja_pct||4);
+    if(r) prow[w]=(prow[w]||0)+r.prowizja;
+  });
+  var prowHtml = Object.entries(prow).map(function(e){return '<span style="margin-right:12px"><span style="font-size:18px;font-weight:600;color:var(--amber-text)">'+e[1].toFixed(2)+'</span> <span style="font-size:11px;color:var(--text3)">'+e[0]+'</span></span>'}).join('')||'<span style="color:var(--text3)">brak zleceń z km</span>';
+  var eff = own.length ? Math.round(own.filter(function(o){return o.status==='Dostarczone'}).length/own.length*100) : 0;
+  var q39 = "'" + 'raporty' + "'";
+  var clearJs = "document.getElementById('r-month').value='';renderView('raporty')";
+  var html = '<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">';
+  html += '<span style="font-size:13px;font-weight:500">Filtruj miesiąc:</span>';
+  html += '<input type="month" id="r-month" value="'+fm+'" onchange="renderView('raporty')" style="padding:6px 10px;border:1px solid var(--border2);border-radius:var(--radius);font-size:13px;font-family:inherit;background:var(--bg);color:var(--text)">';
+  if(fm) html += '<button class="btn" onclick="'+clearJs+'">Wyczyść</button>';
+  html += '</div>';
+  html += '<div class="metrics" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:12px">';
+  html += '<div class="metric"><div class="metric-label">Własne zlecenia</div><div class="metric-val">'+own.length+'</div></div>';
+  html += '<div class="metric"><div class="metric-label">Zewnętrzne</div><div class="metric-val blue">'+ext.length+'</div></div>';
+  html += '<div class="metric"><div class="metric-label">Skuteczność dostaw</div><div class="metric-val amber">'+eff+'%</div></div>';
+  html += '</div>';
+  html += '<div class="metric" style="margin-bottom:10px"><div class="metric-label">Łączny przychód</div><div style="margin-top:4px">'+przHtml+'</div></div>';
+  html += '<div class="metric" style="margin-bottom:16px"><div class="metric-label">Prowizja spedytora</div><div style="margin-top:4px">'+prowHtml+'</div></div>';
+  html += '<div class="two-col">';
+  html += '<div class="card"><div class="card-title">Statusy zleceń własnych</div>';
+  ['Nowe','W trasie','Oczekuje','Dostarczone','Anulowane'].forEach(function(s) {
+    var n=orders.filter(function(o){return o.status===s&&mm(o.data_zaladunek)}).length;
+    var tot=orders.filter(function(o){return mm(o.data_zaladunek)}).length;
+    var pct=tot?Math.round(n/tot*100):0;
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="badge '+(STATUS_MAP[s]||'b-gray')+'" style="width:90px;text-align:center">'+s+'</span><div style="flex:1;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:var(--blue);border-radius:3px"></div></div><span style="font-size:12px;font-weight:600;min-width:20px;text-align:right">'+n+'</span></div>';
+  });
+  html += '</div>';
+  html += '<div class="card"><div class="card-title">Top kierowcy</div>';
+  drivers.map(function(d){return Object.assign({},d,{cnt:orders.filter(function(o){return o.kierowca===d.nazwa&&mm(o.data_zaladunek)}).length})})
+    .sort(function(a,b){return b.cnt-a.cnt}).slice(0,7).forEach(function(d) {
+    html += '<div class="driver-row"><div class="avatar">'+initials(d.nazwa)+'</div><div style="flex:1;font-size:13px">'+d.nazwa+'</div><span style="font-size:14px;font-weight:600">'+d.cnt+'</span></div>';
+  });
+  html += '</div></div>';
+  return html;
+}
+
+// ── PROWIZJA ──────────────────────────────────────────────
+function calcProwizja(fracht, km, waluta, pct) {
+  if (!km||km<=0) return null;
+  var stawka = fracht/km;
+  var procent = (pct||4)/100;
+  var prowizja, opis;
+  if (stawka<=1.3) {
+    prowizja = fracht*procent;
+    opis = fracht.toFixed(2)+' '+waluta+' x '+(pct||4)+'% = '+prowizja.toFixed(2)+' '+waluta;
+  } else {
+    var baz=km*1.3, nad=fracht-baz;
+    prowizja = baz*procent + nad/2;
+    opis = 'baza '+baz.toFixed(2)+' x '+(pct||4)+'% + nadwyżka '+nad.toFixed(2)+' / 2 = '+prowizja.toFixed(2)+' '+waluta;
+  }
+  return {stawka, prowizja, opis};
+}
+
+function renderRozliczenia() {
+  var all = orders.concat(podw.map(function(p){return Object.assign({},p,{skad:p.skad,dokad:p.dokad})}));
+  var zl = all.filter(function(o){return o.kilometry>0&&o.fracht>0&&o.status!=='Anulowane'});
+  if (!zl.length) return '<div class="card"><div class="empty">Brak zleceń z kilometrami</div></div>';
+  var total={};
+  zl.forEach(function(o){ var w=o.waluta||'EUR'; var r=calcProwizja(+o.fracht,+o.kilometry,w,+o.prowizja_pct||4); if(r) total[w]=(total[w]||0)+r.prowizja; });
+  var sumHtml = Object.entries(total).map(function(e){return '<div class="metric" style="display:inline-flex;flex-direction:column;padding:12px 20px;margin-right:10px"><div class="metric-label">Prowizja łącznie ('+e[0]+')</div><div class="metric-val amber">'+e[1].toFixed(2)+' '+e[0]+'</div></div>'}).join('');
+  var rows = '';
+  zl.forEach(function(o) {
+    var w=o.waluta||'EUR'; var r=calcProwizja(+o.fracht,+o.kilometry,w,+o.prowizja_pct||4); if(!r) return;
+    rows += '<tr><td style="font-family:monospace;font-size:11px;color:var(--text3)">'+(o.numer||o.id.slice(0,8))+'</td><td>'+(o.skad||'')+' → '+(o.dokad||'')+'</td><td style="text-align:right">'+Math.round(+o.kilometry)+' km</td><td style="text-align:right">'+(+o.fracht).toFixed(2)+' '+w+'</td><td style="text-align:right;color:var(--text2)">'+(+o.prowizja_pct||4)+'%</td><td style="text-align:right;font-weight:500">'+r.prowizja.toFixed(2)+' '+w+'</td></tr>';
+  });
+  return '<div style="margin-bottom:14px;display:flex;flex-wrap:wrap">'+sumHtml+'</div><div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Nr zlecenia</th><th>Trasa</th><th style="text-align:right">km</th><th style="text-align:right">Fracht</th><th style="text-align:right">%</th><th style="text-align:right">Prowizja</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+// ── KALKULATOR PALIWA ─────────────────────────────────────
+function renderKalkulator() {
+  return '<div style="max-width:640px">' +
+    '<div class="card" style="margin-bottom:14px"><div class="card-title">A. Parametry bazowe</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label>Bazowa cena transportu (€)</label><input type="number" id="k-cb" value="2740" oninput="kalkuluj()"></div><div class="field"><label>Cena diesla — baza (PLN/l)</label><input type="number" id="k-db" value="4.60" step="0.01" oninput="kalkuluj()"></div><div class="field"><label>Udział paliwa w cenie (%)</label><input type="number" id="k-ud" value="35" oninput="kalkuluj()"></div><div style="background:var(--bg2);border-radius:var(--radius);padding:10px;font-size:12px;color:var(--text2)">Trasy &lt;500km: 25–30%<br>500–1500km: 30–35%<br>&gt;1500km: 35–40%</div></div></div>' +
+    '<div class="card" style="margin-bottom:14px"><div class="card-title">B. Parametry bieżące</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label>Aktualna cena diesla (PLN/l)</label><input type="number" id="k-da" value="6.76" step="0.01" oninput="kalkuluj()"></div><div class="field"><label>Cena rynkowa przewoźnika (€)</label><input type="number" id="k-cr" placeholder="opcjonalnie" oninput="kalkuluj()"></div></div></div>' +
+    '<div class="card" style="margin-bottom:14px;border:2px solid var(--blue)"><div class="card-title">C. Wyniki</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px" id="k-wyniki"><div class="metric"><div class="metric-label">Szacowana cena</div><div class="metric-val blue" id="k-r1">—</div></div><div class="metric"><div class="metric-label">Zmiana vs baza</div><div class="metric-val" id="k-r2">—</div></div><div class="metric"><div class="metric-label">Zmiana diesla</div><div class="metric-val" id="k-r3">—</div></div></div></div>' +
+    '<div class="card"><div class="card-title">D. Tabela scenariuszy</div><div style="overflow-x:auto"><table id="k-tbl"><thead><tr><th>Cena diesla (PLN/l)</th><th>Szac. cena (€)</th><th>Zmiana (%)</th><th>Zmiana (€)</th></tr></thead><tbody id="k-tbody"></tbody></table></div></div>' +
+    '</div>';
+}
+
+function kalkuluj() {
+  var cb=parseFloat(document.getElementById('k-cb').value)||0;
+  var db=parseFloat(document.getElementById('k-db').value)||1;
+  var ud=(parseFloat(document.getElementById('k-ud').value)||35)/100;
+  var da=parseFloat(document.getElementById('k-da').value)||0;
+  var cr=parseFloat(document.getElementById('k-cr').value)||0;
+  var npar=cb*(1-ud), wsp=da/db;
+  var cena=npar+cb*ud*wsp;
+  var dp=(cena-cb)/cb*100, de=cena-cb;
+  var ddp=(da-db)/db*100;
+  function fp(v){return(v>=0?'+':'')+v.toFixed(1)+'%'}
+  var el=function(id){return document.getElementById(id)};
+  if(!el('k-r1')) return;
+  el('k-r1').textContent=cena.toFixed(2)+' €';
+  el('k-r2').textContent=fp(dp); el('k-r2').style.color=dp>0?'var(--amber-text)':'var(--green-text)';
+  el('k-r3').textContent=fp(ddp); el('k-r3').style.color=ddp>0?'var(--amber-text)':'var(--green-text)';
+  var scenarios=[3.5,4.0,4.5,4.6,5.0,5.5,6.0,6.5,6.76,7.0,7.5,8.0];
+  var tbody=el('k-tbody'); if(!tbody) return;
+  tbody.innerHTML=scenarios.map(function(d){
+    var c2=npar+cb*ud*d/db, dp2=(c2-cb)/cb*100, de2=c2-cb;
+    var isA=Math.abs(d-da)<0.01, isB=Math.abs(d-db)<0.01;
+    var bg=isA?'background:var(--blue-bg)':isB?'background:var(--green-bg)':'';
+    return '<tr style="'+bg+'"><td>'+d.toFixed(2)+' PLN/l'+(isA?' ◀ aktualny':'')+(isB?' ◀ baza':'')+'</td><td style="font-weight:500">'+c2.toFixed(2)+' €</td><td style="color:'+(dp2>0?'var(--amber-text)':'var(--green-text)')+'">'+fp(dp2)+'</td><td style="color:'+(de2>0?'var(--amber-text)':'var(--green-text)')+'">'+((de2>=0?'+':'')+de2.toFixed(2)+' €')+'</td></tr>';
+  }).join('');
+}
+
+// ── KALENDARZ ─────────────────────────────────────────────
+function renderKalendarz() {
+  var today=new Date(), todayStr=today.toISOString().slice(0,10);
+  var first=new Date(kalYear,kalMonth,1), last=new Date(kalYear,kalMonth+1,0);
+  var startDow=(first.getDay()+6)%7, daysInMonth=last.getDate();
+  var mnazwy=['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+  function evFor(ds) {
+    var ev=kalEvents.filter(function(e){return e.data===ds});
+    orders.forEach(function(o){ if(o.data_zaladunek===ds) ev.push({tytul:o.skad||'Załadunek',typ:'zaladunek',_ro:true}); if(o.data_dostawa===ds) ev.push({tytul:o.dokad||'Dostawa',typ:'dostawa',_ro:true}); });
+    podw.forEach(function(p){ if(p.skad_data===ds) ev.push({tytul:p.skad||'Załadunek zew.',typ:'zaladunek',_ro:true}); if(p.dokad_data===ds) ev.push({tytul:p.dokad||'Dostawa zew.',typ:'dostawa',_ro:true}); });
+    return ev;
+  }
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><button class="btn" onclick="kalPrev()">&#8249; Wstecz</button><h3 style="font-size:16px;font-weight:600">'+mnazwy[kalMonth]+' '+kalYear+'</h3><button class="btn" onclick="kalNext()">Dalej &#8250;</button></div>';
+  html+='<div class="kal-header">'+['Pon','Wt','Śr','Czw','Pt','Sob','Nd'].map(function(d){return '<div class="kal-day-name">'+d+'</div>'}).join('')+'</div>';
+  html+='<div class="kal-grid">';
+  for(var i=0;i<startDow;i++) {
+    var pd=new Date(kalYear,kalMonth,-startDow+i+1);
+    html+='<div class="kal-day other-month"><div class="kal-day-num">'+pd.getDate()+'</div></div>';
+  }
+  for(var d=1;d<=daysInMonth;d++) {
+    var ds=kalYear+'-'+String(kalMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var isT=ds===todayStr, ev=evFor(ds);
+    html+='<div class="kal-day'+(isT?' today':'')+'" onclick="openKalModal(''+ds+'',null)">';
+    html+='<div class="kal-day-num">'+d+'</div>';
+    ev.slice(0,3).forEach(function(e){ html+='<div class="kal-event typ-'+(e.typ||'notatka')+'"'+(e._ro?'':' onclick="event.stopPropagation();openKalModal(''+ds+'',''+e.id+'');"')+' title="'+e.tytul+'">'+e.tytul+'</div>'; });
+    if(ev.length>3) html+='<div style="font-size:9px;color:var(--text3)">+'+( ev.length-3)+' więcej</div>';
+    html+='</div>';
+  }
+  var endDow=(last.getDay()+6)%7;
+  for(var i=endDow+1;i<7;i++) html+='<div class="kal-day other-month"><div class="kal-day-num">'+(i-endDow)+'</div></div>';
+  html+='</div>';
+  return html;
+}
+
+function kalPrev() { kalMonth--; if(kalMonth<0){kalMonth=11;kalYear--;} renderView('kalendarz'); }
+function kalNext() { kalMonth++; if(kalMonth>11){kalMonth=0;kalYear++;} renderView('kalendarz'); }
+
+function openKalModal(dateStr, eventId) {
+  var ev = eventId ? kalEvents.find(function(e){return e.id===eventId}) : null;
+  editingId = ev ? ev.id : null;
+  document.getElementById('modal-title').textContent = ev ? 'Edytuj wydarzenie' : 'Nowe wydarzenie';
+  var typOpts = ['notatka','zaladunek','dostawa','serwis'].map(function(t){return '<option value="'+t+'"'+((ev&&ev.typ===t)?' selected':'')+'>'+t.charAt(0).toUpperCase()+t.slice(1)+'</option>'}).join('');
+  document.getElementById('modal-body').innerHTML =
+    '<div class="field"><label>Data</label><input type="date" id="kal-d" value="'+(ev?ev.data:dateStr||today.toISOString().slice(0,10))+'"></div>' +
+    '<div class="field"><label>Tytuł</label><input id="kal-t" value="'+(ev?ev.tytul||'':'')+'" placeholder="np. Spotkanie z klientem"></div>' +
+    '<div class="field"><label>Typ</label><select id="kal-typ">'+typOpts+'</select></div>' +
+    '<div class="field full"><label>Notatka</label><textarea id="kal-n" rows="4">'+(ev?ev.notatka||'':'')+'</textarea></div>';
+  document.getElementById('modal-foot').innerHTML =
+    (ev?'<button class="btn btn-danger" onclick="deleteKalEvent()">Usuń</button>':'') +
+    '<button class="btn" onclick="closeModal()">Anuluj</button>' +
+    '<button class="btn btn-primary" onclick="saveKalEvent()">Zapisz</button>';
+  openModal();
+}
+
+async function saveKalEvent() {
+  var data=document.getElementById('kal-d').value, tytul=document.getElementById('kal-t').value.trim();
+  if(!data||!tytul) { showToast('Wypełnij datę i tytuł', true); return; }
+  var payload={data, tytul, typ:document.getElementById('kal-typ').value, notatka:document.getElementById('kal-n').value.trim()};
+  if(editingId) await sb.from('kalendarz').update(payload).eq('id',editingId);
+  else await sb.from('kalendarz').insert(payload);
+  closeModal(); showToast('Zapisano ✓');
+  await loadAll(); renderView('kalendarz');
+}
+
+async function deleteKalEvent() {
+  if(!confirm('Usunąć wydarzenie?')) return;
+  await sb.from('kalendarz').delete().eq('id',editingId);
+  closeModal(); showToast('Usunięto');
+  await loadAll(); renderView('kalendarz');
+}
+
+// ── AI PDF READING ─────────────────────────────────────────
+function fileToBase64(file) {
+  return new Promise(function(res,rej){
+    var r=new FileReader();
+    r.onload=function(){res(r.result.split(',')[1])};
+    r.onerror=rej;
+    r.readAsDataURL(file);
+  });
+}
+
+async function callClaudeWithPDF(base64, type) {
+  var prompt = type==='podw'
+    ? 'Przeanalizuj zlecenie transportowe. Zwróć TYLKO JSON: {"numer":"","zleceniobiorca_nazwa":"","zleceniobiorca_adres":"","zleceniobiorca_nip":"","kierowca":"","kierowca_tel":"","auto":"","skad":"","skad_adres":"","skad_data":"YYYY-MM-DD","skad_godz":"","dokad":"","dokad_adres":"","dokad_data":"YYYY-MM-DD","dokad_godz":"","fracht":0,"waluta":"EUR","platnosc_dni":30,"referencje":"","uwagi":""}'
+    : 'Przeanalizuj zlecenie transportowe. Zwróć TYLKO JSON: {"numer":"","skad":"","dokad":"","klient":"","kierowca":"","auto":"","data_zaladunek":"YYYY-MM-DD","data_dostawa":"YYYY-MM-DD","fracht":0,"waluta":"EUR","uwagi":""}';
+  var resp = await fetch(CLAUDE_PROXY, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1000,
+      messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:prompt}]}]
+    })
+  });
+  var data=await resp.json();
+  if(data.error) throw new Error(data.error.message||JSON.stringify(data.error));
+  var content=data.content||[];
+  var tb=content.find(function(b){return b.type==='text'});
+  if(!tb) throw new Error('Brak odpowiedzi AI');
+  var text=tb.text.replace(/```json/g,'').replace(/```/g,'').trim();
+  return JSON.parse(text);
+}
+
+async function czytajPDFOrder() {
+  var input=document.getElementById('f-pdf'), btn=document.getElementById('f-pdf-btn'), status=document.getElementById('f-pdf-status');
+  if(!input||!input.files||!input.files[0]) { showToast('Wybierz plik PDF', true); return; }
+  btn.textContent='Czytam...'; btn.disabled=true; status.textContent='AI analizuje...';
+  try {
+    var b64=await fileToBase64(input.files[0]);
+    var d=await callClaudeWithPDF(b64,'order');
+    function sv(id,v){var el=document.getElementById(id);if(el&&v!==undefined&&v!==null)el.value=v;}
+    sv('f-numer',d.numer); sv('f-skad',d.skad); sv('f-dokad',d.dokad); sv('f-klient',d.klient);
+    sv('f-zal',d.data_zaladunek); sv('f-dos',d.data_dostawa); sv('f-uwagi',d.uwagi);
+    if(d.fracht) sv('f-fracht',d.fracht);
+    if(d.waluta){var ws=document.getElementById('f-waluta');if(ws)ws.value=d.waluta;}
+    status.textContent='Wypełniono! Sprawdź i popraw.'; status.style.color='var(--green-text)';
+  } catch(e) { status.textContent='Błąd: '+e.message; status.style.color='var(--red-text)'; }
+  btn.textContent='Czytaj PDF'; btn.disabled=false;
+}
+
+async function czytajPDFPodw() {
+  var input=document.getElementById('pw-pdf'), btn=document.getElementById('pw-pdf-btn'), status=document.getElementById('pw-pdf-status');
+  if(!input||!input.files||!input.files[0]) { showToast('Wybierz plik PDF', true); return; }
+  btn.textContent='Czytam...'; btn.disabled=true; status.textContent='AI analizuje...';
+  try {
+    var b64=await fileToBase64(input.files[0]);
+    var d=await callClaudeWithPDF(b64,'podw');
+    function sv(id,v){var el=document.getElementById(id);if(el&&v!==undefined&&v!==null)el.value=v;}
+    sv('pw-nr',d.numer); sv('pw-nazwa',d.zleceniobiorca_nazwa); sv('pw-adres',d.zleceniobiorca_adres);
+    sv('pw-nip',d.zleceniobiorca_nip); sv('pw-kier',d.kierowca); sv('pw-tel',d.kierowca_tel);
+    sv('pw-auto',d.auto); sv('pw-skad',d.skad); sv('pw-skad-adres',d.skad_adres);
+    sv('pw-skad-d',d.skad_data); sv('pw-skad-g',d.skad_godz);
+    sv('pw-dokad',d.dokad); sv('pw-dokad-adres',d.dokad_adres);
+    sv('pw-dokad-d',d.dokad_data); sv('pw-dokad-g',d.dokad_godz);
+    if(d.fracht) sv('pw-fracht',d.fracht);
+    if(d.waluta){var ws=document.getElementById('pw-waluta');if(ws)ws.value=d.waluta;}
+    if(d.platnosc_dni) sv('pw-plat',d.platnosc_dni);
+    sv('pw-ref',d.referencje); sv('pw-uwagi',d.uwagi);
+    status.textContent='Wypełniono! Sprawdź i popraw.'; status.style.color='var(--green-text)';
+  } catch(e) { status.textContent='Błąd: '+e.message; status.style.color='var(--red-text)'; }
+  btn.textContent='Czytaj PDF'; btn.disabled=false;
+}
 
 // ── PDF EXPORT ─────────────────────────────────────────────
-
-function exportPDF(id) {
-  var o = orders.find(function(x){return x.id===id;});
-  if (!o) return;
-  var f = (+o.fracht||0).toLocaleString('pl-PL');
-  var w = o.waluta||'PLN';
-  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Zlecenie</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:12mm 15mm}.header{background:#378ADD;color:#fff;padding:6mm 8mm;margin:-12mm -15mm 6mm;display:flex;justify-content:space-between;align-items:center}.header h1{font-size:14pt;font-weight:bold}.header .num{font-size:10pt}.header .date{font-size:8pt;opacity:.85}.section{margin:3mm 0}.section-title{background:#f0f0f5;color:#185FA5;font-weight:bold;font-size:8pt;padding:1.5mm 3mm;letter-spacing:.04em}.two-col{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ddd}.col{padding:2.5mm 3mm;border-right:1px solid #ddd;word-break:break-word;overflow-wrap:anywhere}.col:last-child{border-right:none}.col-label{font-size:7.5pt;color:#888;margin-bottom:0.5mm;text-transform:uppercase}.col-val{font-size:9pt;font-weight:bold}.fracht-box{background:#E6F1FB;border:1px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between;align-items:center}.fracht-val{font-size:16pt;font-weight:bold;color:#185FA5}.fracht-meta{font-size:8pt;color:#666;text-align:right}.uwagi-box{border:1px solid #FAC775;background:#FAEEDA;padding:2.5mm 3mm;margin:3mm 0;word-break:break-word}.uwagi-label{font-size:7.5pt;color:#633806;font-weight:bold;margin-bottom:1mm}.uwagi-val{font-size:8.5pt;color:#333;line-height:1.5}.podpisy{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-top:12mm}.podpis{border-top:1px solid #111;padding-top:2mm;font-size:7.5pt;color:#888}.footer{margin-top:8mm;padding-top:3mm;border-top:1px solid #ddd;font-size:7pt;color:#aaa;text-align:center}.btn-print{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}@media print{.btn-print{display:none}body{padding:10mm 15mm}.header{margin:-10mm -15mm 6mm}}</style></head><body>';
-  html += '<button class="btn-print" onclick="window.print()">Drukuj / Zapisz PDF</button>';
-  html += '<div class="header"><div><div class="date">Data wydruku: ' + new Date().toLocaleDateString('pl-PL') + '</div><h1>ZLECENIE TRANSPORTOWE</h1></div><div class="num">' + (o.numer||'') + '</div></div>';
-  html += '<div class="section"><div class="section-title">TRASA</div><div class="two-col"><div class="col"><div class="col-label">Załadunek</div><div class="col-val">' + (o.skad||'-') + '</div></div><div class="col"><div class="col-label">Rozładunek</div><div class="col-val">' + (o.dokad||'-') + '</div></div></div></div>';
-  html += '<div class="section"><div class="section-title">TERMINY</div><div class="two-col"><div class="col"><div class="col-label">Data załadunku</div><div class="col-val">' + (o.data_zaladunek||'-') + '</div></div><div class="col"><div class="col-label">Data dostawy</div><div class="col-val">' + (o.data_dostawa||'-') + '</div></div></div></div>';
-  html += '<div class="section"><div class="section-title">ZLECENIODAWCA</div><div class="two-col"><div class="col"><div class="col-label">Klient / firma</div><div class="col-val">' + (o.klient||'-') + '</div></div><div class="col"><div class="col-label">Nr ref. klienta</div><div class="col-val">' + (o.ref||'-') + '</div></div></div></div>';
-  html += '<div class="section"><div class="section-title">REALIZACJA</div><div class="two-col"><div class="col"><div class="col-label">Kierowca</div><div class="col-val">' + ((o.kierowca||'-') + (o.kierowca2?' + '+o.kierowca2:'')) + '</div></div><div class="col"><div class="col-label">Auto</div><div class="col-val">' + (o.auto||'-') + '</div></div></div></div>';
-  html += '<div class="fracht-box"><div><div style="font-size:7.5pt;color:#185FA5;margin-bottom:1mm">WYNAGRODZENIE</div><div class="fracht-val">' + f + ' ' + w + '</div></div><div class="fracht-meta">Status: ' + (o.status||'-') + '</div></div>';
-  if(o.uwagi) html += '<div class="uwagi-box"><div class="uwagi-label">UWAGI</div><div class="uwagi-val">' + o.uwagi + '</div></div>';
-  html += '<div class="podpisy"><div class="podpis">Podpis zleceniodawcy<br><br><br></div><div class="podpis">Podpis kierowcy<br><br><br></div></div>';
-  html += '<div class="footer">Wygenerowano przez TransPort</div>';
-  html += '</body></html>';
-  var win = window.open('','_blank','width=900,height=700');
-  win.document.write(html);
-  win.document.close();
-  setTimeout(function(){ win.focus(); }, 300);
+function exportOrderPDF(id) {
+  var o=orders.find(function(x){return x.id===id}); if(!o) return;
+  var f=(+o.fracht||0).toLocaleString('pl-PL');
+  var w=o.waluta||'PLN';
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Zlecenie</title>';
+  html+='<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:12mm 15mm}.hdr{background:#378ADD;color:#fff;padding:6mm 8mm;margin:-12mm -15mm 6mm;display:flex;justify-content:space-between}.hdr h1{font-size:13pt;font-weight:bold}.sec-t{background:#f0f0f5;color:#185FA5;font-weight:bold;font-size:8pt;padding:2mm 3mm;margin:3mm 0 0}.tc{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ddd}.tc-c{padding:2.5mm 3mm;border-right:1px solid #ddd;word-break:break-word}.tc-c:last-child{border-right:none}.lbl{font-size:7pt;color:#888;text-transform:uppercase}.val{font-size:9pt;font-weight:bold}.frcht{background:#E6F1FB;border:1px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between}.frcht-v{font-size:16pt;font-weight:bold;color:#185FA5}.uwagi{border:1px solid #fac775;background:#faeeda;padding:2.5mm 3mm;margin:3mm 0;word-break:break-word}.pdp{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-top:12mm}.pdp-l{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#888}.ftr{margin-top:8mm;padding-top:3mm;border-top:1px solid #ddd;font-size:7pt;color:#aaa;text-align:center}.btn-p{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}@media print{.btn-p{display:none}body{padding:10mm 15mm}.hdr{margin:-10mm -15mm 6mm}}</style>';
+  html+='</head><body>';
+  html+='<button class="btn-p" onclick="window.print()">Drukuj / Zapisz PDF</button>';
+  html+='<div class="hdr"><div><div style="font-size:8pt;opacity:.85">Data wydruku: '+new Date().toLocaleDateString('pl-PL')+'</div><h1>ZLECENIE TRANSPORTOWE</h1></div><div style="font-size:10pt">'+(o.numer||'')+'</div></div>';
+  html+='<div class="sec-t">TRASA</div><div class="tc"><div class="tc-c"><div class="lbl">Załadunek</div><div class="val">'+(o.skad||'-')+'</div></div><div class="tc-c"><div class="lbl">Rozładunek</div><div class="val">'+(o.dokad||'-')+'</div></div></div>';
+  html+='<div class="sec-t">TERMINY</div><div class="tc"><div class="tc-c"><div class="lbl">Data załadunku</div><div class="val">'+(o.data_zaladunek||'-')+'</div></div><div class="tc-c"><div class="lbl">Data dostawy</div><div class="val">'+(o.data_dostawa||'-')+'</div></div></div>';
+  html+='<div class="sec-t">ZLECENIODAWCA</div><div class="tc"><div class="tc-c"><div class="lbl">Klient</div><div class="val">'+(o.klient||'-')+'</div></div><div class="tc-c"><div class="lbl">Nr ref.</div><div class="val">'+(o.ref||'-')+'</div></div></div>';
+  html+='<div class="sec-t">REALIZACJA</div><div class="tc"><div class="tc-c"><div class="lbl">Kierowca</div><div class="val">'+(o.kierowca||'-')+(o.kierowca2?' + '+o.kierowca2:'')+'</div></div><div class="tc-c"><div class="lbl">Auto</div><div class="val">'+(o.auto||'-')+'</div></div></div>';
+  html+='<div class="frcht"><div><div style="font-size:7pt;color:#185FA5">WYNAGRODZENIE</div><div class="frcht-v">'+f+' '+w+'</div></div><div style="font-size:8pt;color:#666;text-align:right">Status: '+(o.status||'-')+'</div></div>';
+  if(o.uwagi) html+='<div class="uwagi"><div style="font-size:7pt;color:#633806;font-weight:bold;margin-bottom:1mm">UWAGI</div><div style="font-size:8.5pt;line-height:1.5">'+o.uwagi+'</div></div>';
+  html+='<div class="pdp"><div class="pdp-l">Podpis zleceniodawcy<br><br><br></div><div class="pdp-l">Podpis kierowcy<br><br><br></div></div>';
+  html+='<div class="ftr">Wygenerowano przez TransPort</div>';
+  html+='</body></html>';
+  var win=window.open('','_blank','width=900,height=700');
+  win.document.write(html); win.document.close();
+  setTimeout(function(){win.focus()},300);
 }
+
+function printPodwPDF(id) {
+  var p=podw.find(function(x){return x.id===id}); if(!p) return;
+  var f=(+p.fracht||0).toLocaleString('pl-PL');
+  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Zlecenie zewnętrzne</title>';
+  html+='<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:10mm 15mm}.hdr{background:#378ADD;color:#fff;padding:5mm 8mm;margin:-10mm -15mm 5mm;display:flex;justify-content:space-between;align-items:center}.hdr h1{font-size:13pt;font-weight:bold}.tc{display:table;width:100%;border-collapse:collapse;margin:3mm 0}.tc-c{display:table-cell;width:50%;border:1px solid #ddd;padding:2.5mm 3mm;vertical-align:top;word-break:break-word}.tc-hdr{font-weight:bold;font-size:8pt;border-bottom:1px solid #ddd;margin-bottom:1.5mm;padding-bottom:1mm;color:#185FA5}.lbl{font-size:7pt;color:#888}.val{font-size:9pt;font-weight:bold}.frcht{background:#E6F1FB;border:1px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between}.frcht-v{font-size:14pt;font-weight:bold;color:#185FA5}.uwagi{border:1px solid #fac775;background:#faeeda;padding:2.5mm 3mm;margin:3mm 0}.warunki{font-size:8pt;color:#444;line-height:1.4;margin:2mm 0}.pdp{display:grid;grid-template-columns:1fr 1fr;gap:15mm;margin-top:10mm}.pdp-l{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#888}.btn-p{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}@media print{.btn-p{display:none}}</style>';
+  html+='</head><body>';
+  html+='<button class="btn-p" onclick="window.print()">Drukuj / Zapisz PDF</button>';
+  html+='<div class="hdr"><div><div style="font-size:8pt;opacity:.85">LTE LOGISTIC SP. Z O.O. | Kielecka 41A/8, 02-530 Warszawa | NIP: PL5213966752</div><h1>ZLECENIE TRANSPORTOWE '+(p.numer||'')+'</h1></div><div style="font-size:8pt;opacity:.85">'+new Date().toLocaleDateString('pl-PL')+'</div></div>';
+  html+='<div class="tc"><div class="tc-c"><div class="tc-hdr">ZLECENIODAWCA</div><div style="font-weight:bold">LTE LOGISTIC SP. Z O.O.</div><div>Kielecka 41A/8, PL 02-530 Warszawa</div><div>VAT: PL5213966752</div></div><div class="tc-c"><div class="tc-hdr">ZLECENIOBIORCA</div><div style="font-weight:bold">'+(p.zleceniobiorca_nazwa||'-')+'</div><div>'+(p.zleceniobiorca_adres||'')+'</div>'+(p.zleceniobiorca_nip?'<div>NIP: '+p.zleceniobiorca_nip+'</div>':'')+(p.kierowca?'<div>Kierowca: <strong>'+p.kierowca+'</strong></div>':'')+(p.kierowca_tel?'<div>Tel: '+p.kierowca_tel+'</div>':'')+(p.auto?'<div>Auta: '+p.auto+'</div>':'')+'</div></div>';
+  html+='<div class="tc"><div class="tc-c"><div class="tc-hdr">ZAŁADUNEK'+(p.skad_data?' '+p.skad_data:'')+(p.skad_godz?' '+p.skad_godz:'')+'</div><div style="font-weight:bold">'+(p.skad||'-')+'</div><div style="font-size:8pt">'+(p.skad_adres||'')+'</div>'+(p.referencje?'<div style="font-size:8pt;color:#888">Ref: '+p.referencje+'</div>':'')+'</div><div class="tc-c"><div class="tc-hdr">ROZŁADUNEK'+(p.dokad_data?' '+p.dokad_data:'')+(p.dokad_godz?' '+p.dokad_godz:'')+'</div><div style="font-weight:bold">'+(p.dokad||'-')+'</div><div style="font-size:8pt">'+(p.dokad_adres||'')+'</div></div></div>';
+  html+='<div class="frcht"><div><div style="font-size:7pt;color:#185FA5">CENA ALL IN NETTO</div><div class="frcht-v">'+f+' '+(p.waluta||'EUR')+'</div></div><div style="font-size:8pt;color:#666;text-align:right">Termin platnosci: '+(p.platnosc_dni||30)+' dni<br>Status: '+(p.status||'Nowe')+'</div></div>';
+  if(p.uwagi) html+='<div class="uwagi"><div style="font-size:7pt;color:#633806;font-weight:bold;margin-bottom:1mm">UWAGI</div><div style="line-height:1.5">'+p.uwagi+'</div></div>';
+  html+='<hr style="margin:4mm 0;border:none;border-top:1px solid #ddd">';
+  html+='<div style="font-weight:bold;font-size:8pt;margin-bottom:2mm">WARUNKI FINANSOWE</div>';
+  html+='<div class="warunki">Cena All In Netto: '+f+' '+(p.waluta||'EUR')+' + 23% VAT | Termin platnosci: '+(p.platnosc_dni||30)+' dni po otrzymaniu kompletu dokumentow pocztą.</div>';
+  html+='<div class="warunki">Fakture nalezy wystawic w miesiacu rozladunku. VAT i fracht EUR przeliczyc na PLN wg kursu NBP. NIE WYSTAWIAC FAKTUR ZBIORCZYCH.</div>';
+  html+='<hr style="margin:3mm 0;border:none;border-top:1px solid #ddd">';
+  html+='<div style="font-weight:bold;font-size:8pt;margin-bottom:2mm">WARUNKI WYKONANIA</div>';
+  html+='<div class="warunki">1. Zleceniobiorca posiada aktualna polise OC Przewoznika, licencje transportowa i wymagane zezwolenia.</div>';
+  html+='<div class="warunki">2. Brak odmowy w ciagu 30 min od zlecenia = przyjecie do realizacji. Rezygnacja po 30 min: kara do 100% frachtu.</div>';
+  html+='<div class="warunki">3. O braku mozliwosci wykonania informowac co najmniej 12h przed zaladunkiem. Zakaz dodatkowego zaladunku bez zgody LTE (kara min. 500 EUR).</div>';
+  html+='<div class="pdp"><div class="pdp-l">Podpis zleceniodawcy / LTE Logistic<br><br><br></div><div class="pdp-l">Podpis i pieczatka zleceniobiorcy<br><br><br></div></div>';
+  html+='</body></html>';
+  var win=window.open('','_blank','width=900,height=700');
+  win.document.write(html); win.document.close();
+  setTimeout(function(){win.focus()},300);
+}
+
+// ── EXCEL EXPORT ──────────────────────────────────────────
+function exportExcelZlecenia() {
+  if(!window.XLSX) { showToast('Biblioteka XLSX niedostępna', true); return; }
+  var wb=XLSX.utils.book_new();
+  var data=[['Nr','Skad','Dokad','Klient','Kierowca','Auto','Data zaladunku','Data dostawy','Fracht','Waluta','km','Status']];
+  orders.forEach(function(o){ data.push([o.numer||'',o.skad||'',o.dokad||'',o.klient||'',o.kierowca||'',o.auto||'',o.data_zaladunek||'',o.data_dostawa||'',+o.fracht||0,o.waluta||'PLN',+o.kilometry||0,o.status||'']); });
+  var ws=XLSX.utils.aoa_to_sheet(data);
+  ws['!cols']=[10,18,18,20,15,15,12,12,10,6,8,12].map(function(w){return{wch:w}});
+  XLSX.utils.book_append_sheet(wb,ws,'Zlecenia');
+  XLSX.writeFile(wb,'zlecenia-'+new Date().toLocaleDateString('pl-PL').replace(/\./g,'-')+'.xlsx');
+  showToast('Excel pobrany');
+}
+
+function exportExcelRaport() {
+  if(!window.XLSX) { showToast('Biblioteka XLSX niedostępna', true); return; }
+  var fm=document.getElementById('r-month')?document.getElementById('r-month').value:'';
+  function mm(ds){return !fm||(ds||'').startsWith(fm);}
+  var own=orders.filter(function(o){return o.status!=='Anulowane'&&mm(o.data_zaladunek)});
+  var ext=podw.filter(function(p){return p.status!=='Anulowane'&&mm(p.skad_data)});
+  var wb=XLSX.utils.book_new();
+  var sumData=[['RAPORT MIESIĘCZNY - '+(fm||new Date().toISOString().slice(0,7))],[]];
+  sumData.push(['Własne zlecenia',own.length]);
+  sumData.push(['Zewnętrzne zlecenia',ext.length]);
+  var wsSum=XLSX.utils.aoa_to_sheet(sumData);
+  XLSX.utils.book_append_sheet(wb,wsSum,'Podsumowanie');
+  var data=[['Nr','Typ','Skad','Dokad','Klient','Data zaladunku','Fracht','Waluta','km','Status']];
+  own.forEach(function(o){data.push([o.numer||'','własne',o.skad||'',o.dokad||'',o.klient||'',o.data_zaladunek||'',+o.fracht||0,o.waluta||'PLN',+o.kilometry||0,o.status||''])});
+  ext.forEach(function(p){data.push([p.numer||'','zewnętrzne',p.skad||'',p.dokad||'',p.zleceniobiorca_nazwa||'',p.skad_data||'',+p.fracht||0,p.waluta||'EUR',+p.kilometry||0,p.status||''])});
+  var wsD=XLSX.utils.aoa_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb,wsD,'Zlecenia');
+  XLSX.writeFile(wb,'raport-'+(fm||new Date().toISOString().slice(0,7))+'.xlsx');
+  showToast('Raport pobrany');
+}
+
+function exportExcelProwizja() {
+  if(!window.XLSX) { showToast('Biblioteka XLSX niedostępna', true); return; }
+  var fm=document.getElementById('r-month')?document.getElementById('r-month').value:'';
+  function mm(ds){return !fm||(ds||'').startsWith(fm);}
+  var all=orders.filter(function(o){return o.status!=='Anulowane'&&mm(o.data_zaladunek)&&o.kilometry>0&&o.fracht>0})
+    .concat(podw.filter(function(p){return p.status!=='Anulowane'&&mm(p.skad_data)&&p.kilometry>0&&p.fracht>0}).map(function(p){return Object.assign({},p,{skad:p.skad,dokad:p.dokad,waluta:p.waluta||'EUR'})}));
+  var wb=XLSX.utils.book_new();
+  var total={};
+  all.forEach(function(o){var w=o.waluta||'EUR';var r=calcProwizja(+o.fracht,+o.kilometry,w,+o.prowizja_pct||4);if(r) total[w]=(total[w]||0)+r.prowizja;});
+  var sumData=[['PROWIZJA SPEDYTORA - '+(fm||new Date().toISOString().slice(0,7))],[]];
+  Object.entries(total).forEach(function(e){sumData.push([e[0],+e[1].toFixed(2)])});
+  var wsSum=XLSX.utils.aoa_to_sheet(sumData);
+  XLSX.utils.book_append_sheet(wb,wsSum,'Podsumowanie');
+  var data=[['Nr','Trasa','Fracht','Waluta','km','Stawka/km','Prowizja%','Prowizja']];
+  all.forEach(function(o){var w=o.waluta||'EUR';var r=calcProwizja(+o.fracht,+o.kilometry,w,+o.prowizja_pct||4);if(r) data.push([o.numer||'',(o.skad||'')+' -> '+(o.dokad||''),+o.fracht,w,+o.kilometry,+r.stawka.toFixed(2),+o.prowizja_pct||4,+r.prowizja.toFixed(2)])});
+  var wsD=XLSX.utils.aoa_to_sheet(data);
+  XLSX.utils.book_append_sheet(wb,wsD,'Szczegoly');
+  XLSX.writeFile(wb,'prowizja-'+(fm||new Date().toISOString().slice(0,7))+'.xlsx');
+  showToast('Excel prowizji pobrany');
+}
+
+// ── PWA ───────────────────────────────────────────────────
+(function(){
+  var m={name:'TransPort',short_name:'TransPort',start_url:'/transport/',display:'standalone',background_color:'#f1f0eb',theme_color:'#378ADD',icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%23378ADD'/%3E%3Ctext y='360' x='256' font-size='300' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'%3ET%3C/text%3E%3C/svg%3E",sizes:'512x512',type:'image/svg+xml'}]};
+  var blob=new Blob([JSON.stringify(m)],{type:'application/json'});
+  var el=document.getElementById('pwa-manifest');
+  if(el) el.href=URL.createObjectURL(blob);
+  if('serviceWorker' in navigator){
+    var sw="self.addEventListener('install',function(e){self.skipWaiting()});self.addEventListener('activate',function(e){clients.claim()});self.addEventListener('fetch',function(e){if(e.request.method!=='GET')return;e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request)}))})";
+    navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(function(){});
+  }
+})();
 </script>
 </body>
 </html>
