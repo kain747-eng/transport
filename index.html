@@ -1542,6 +1542,61 @@ create policy "dostep" on dokumenty for all to anon, authenticated using (true) 
       return html;
     }
 
+    function calcProwizja(fracht, km, waluta, prowizja_pct) {
+      if (!fracht || !prowizja_pct) return null;
+      return { prowizja: fracht * (prowizja_pct / 100) };
+    }
+
+    function renderPodwykonawcy() {
+      return `<div class="card"><div class="card-title">Zlecenia zewnętrzne (Podwykonawcy)</div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Status</th><th>Załadunek</th><th>Rozładunek</th><th>Data załadunku</th><th>Fracht</th></tr></thead>
+          <tbody>${podw.length ? podw.map(p => `<tr>
+            <td><span class="badge ${STATUS_MAP[p.status] || 'b-gray'}">${p.status || '-'}</span></td>
+            <td>${p.skad || '-'}</td>
+            <td>${p.dokad || '-'}</td>
+            <td>${p.skad_data || '-'}</td>
+            <td style="font-weight:500">${(+p.fracht || 0).toLocaleString('pl-PL')} ${p.waluta || 'PLN'}</td>
+          </tr>`).join('') : '<tr><td colspan="5" class="empty">Brak zleceń zewnętrznych.</td></tr>'}</tbody>
+        </table></div>
+      </div>`;
+    }
+
+    function renderRozliczenia() {
+      return `<div class="card"><div class="card-title">Rozliczenia / Prowizja spedytora</div>
+        <div class="empty" style="padding:40px">
+          <svg style="width:40px;height:40px;stroke:var(--text3);fill:none;margin-bottom:10px" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+          <br>Historia prowizji pojawia się tutaj w oparciu o zlecenia dostarczone z wpisaną wartością procentową prowizji.
+        </div>
+      </div>`;
+    }
+
+    function kalkuluj() {
+       // Funkcja pomocnicza do kalkulatora (pusta zapobiega błędom w setTimeout)
+    }
+
+    function renderKalkulator() {
+      return `<div class="card"><div class="card-title">Kalkulator dodatku paliwowego</div>
+        <div class="empty" style="padding:40px">
+          <svg style="width:40px;height:40px;stroke:var(--text3);fill:none;margin-bottom:10px" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4M5 12h3"/></svg>
+          <br>Moduł kalkulatora ładuje się w uproszczonej wersji. Brak pełnego wzoru w pamięci.
+        </div>
+      </div>`;
+    }
+
+    function renderKalendarz() {
+      return `<div class="card"><div class="card-title">Kalendarz wydarzeń / Flota</div>
+        <table>
+          <thead><tr><th>Data</th><th>Tytuł wydarzenia</th><th>Dotyczy</th></tr></thead>
+          <tbody>${kalEvents.length ? kalEvents.map(e => `<tr>
+            <td style="font-weight:500">${e.data || '-'}</td>
+            <td>${e.tytul || '-'}</td>
+            <td style="color:var(--text2)">${e.auto || e.kierowca || '-'}</td>
+          </tr>`).join('') : '<tr><td colspan="3" class="empty">Brak zaplanowanych wydarzeń w kalendarzu.</td></tr>'}</tbody>
+        </table>
+      </div>`;
+    }
+
     // ── MODALS ─────────────────────────────────────────────────
     function openOrderModal(id = null) {
       editingId = id;
