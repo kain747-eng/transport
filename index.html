@@ -1188,31 +1188,132 @@ function exportOrderPDF(id) {
 }
 
 function printPodwPDF(id) {
-  var p=podw.find(function(x){return x.id===id}); if(!p) return;
-  var f=(+p.fracht||0).toLocaleString('pl-PL');
-  var html='<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Zlecenie zewnetrzne</title>';
-  html+='<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:10mm 15mm}.hdr{background:#378ADD;color:#fff;padding:5mm 8mm;margin:-10mm -15mm 5mm;display:flex;justify-content:space-between;align-items:center}.hdr h1{font-size:13pt;font-weight:bold}.tc{display:table;width:100%;border-collapse:collapse;margin:3mm 0}.tc-c{display:table-cell;width:50%;border:1px solid #ddd;padding:2.5mm 3mm;vertical-align:top;word-break:break-word}.tc-hdr{font-weight:bold;font-size:8pt;border-bottom:1px solid #ddd;margin-bottom:1.5mm;padding-bottom:1mm;color:#185FA5}.lbl{font-size:7pt;color:#888}.val{font-size:9pt;font-weight:bold}.frcht{background:#E6F1FB;border:1px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between}.frcht-v{font-size:14pt;font-weight:bold;color:#185FA5}.uwagi{border:1px solid #fac775;background:#faeeda;padding:2.5mm 3mm;margin:3mm 0}.warunki{font-size:8pt;color:#444;line-height:1.4;margin:2mm 0}.pdp{display:grid;grid-template-columns:1fr 1fr;gap:15mm;margin-top:10mm}.pdp-l{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#888}.btn-p{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}@media print{.btn-p{display:none}}</style>';
-  html+='</head><body>';
-  html+='<button class="btn-p" onclick="window.print()">Drukuj / Zapisz PDF</button>';
-  html+='<div class="hdr"><div><div style="font-size:8pt;opacity:.85">LTE LOGISTIC SP. Z O.O. | Kielecka 41A/8, 02-530 Warszawa | NIP: PL5213966752</div><h1>ZLECENIE TRANSPORTOWE '+(p.numer||'')+'</h1></div><div style="font-size:8pt;opacity:.85">'+new Date().toLocaleDateString('pl-PL')+'</div></div>';
-  html+='<div class="tc"><div class="tc-c"><div class="tc-hdr">ZLECENIODAWCA</div><div style="font-weight:bold">LTE LOGISTIC SP. Z O.O.</div><div>Kielecka 41A/8, PL 02-530 Warszawa</div><div>VAT: PL5213966752</div></div><div class="tc-c"><div class="tc-hdr">ZLECENIOBIORCA</div><div style="font-weight:bold">'+(p.zleceniobiorca_nazwa||'-')+'</div><div>'+(p.zleceniobiorca_adres||'')+'</div>'+(p.zleceniobiorca_nip?'<div>NIP: '+p.zleceniobiorca_nip+'</div>':'')+(p.kierowca?'<div>Kierowca: <strong>'+p.kierowca+'</strong></div>':'')+(p.kierowca_tel?'<div>Tel: '+p.kierowca_tel+'</div>':'')+(p.auto?'<div>Auta: '+p.auto+'</div>':'')+'</div></div>';
-  html+='<div class="tc"><div class="tc-c"><div class="tc-hdr">ZAŁADUNEK'+(p.skad_data?' '+p.skad_data:'')+(p.skad_godz?' '+p.skad_godz:'')+'</div><div style="font-weight:bold">'+(p.skad||'-')+'</div><div style="font-size:8pt">'+(p.skad_adres||'')+'</div>'+(p.referencje?'<div style="font-size:8pt;color:#888">Ref: '+p.referencje+'</div>':'')+'</div><div class="tc-c"><div class="tc-hdr">ROZŁADUNEK'+(p.dokad_data?' '+p.dokad_data:'')+(p.dokad_godz?' '+p.dokad_godz:'')+'</div><div style="font-weight:bold">'+(p.dokad||'-')+'</div><div style="font-size:8pt">'+(p.dokad_adres||'')+'</div></div></div>';
-  html+='<div class="frcht"><div><div style="font-size:7pt;color:#185FA5">CENA ALL IN NETTO</div><div class="frcht-v">'+f+' '+(p.waluta||'EUR')+'</div></div><div style="font-size:8pt;color:#666;text-align:right">Termin platnosci: '+(p.platnosc_dni||30)+' dni<br>Status: '+(p.status||'Nowe')+'</div></div>';
-  if(p.uwagi) html+='<div class="uwagi"><div style="font-size:7pt;color:#633806;font-weight:bold;margin-bottom:1mm">UWAGI</div><div style="line-height:1.5">'+p.uwagi+'</div></div>';
-  html+='<hr style="margin:4mm 0;border:none;border-top:1px solid #ddd">';
-  html+='<div style="font-weight:bold;font-size:8pt;margin-bottom:2mm">WARUNKI FINANSOWE</div>';
-  html+='<div class="warunki">Cena All In Netto: '+f+' '+(p.waluta||'EUR')+' + 23% VAT | Termin platnosci: '+(p.platnosc_dni||30)+' dni po otrzymaniu kompletu dokumentow pocztą.</div>';
-  html+='<div class="warunki">Fakture nalezy wystawic w miesiacu rozladunku. VAT i fracht EUR przeliczyc na PLN wg kursu NBP. NIE WYSTAWIAC FAKTUR ZBIORCZYCH.</div>';
-  html+='<hr style="margin:3mm 0;border:none;border-top:1px solid #ddd">';
-  html+='<div style="font-weight:bold;font-size:8pt;margin-bottom:2mm">WARUNKI WYKONANIA</div>';
-  html+='<div class="warunki">1. Zleceniobiorca posiada aktualna polise OC Przewoznika, licencje transportowa i wymagane zezwolenia.</div>';
-  html+='<div class="warunki">2. Brak odmowy w ciagu 30 min od zlecenia = przyjecie do realizacji. Rezygnacja po 30 min: kara do 100% frachtu.</div>';
-  html+='<div class="warunki">3. O braku mozliwosci wykonania informowac co najmniej 12h przed zaladunkiem. Zakaz dodatkowego zaladunku bez zgody LTE (kara min. 500 EUR).</div>';
-  html+='<div class="pdp"><div class="pdp-l">Podpis zleceniodawcy / LTE Logistic<br><br><br></div><div class="pdp-l">Podpis i pieczatka zleceniobiorcy<br><br><br></div></div>';
-  html+='</body></html>';
-  var win=window.open('','_blank','width=900,height=700');
-  win.document.write(html); win.document.close();
-  setTimeout(function(){win.focus()},300);
+  var p = podw.find(function(x){return x.id===id}); if(!p) return;
+  var f = (+p.fracht||0).toLocaleString('pl-PL');
+  var w = p.waluta||'EUR';
+  var dt = new Date().toLocaleDateString('pl-PL');
+
+  var html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Zlecenie '+( p.numer||'')+' </title>';
+  html += '<style>';
+  html += '*{margin:0;padding:0;box-sizing:border-box}';
+  html += 'body{font-family:Arial,sans-serif;font-size:9pt;color:#111;padding:10mm 15mm}';
+  html += '.logo{font-size:18pt;font-weight:bold;color:#378ADD;line-height:1}';
+  html += '.logo-sub{font-size:8pt;color:#666;font-weight:normal}';
+  html += '.hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4mm;border-bottom:2px solid #378ADD;padding-bottom:3mm}';
+  html += '.title{text-align:center;margin:4mm 0 5mm}';
+  html += '.title h1{font-size:13pt;font-weight:bold;letter-spacing:.05em}';
+  html += '.title h2{font-size:11pt;color:#378ADD;margin-top:2mm}';
+  html += '.two-col{display:grid;grid-template-columns:1fr 1fr;gap:4mm;margin:3mm 0}';
+  html += '.box{border:1px solid #ccc;padding:2.5mm 3mm}';
+  html += '.box-title{font-weight:bold;font-size:8pt;text-transform:uppercase;color:#378ADD;border-bottom:1px solid #ddd;padding-bottom:1mm;margin-bottom:1.5mm}';
+  html += '.box p{font-size:8.5pt;line-height:1.5;word-break:break-word}';
+  html += '.trasa-hdr{background:#f5f5f5;border:1px solid #ccc;text-align:center;font-weight:bold;font-size:9pt;padding:2mm;margin:3mm 0 0;text-transform:uppercase}';
+  html += '.trasa-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #ccc;border-top:none;margin-bottom:3mm}';
+  html += '.trasa-col{padding:2.5mm 3mm;word-break:break-word}';
+  html += '.trasa-col:first-child{border-right:1px solid #ccc}';
+  html += '.trasa-col-hdr{font-weight:bold;font-size:8pt;color:#378ADD;margin-bottom:1mm;text-transform:uppercase}';
+  html += '.wynagrodzenie{background:#EAF3FB;border:2px solid #378ADD;padding:3mm 4mm;margin:3mm 0;display:flex;justify-content:space-between;align-items:center}';
+  html += '.wynagrodzenie-val{font-size:16pt;font-weight:bold;color:#185FA5}';
+  html += '.warunki{font-size:7.5pt;color:#444;line-height:1.4;margin:1mm 0}';
+  html += '.section-title{font-weight:bold;font-size:8.5pt;margin:3mm 0 1mm;border-bottom:1px solid #ddd;padding-bottom:1mm}';
+  html += '.podpisy{display:grid;grid-template-columns:1fr 1fr;gap:20mm;margin-top:10mm}';
+  html += '.podpis{border-top:1px solid #111;padding-top:2mm;font-size:8pt;color:#888}';
+  html += '.btn-p{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold}';
+  html += '@media print{.btn-p{display:none}body{padding:8mm 12mm}}';
+  html += '</style></head><body>';
+
+  html += '<button class="btn-p" onclick="window.print()">Drukuj / Zapisz PDF</button>';
+
+  // Header
+  html += '<div class="hdr">';
+  html += '<div><div class="logo">LTE<span class="logo-sub"> LOGISTIC</span></div><div style="font-size:8pt;color:#666;margin-top:1mm">Sp. z o.o.</div></div>';
+  html += '<div style="text-align:right;font-size:8pt;color:#666"><div>Data wystawienia: '+dt+'</div></div>';
+  html += '</div>';
+
+  // Title
+  html += '<div class="title"><h1>ZLECENIE TRANSPORTOWE</h1><h2>'+(p.numer||'')+'</h2></div>';
+
+  // Zleceniodawca / Zleceniobiorca
+  html += '<div class="two-col">';
+  html += '<div class="box"><div class="box-title">Zleceniodawca :</div>';
+  html += '<p><strong>LTE LOGISTIC SP. Z O.O.</strong><br>KIELECKA 41A/8<br>PL 02-530 WARSZAWA<br>VAT ID 5213966752</p>';
+  html += '</div>';
+  html += '<div class="box"><div class="box-title">Zleceniobiorca :</div>';
+  html += '<p>';
+  if(p.zleceniobiorca_nazwa) html += '<strong>'+p.zleceniobiorca_nazwa+'</strong><br>';
+  if(p.zleceniobiorca_adres) html += p.zleceniobiorca_adres+'<br>';
+  if(p.zleceniobiorca_nip) html += 'Nip: '+p.zleceniobiorca_nip+'<br>';
+  if(p.auto) html += '<br><strong>NUMERY AUTA :</strong> '+p.auto+'<br>';
+  if(p.kierowca) html += '<strong>KIEROWCA:</strong> '+p.kierowca;
+  if(p.kierowca_tel) html += ' tel: '+p.kierowca_tel;
+  html += '</p></div></div>';
+
+  // Trasa
+  html += '<div class="trasa-hdr">DANE DOTYCZACE ZALADUNKU/ROZLADUNKU:</div>';
+  html += '<div class="trasa-grid">';
+  html += '<div class="trasa-col"><div class="trasa-col-hdr">ZALADUNEK'+(p.skad_data?' '+p.skad_data:'')+(p.skad_godz?' '+p.skad_godz:'')+'</div>';
+  if(p.skad) html += '<p><strong>'+p.skad+'</strong></p>';
+  if(p.skad_adres) html += '<p>'+p.skad_adres+'</p>';
+  if(p.referencje) html += '<p style="color:#666;font-size:8pt">Ref: '+p.referencje+'</p>';
+  html += '</div>';
+  html += '<div class="trasa-col"><div class="trasa-col-hdr">ROZLADUNEK'+(p.dokad_data?' '+p.dokad_data:'')+(p.dokad_godz?' '+p.dokad_godz:'')+'</div>';
+  if(p.dokad) html += '<p><strong>'+p.dokad+'</strong></p>';
+  if(p.dokad_adres) html += '<p>'+p.dokad_adres+'</p>';
+  html += '</div></div>';
+
+  // Wynagrodzenie
+  html += '<div class="wynagrodzenie">';
+  html += '<div><div style="font-size:7.5pt;color:#185FA5;margin-bottom:1mm">Cena All In Netto:</div><div class="wynagrodzenie-val">'+f+' '+w+' + 23% VAT</div></div>';
+  html += '<div style="text-align:right;font-size:8pt;color:#666">Termin platnosci: '+(p.platnosc_dni||30)+' dni<br>Status: '+(p.status||'Nowe')+'</div>';
+  html += '</div>';
+
+  if(p.uwagi) {
+    html += '<div style="border:1px solid #fac775;background:#faeeda;padding:2.5mm 3mm;margin:2mm 0;word-break:break-word">';
+    html += '<div style="font-size:7.5pt;color:#633806;font-weight:bold;margin-bottom:1mm">UWAGI</div>';
+    html += '<div style="font-size:8.5pt;line-height:1.5">'+p.uwagi+'</div></div>';
+  }
+
+  // Warunki finansowe
+  html += '<div class="section-title">Warunki Finansowe</div>';
+  html += '<div class="warunki">Cena All In Netto: '+f+' '+w+' + 23% VAT</div>';
+  html += '<div class="warunki">Termin platnosci: '+(p.platnosc_dni||30)+' dni po otrzymaniu kompletu dokumentow pocztą.</div>';
+  html += '<div class="warunki">Fakture nalezy wystawic w miesiacu rozladunku. VAT i fracht EUR przeliczyc na PLN wg kursu NBP.</div>';
+  html += '<div class="warunki">NIE WYSTAWIAC FAKTUR ZBIORCZYCH. Faktura musi zawierac numer zlecenia.</div>';
+  html += '<div class="warunki">SKONTO: 3-5 dni od otrzymania oryginalow = 3% (tylko po potwierdzeniu mailowym).</div>';
+  html += '<div class="warunki">Po rozladunku: zdjecie CMR na mail z numerem zlecenia. Brak zdjecia = nota do 50 EUR.</div>';
+
+  // Warunki wykonania
+  html += '<div class="section-title">Warunki wykonania zlecenia</div>';
+  var war = [
+    '1. Zleceniobiorca posiada aktualna polise OC Przewoznika, licencje transportowa i wymagane zezwolenia.',
+    '2. Brak odmowy w ciagu 30 min od zlecenia = przyjecie do realizacji. Rezygnacja po 30 min: kara do 100% frachtu.',
+    '3. Informowanie o pozycji pojazdu na zadanie Zleceniodawcy.',
+    '4. O braku mozliwosci wykonania informowac co najmniej 12h przed zaladunkiem.',
+    '5. Czas wolny: 24h kraj, 48h zagranica (bez dni wolnych). Za granica: busy 50E, solowki 75E, ciezarowki 100E.',
+    '6. Kontrola towaru; zabezpieczenie przed przemieszczaniem. Uszkodzenia odnotowac w CMR polu 18.',
+    '7. Zakaz dodatkowego zaladunku bez zgody LTE (kara min. 500 EUR). Zakaz kontaktu z zaladowca (kara min. 300 EUR).',
+    '8. Zakaz umow z nadawca/odbiorca przez 24 miesiace (kara 50 000 PLN).',
+    '9. Postoj wylacznie na bezpiecznych parkingach.',
+    '10. Przestrzeganie przepisow o place minimalnej we wszystkich krajach.'
+  ];
+  war.forEach(function(w2){ html += '<div class="warunki">'+w2+'</div>'; });
+
+  // Dane
+  html += '<div class="warunki" style="margin-top:3mm"><strong>Dane do korespondencji:</strong> LTE LOGISTIC, ul. Slowackiego 11, 62-700 Turek, NIP: PL5213966752</div>';
+  html += '<div class="warunki"><strong>Dane do fakturowania:</strong> LTE LOGISTIC SPOLKA Z OGRANICZONA ODPOWIEDZIALNOSCIA, Kielecka 41A/8, 02-530 Warszawa, NIP: PL5213966752</div>';
+
+  // Podpisy
+  html += '<div class="podpisy">';
+  html += '<div class="podpis">Podpis zleceniodawcy / LTE Logistic<br><br><br></div>';
+  html += '<div class="podpis">Podpis i pieczatka zleceniobiorcy<br><br><br></div>';
+  html += '</div>';
+
+  html += '</body></html>';
+
+  var win = window.open('','_blank','width=950,height=750');
+  win.document.write(html);
+  win.document.close();
+  setTimeout(function(){ win.focus(); }, 300);
 }
 
 // ── EXCEL EXPORT ──────────────────────────────────────────
