@@ -248,6 +248,7 @@ const SUPABASE_URL = 'https://lpvxzokrntzvpqjkudyf.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxwdnh6b2tybnR6dnBxamt1ZHlmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NzA5NTIsImV4cCI6MjA5MTE0Njk1Mn0.8kCHA9nUsy9W6H92lVKW4yV-xNSwPhoNO2uJ_cphiss';
 const CLAUDE_PROXY = 'https://lpvxzokrntzvpqjkudyf.supabase.co/functions/v1/claude-proxy';
 const APP_PASSWORD = 'transport2024';
+const GOOGLE_KEY = 'AIzaSyDZub9VnimP8WFzvBBzcyoDL-iCrynzG4I';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:false,autoRefreshToken:false}});
 const STATUS_MAP = {'Nowe':'b-gray','W trasie':'b-blue','Oczekuje':'b-amber','Dostarczone':'b-green','Anulowane':'b-red'};
@@ -479,6 +480,7 @@ function openOrderModal(id) {
     '<div class="field"><label>Fracht</label><input type="number" id="f-fracht" value="'+(o.fracht||'')+'" placeholder="0"></div>' +
     '<div class="field"><label>Waluta</label><select id="f-waluta">'+walutyOpts+'</select></div>' +
     '<div class="field"><label>Kilometry (km)</label><input type="number" id="f-km" value="'+(o.kilometry||'')+'" placeholder="0"></div>' +
+    '<div class="field" style="align-self:end"><button type="button" class="btn" style="width:100%" id="btn-calc-km">Oblicz km (Google)</button><div id="f-km-st" style="font-size:11px;margin-top:3px;color:var(--text2)"></div></div>' +
     '<div class="field"><label>Prowizja (%)</label><input type="number" id="f-prow" value="'+(o.prowizja_pct||4)+'" step="0.5" min="0" max="100"></div>' +
     '<div class="field"><label>Nr ref. klienta</label><input id="f-ref" value="'+(o.ref||'')+'" placeholder="opcjonalnie"></div>' +
     '<div class="field full"><label>Uwagi</label><textarea id="f-uwagi">'+(o.uwagi||'')+'</textarea></div>';
@@ -487,6 +489,10 @@ function openOrderModal(id) {
     '<button class="btn" onclick="closeModal()">Anuluj</button>' +
     '<button class="btn btn-primary" onclick="saveOrder()">Zapisz</button>';
   openModal();
+  setTimeout(function(){
+    var b=document.getElementById('btn-calc-km');
+    if(b) b.onclick=function(){autoCalcKm('f-skad','f-dokad','f-km','f-km-st');};
+  },0);
 }
 
 async function saveOrder() {
@@ -838,6 +844,7 @@ function openPodwModal(id) {
     '<div class="field"><label>Fracht</label><input type="number" id="pw-fracht" value="'+(p.fracht||'')+'" placeholder="0"></div>' +
     '<div class="field"><label>Waluta</label><select id="pw-waluta">'+walutyOpts+'</select></div>' +
     '<div class="field"><label>Kilometry (km)</label><input type="number" id="pw-km" value="'+(p.kilometry||'')+'" placeholder="0"></div>' +
+    '<div class="field" style="align-self:end"><button type="button" class="btn" style="width:100%" id="btn-calc-pw-km">Oblicz km (Google)</button><div id="pw-km-st" style="font-size:11px;margin-top:3px;color:var(--text2)"></div></div>' +
     '<div class="field"><label>Prowizja (%)</label><input type="number" id="pw-prow" value="'+(p.prowizja_pct||4)+'" step="0.5"></div>' +
     '<div class="field"><label>Płatność (dni)</label><input type="number" id="pw-plat" value="'+(p.platnosc_dni||30)+'"></div>' +
     '<div class="field"><label>Referencje</label><input id="pw-ref" value="'+(p.referencje||'')+'"></div>' +
@@ -1463,6 +1470,39 @@ function exportExcelProwizja() {
     navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(function(){});
   }
 })();
+
+async function calcDistanceKm(origin, destination) {
+  if (!origin || !destination || origin.length < 3 || destination.length < 3) return null;
+  try {
+    var resp = await fetch(
+      'https://maps.googleapis.com/maps/api/distancematrix/json?origins=' + encodeURIComponent(origin) +
+      '&destinations=' + encodeURIComponent(destination) + '&mode=driving&key=' + GOOGLE_KEY
+    );
+    var data = await resp.json();
+    if (data.rows && data.rows[0] && data.rows[0].elements[0] && data.rows[0].elements[0].status==='OK') {
+      return Math.round(data.rows[0].elements[0].distance.value / 1000);
+    }
+  } catch(e) { console.warn('Distance calc failed:', e); }
+  return null;
+}
+
+async function autoCalcKm(skadId, dokadId, kmId, statusId) {
+  var skadEl = document.getElementById(skadId);
+  var dokadEl = document.getElementById(dokadId);
+  var kmEl = document.getElementById(kmId);
+  var stEl = document.getElementById(statusId);
+  if (!skadEl || !dokadEl || !kmEl) return;
+  var o = skadEl.value.trim(), d = dokadEl.value.trim();
+  if (o.length < 3 || d.length < 3) { showToast('Wpisz adresy skad i dokad', true); return; }
+  if (stEl) stEl.textContent = 'Obliczam...';
+  var km = await calcDistanceKm(o, d);
+  if (km) {
+    kmEl.value = km;
+    if (stEl) { stEl.textContent = km + ' km (Google Maps)'; stEl.style.color = 'var(--green-text)'; }
+  } else {
+    if (stEl) { stEl.textContent = 'Nie udalo sie obliczyc'; stEl.style.color = 'var(--red-text)'; }
+  }
+}
 </script>
 </body>
 </html>
