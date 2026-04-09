@@ -1021,15 +1021,15 @@ function renderKalendarz() {
   var today=new Date(), todayStr=today.toISOString().slice(0,10);
   var first=new Date(kalYear,kalMonth,1), last=new Date(kalYear,kalMonth+1,0);
   var startDow=(first.getDay()+6)%7, daysInMonth=last.getDate();
-  var mnazwy=['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'];
+  var mnazwy=['Styczen','Luty','Marzec','Kwiecien','Maj','Czerwiec','Lipiec','Sierpien','Wrzesien','Pazdziernik','Listopad','Grudzien'];
   function evFor(ds) {
     var ev=kalEvents.filter(function(e){return e.data===ds});
-    orders.forEach(function(o){ if(o.data_zaladunek===ds) ev.push({tytul:o.skad||'Załadunek',typ:'zaladunek',_ro:true}); if(o.data_dostawa===ds) ev.push({tytul:o.dokad||'Dostawa',typ:'dostawa',_ro:true}); });
-    podw.forEach(function(p){ if(p.skad_data===ds) ev.push({tytul:p.skad||'Załadunek zew.',typ:'zaladunek',_ro:true}); if(p.dokad_data===ds) ev.push({tytul:p.dokad||'Dostawa zew.',typ:'dostawa',_ro:true}); });
+    orders.forEach(function(o){ if(o.data_zaladunek===ds) ev.push({tytul:o.skad||'Zaladunek',typ:'zaladunek',_ro:true}); if(o.data_dostawa===ds) ev.push({tytul:o.dokad||'Dostawa',typ:'dostawa',_ro:true}); });
+    podw.forEach(function(p){ if(p.skad_data===ds) ev.push({tytul:p.skad||'Zaladunek zew.',typ:'zaladunek',_ro:true}); if(p.dokad_data===ds) ev.push({tytul:p.dokad||'Dostawa zew.',typ:'dostawa',_ro:true}); });
     return ev;
   }
   var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><button class="btn" onclick="kalPrev()">&#8249; Wstecz</button><h3 style="font-size:16px;font-weight:600">'+mnazwy[kalMonth]+' '+kalYear+'</h3><button class="btn" onclick="kalNext()">Dalej &#8250;</button></div>';
-  html+='<div class="kal-header">'+['Pon','Wt','Śr','Czw','Pt','Sob','Nd'].map(function(d){return '<div class="kal-day-name">'+d+'</div>'}).join('')+'</div>';
+  html+='<div class="kal-header">'+['Pon','Wt','Sr','Czw','Pt','Sob','Nd'].map(function(d){return '<div class="kal-day-name">'+d+'</div>'}).join('')+'</div>';
   html+='<div class="kal-grid">';
   for(var i=0;i<startDow;i++) {
     var pd=new Date(kalYear,kalMonth,-startDow+i+1);
@@ -1038,14 +1038,14 @@ function renderKalendarz() {
   for(var d=1;d<=daysInMonth;d++) {
     var ds=kalYear+'-'+String(kalMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     var isT=ds===todayStr, ev=evFor(ds);
-    html+='<div class="kal-day'+(isT?' today':'')+'" data-ds=""+ds+"" class="kal-day">';
+    html+='<div class="kal-day'+(isT?' today':'')+'" data-ds="'+ds+'" style="cursor:pointer">';
     html+='<div class="kal-day-num">'+d+'</div>';
-    ev.slice(0,3).forEach(function(e){ 
-    var evClass = 'kal-event typ-'+(e.typ||'notatka')+(e._ro?'':' kal-ev-click');
-    var evData = e._ro?'':'data-eds="'+ds+'" data-eid="'+(e.id||'')+'"';
-    html+='<div class="'+evClass+'" '+evData+' title="'+e.tytul+'">'+e.tytul+'</div>'; 
-  });
-    if(ev.length>3) html+='<div style="font-size:9px;color:var(--text3)">+'+( ev.length-3)+' więcej</div>';
+    ev.slice(0,3).forEach(function(e){
+      var evClass='kal-event typ-'+(e.typ||'notatka')+(e._ro?'':' kal-ev-click');
+      var evData=e._ro?'':'data-eds="'+ds+'" data-eid="'+(e.id||'')+'"';
+      html+='<div class="'+evClass+'" '+evData+' title="'+e.tytul+'">'+e.tytul+'</div>';
+    });
+    if(ev.length>3) html+='<div style="font-size:9px;color:var(--text3)">+'+(ev.length-3)+' wiecej</div>';
     html+='</div>';
   }
   var endDow=(last.getDay()+6)%7;
