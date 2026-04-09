@@ -2,8 +2,14 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>TransPort — zarządzanie zleceniami</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TransPort</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TransPort">
+<meta name="theme-color" content="#378ADD">
+<link rel="manifest" id="pwa-manifest">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
@@ -151,6 +157,85 @@ tr:hover td{background:var(--bg2);cursor:pointer}
   .content{padding:10px;padding-bottom:70px}
 }
 </style>
+
+<script>
+// PWA Manifest
+const manifest = {
+  name: 'TransPort — zarządzanie flotą',
+  short_name: 'TransPort',
+  description: 'System zarządzania zleceniami transportowymi',
+  start_url: '.',
+  display: 'standalone',
+  background_color: '#f1f0eb',
+  theme_color: '#378ADD',
+  orientation: 'any',
+  icons: [
+    {
+      src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23378ADD'/><text y='360' x='256' font-size='300' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>T</text></svg>",
+      sizes: '512x512',
+      type: 'image/svg+xml',
+      purpose: 'any maskable'
+    }
+  ]
+};
+const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const url = URL.createObjectURL(blob);
+document.getElementById('pwa-manifest').setAttribute('href', url);
+
+// Service Worker for offline support
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'transport-v1';
+    const ASSETS = ['/transport/', '/transport/index.html'];
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(()=>{})));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    });
+  `;
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl, {scope: '/transport/'}).catch(()=>{});
+}
+</script>
+<script>
+(function(){
+  // Inline manifest
+  var manifest = {
+    name: 'TransPort',
+    short_name: 'TransPort',
+    start_url: '/transport/',
+    display: 'standalone',
+    background_color: '#f1f0eb',
+    theme_color: '#378ADD',
+    icons: [{src:'https://kain747-eng.github.io/transport/icon.png',sizes:'192x192',type:'image/png'}]
+  };
+  var blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
+
+  // Service Worker
+  if('serviceWorker' in navigator){
+    var sw = [
+      'var C="tp-v2";',
+      'self.addEventListener("install",function(e){self.skipWaiting();});',
+      'self.addEventListener("activate",function(e){e.waitUntil(clients.claim());});',
+      'self.addEventListener("fetch",function(e){',
+      '  if(e.request.method!=="GET")return;',
+      '  e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));',
+      '});'
+    ].join('\n');
+    var swBlob = new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
+  }
+})();
+</script>
 </head>
 <body>
 
@@ -203,6 +288,9 @@ tr:hover td{background:var(--bg2);cursor:pointer}
     </div>
     <div class="nav" onclick="showView('kalkulator')">
       <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4M5 12h3"/></svg>Kalkulator paliwa
+    </div>
+    <div class="nav" onclick="showView('kalendarz')">
+      <svg viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="13" rx="1"/><path d="M1 6h14M5 1v2M11 1v2"/></svg>Kalendarz
     </div>
     <div style="flex:1"></div>
     <div class="sidebar-bottom" style="padding:14px 16px;border-top:1px solid var(--border)">
@@ -298,12 +386,12 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
 const STATUS_MAP = {'Nowe':'b-gray','W trasie':'b-blue','Oczekuje':'b-amber','Dostarczone':'b-green','Anulowane':'b-red'};
 let currentView = 'dashboard';
 let currentUser = null;
-let orders = [], drivers = [], cars = [], docs = [], podw = [];
+let orders = [], drivers = [], cars = [], docs = [], podw = [], kalEvents = [];
 let editingId = null;
 
 // ── AUTH — proste hasło, bez Supabase auth ─────────────────
 const APP_PASSWORD = 'transport2024';
-const ANTHROPIC_KEY = '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'; // zmień na własne hasło
+ // zmień na własne hasło
 
 function checkPassword() {
   const pass = document.getElementById('login-password').value;
@@ -356,9 +444,10 @@ async function loadAll() {
       sb.from('flota').select('*').order('rejestracja'),
       sb.from('dokumenty').select('*').order('created_at', { ascending: false }),
       sb.from('podwykonawcy_zlecenia').select('*').order('created_at', { ascending: false }),
+      sb.from('kalendarz').select('*').order('data', { ascending: true }),
     ]);
 
-    const [z, k, f, d, pw] = await Promise.race([fetchData, timeout(8000)]);
+    const [z, k, f, d, pw, ke] = await Promise.race([fetchData, timeout(8000)]);
 
     if (z.error) throw new Error('zlecenia: ' + z.error.message);
     if (k.error) throw new Error('kierowcy: ' + k.error.message);
@@ -371,6 +460,7 @@ async function loadAll() {
     cars    = f.data || [];
     docs    = d.data || [];
     podw    = pw.data || [];
+    kalEvents = ke.data || [];
   } catch(e) {
     document.getElementById('main-content').innerHTML = `
       <div style="background:#FCEBEB;border:1px solid #f09595;border-radius:12px;padding:24px;margin-bottom:16px;color:#791F1F">
@@ -430,7 +520,7 @@ function showView(v) {
   // sync mobile action button
   const mobileActs = document.getElementById('topbar-actions-mobile');
   if (mobileActs) mobileActs.innerHTML = document.getElementById('topbar-actions').innerHTML;
-  const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne', rozliczenia:'Prowizja spedytora', kalkulator:'Kalkulator dodatku paliwowego' };
+  const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne', rozliczenia:'Prowizja spedytora', kalkulator:'Kalkulator dodatku paliwowego', kalendarz:'Kalendarz' };
   document.getElementById('view-title').textContent = titles[v] || v;
   const acts = document.getElementById('topbar-actions');
   const btns = {
@@ -442,6 +532,7 @@ function showView(v) {
     podwykonawcy: '<button class="btn btn-primary" onclick="openPodwModal()">+ Nowe zlecenie zewnętrzne</button>',
     raporty: '<button class="btn" onclick="exportExcelRaport()">Export Excel</button><button class="btn" onclick="exportExcelProwizja()">Export prowizji</button>',
     kalkulator: '',
+    kalendarz: '<button class="btn btn-primary" onclick="openKalModal(null, null)">+ Notatka / Wydarzenie</button>',
     rozliczenia: '',
   };
   acts.innerHTML = btns[v] || '';
@@ -459,6 +550,7 @@ function renderView(v) {
   else if (v === 'podwykonawcy') c.innerHTML = renderPodwykonawcy();
   else if (v === 'rozliczenia') c.innerHTML = renderRozliczenia();
   else if (v === 'kalkulator') { c.innerHTML = renderKalkulator(); setTimeout(kalkuluj, 0); }
+  else if (v === 'kalendarz') c.innerHTML = renderKalendarz();
 }
 
 // ── VIEWS ─────────────────────────────────────────────────
@@ -1050,7 +1142,86 @@ function exportPDF(id) {
     .footer{margin-top:8mm;padding-top:3mm;border-top:1px solid #ddd;font-size:7pt;color:#aaa;text-align:center}
     .btn-print{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.2)}
     @media print{.btn-print{display:none}body{padding:10mm 15mm}.header{margin:-10mm -15mm 6mm}}
-  </style></head><body>
+  </style>
+<script>
+// PWA Manifest
+const manifest = {
+  name: 'TransPort — zarządzanie flotą',
+  short_name: 'TransPort',
+  description: 'System zarządzania zleceniami transportowymi',
+  start_url: '.',
+  display: 'standalone',
+  background_color: '#f1f0eb',
+  theme_color: '#378ADD',
+  orientation: 'any',
+  icons: [
+    {
+      src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23378ADD'/><text y='360' x='256' font-size='300' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>T</text></svg>",
+      sizes: '512x512',
+      type: 'image/svg+xml',
+      purpose: 'any maskable'
+    }
+  ]
+};
+const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const url = URL.createObjectURL(blob);
+document.getElementById('pwa-manifest').setAttribute('href', url);
+
+// Service Worker for offline support
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'transport-v1';
+    const ASSETS = ['/transport/', '/transport/index.html'];
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(()=>{})));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    });
+  `;
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl, {scope: '/transport/'}).catch(()=>{});
+}
+</script>
+<script>
+(function(){
+  // Inline manifest
+  var manifest = {
+    name: 'TransPort',
+    short_name: 'TransPort',
+    start_url: '/transport/',
+    display: 'standalone',
+    background_color: '#f1f0eb',
+    theme_color: '#378ADD',
+    icons: [{src:'https://kain747-eng.github.io/transport/icon.png',sizes:'192x192',type:'image/png'}]
+  };
+  var blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
+
+  // Service Worker
+  if('serviceWorker' in navigator){
+    var sw = [
+      'var C="tp-v2";',
+      'self.addEventListener("install",function(e){self.skipWaiting();});',
+      'self.addEventListener("activate",function(e){e.waitUntil(clients.claim());});',
+      'self.addEventListener("fetch",function(e){',
+      '  if(e.request.method!=="GET")return;',
+      '  e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));',
+      '});'
+    ].join('\n');
+    var swBlob = new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
+  }
+})();
+</script>
+</head><body>
   <button class="btn-print" onclick="window.print()">Drukuj / Zapisz PDF</button>
   <div class="header">
     <div><div class="date">Data wydruku: ${new Date().toLocaleDateString('pl-PL')}</div><h1>ZLECENIE TRANSPORTOWE</h1></div>
@@ -2294,14 +2465,150 @@ function exportExcelProwizja() {
   XLSX.writeFile(wb, 'prowizja-'+miesiac+'.xlsx');
   showToast('Plik Excel prowizji pobrany');
 }
+
+// ── KALENDARZ ──────────────────────────────────────────────
+let kalYear = new Date().getFullYear();
+let kalMonth = new Date().getMonth();
+
+function renderKalendarz() {
+  var today = new Date();
+  var todayStr = today.toISOString().slice(0,10);
+  var firstDay = new Date(kalYear, kalMonth, 1);
+  var lastDay = new Date(kalYear, kalMonth+1, 0);
+  var startDow = (firstDay.getDay()+6)%7; // Monday=0
+  var daysInMonth = lastDay.getDate();
+  var miesNazwy = ['Styczen','Luty','Marzec','Kwiecien','Maj','Czerwiec','Lipiec','Sierpien','Wrzesien','Pazdziernik','Listopad','Grudzien'];
+
+  // Events for this month + nearby
+  function eventsFor(dateStr) {
+    var evs = kalEvents.filter(function(e){ return e.data === dateStr; });
+    // Also show orders
+    orders.forEach(function(o){
+      if(o.data_zaladunek === dateStr) evs.push({tytul: (o.skad||'Zaladunek'), typ:'zaladunek', _order:true, id:o.id});
+      if(o.data_dostawa === dateStr) evs.push({tytul: (o.dokad||'Dostawa'), typ:'dostawa', _order:true, id:o.id});
+    });
+    podw.forEach(function(p){
+      if(p.skad_data === dateStr) evs.push({tytul: (p.skad||'Zaladunek zew.'), typ:'zaladunek', _order:true, id:p.id});
+      if(p.dokad_data === dateStr) evs.push({tytul: (p.dokad||'Dostawa zew.'), typ:'dostawa', _order:true, id:p.id});
+    });
+    return evs;
+  }
+
+  var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+  html += '<button class="btn" onclick="kalPrev()">&#8249; Wstecz</button>';
+  html += '<h3 style="font-size:16px;font-weight:600">'+miesNazwy[kalMonth]+' '+kalYear+'</h3>';
+  html += '<button class="btn" onclick="kalNext()">Dalej &#8250;</button>';
+  html += '</div>';
+
+  html += '<div class="kal-header">';
+  ['Pon','Wt','Sr','Czw','Pt','Sob','Nd'].forEach(function(d){
+    html += '<div class="kal-day-name">'+d+'</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="kal-grid">';
+
+  // Empty cells before first day
+  for(var i=0;i<startDow;i++){
+    var prevDate = new Date(kalYear, kalMonth, -startDow+i+1);
+    html += '<div class="kal-day other-month"><div class="kal-day-num">'+prevDate.getDate()+'</div></div>';
+  }
+
+  // Days of month
+  for(var d=1;d<=daysInMonth;d++){
+    var dateStr = kalYear+'-'+String(kalMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var isToday = dateStr === todayStr;
+    var evs = eventsFor(dateStr);
+    html += '<div class="kal-day'+(isToday?' today':'')+'" onclick="openKalModal(''+dateStr+'', null)">';
+    html += '<div class="kal-day-num">'+d+'</div>';
+    evs.slice(0,3).forEach(function(ev){
+      var typ = ev.typ||'notatka';
+      html += '<div class="kal-event typ-'+typ+'" onclick="event.stopPropagation();'+(ev._order?'':'openKalModal(''+dateStr+'',''+ev.id+'')')+'" title="'+ev.tytul+'">'+ev.tytul+'</div>';
+    });
+    if(evs.length>3) html += '<div style="font-size:9px;color:var(--text3)">+'+( evs.length-3)+' wiecej</div>';
+    html += '</div>';
+  }
+
+  // Empty cells after last day
+  var endDow = (lastDay.getDay()+6)%7;
+  for(var i=endDow+1;i<7;i++){
+    html += '<div class="kal-day other-month"><div class="kal-day-num">'+(i-endDow)+'</div></div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function kalPrev() {
+  kalMonth--;
+  if(kalMonth<0){kalMonth=11;kalYear--;}
+  renderView('kalendarz');
+}
+function kalNext() {
+  kalMonth++;
+  if(kalMonth>11){kalMonth=0;kalYear++;}
+  renderView('kalendarz');
+}
+
+function openKalModal(dateStr, eventId) {
+  var ev = eventId ? kalEvents.find(function(e){return e.id===eventId;}) : null;
+  editingId = ev ? ev.id : null;
+  document.getElementById('modal-title').textContent = ev ? 'Edytuj wydarzenie' : 'Nowe wydarzenie';
+  document.getElementById('modal-body').innerHTML =
+    '<div class="field"><label>Data</label><input type="date" id="kal-data" value="'+(ev?ev.data:dateStr||new Date().toISOString().slice(0,10))+'"></div>' +
+    '<div class="field"><label>Tytuł</label><input id="kal-tytul" value="'+(ev?ev.tytul||'':'')+'" placeholder="np. Spotkanie z klientem"></div>' +
+    '<div class="field"><label>Typ</label><select id="kal-typ">' +
+      ['notatka','zaladunek','dostawa','serwis'].map(function(t){ return '<option value="'+t+'"'+(ev&&ev.typ===t?' selected':'')+'>'+t.charAt(0).toUpperCase()+t.slice(1)+'</option>'; }).join('') +
+    '</select></div>' +
+    '<div class="field full"><label>Notatka</label><textarea id="kal-notatka" rows="4">'+(ev?ev.notatka||'':'')+'</textarea></div>';
+  document.getElementById('modal-foot').innerHTML =
+    (ev ? '<button class="btn btn-danger" onclick="deleteKalEvent()">Usuń</button>' : '') +
+    '<button class="btn" onclick="closeModal()">Anuluj</button>' +
+    '<button class="btn btn-primary" onclick="saveKalEvent()">Zapisz</button>';
+  document.getElementById('modal-overlay').style.display='flex';
+}
+
+async function saveKalEvent() {
+  var payload = {
+    data: document.getElementById('kal-data').value,
+    tytul: document.getElementById('kal-tytul').value.trim(),
+    typ: document.getElementById('kal-typ').value,
+    notatka: document.getElementById('kal-notatka').value.trim()
+  };
+  if(!payload.tytul||!payload.data){ showToast('Wypełnij datę i tytuł', true); return; }
+  if(editingId) {
+    await sb.from('kalendarz').update(payload).eq('id', editingId);
+  } else {
+    await sb.from('kalendarz').insert(payload);
+  }
+  closeModal();
+  showToast(editingId ? 'Wydarzenie zaktualizowane' : 'Wydarzenie dodane');
+  await loadAll();
+  renderView('kalendarz');
+}
+
+async function deleteKalEvent() {
+  if(!confirm('Usunąć to wydarzenie?')) return;
+  await sb.from('kalendarz').delete().eq('id', editingId);
+  closeModal();
+  showToast('Wydarzenie usunięte');
+  await loadAll();
+  renderView('kalendarz');
+}
 </script>
 </body>
 </html>filterMonth ? \'<span id=\"r-clear-btn\" class=\"btn\" style=\"cursor:pointer\">Wyczysc filtr</span>\' : \'\'}
   </div>ml lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>TransPort — zarządzanie zleceniami</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>TransPort</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TransPort">
+<meta name="theme-color" content="#378ADD">
+<link rel="manifest" id="pwa-manifest">
+<link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/polyfills.umd.min.js"></script>
@@ -2449,6 +2756,85 @@ tr:hover td{background:var(--bg2);cursor:pointer}
   .content{padding:10px;padding-bottom:70px}
 }
 </style>
+
+<script>
+// PWA Manifest
+const manifest = {
+  name: 'TransPort — zarządzanie flotą',
+  short_name: 'TransPort',
+  description: 'System zarządzania zleceniami transportowymi',
+  start_url: '.',
+  display: 'standalone',
+  background_color: '#f1f0eb',
+  theme_color: '#378ADD',
+  orientation: 'any',
+  icons: [
+    {
+      src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23378ADD'/><text y='360' x='256' font-size='300' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>T</text></svg>",
+      sizes: '512x512',
+      type: 'image/svg+xml',
+      purpose: 'any maskable'
+    }
+  ]
+};
+const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const url = URL.createObjectURL(blob);
+document.getElementById('pwa-manifest').setAttribute('href', url);
+
+// Service Worker for offline support
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'transport-v1';
+    const ASSETS = ['/transport/', '/transport/index.html'];
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(()=>{})));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    });
+  `;
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl, {scope: '/transport/'}).catch(()=>{});
+}
+</script>
+<script>
+(function(){
+  // Inline manifest
+  var manifest = {
+    name: 'TransPort',
+    short_name: 'TransPort',
+    start_url: '/transport/',
+    display: 'standalone',
+    background_color: '#f1f0eb',
+    theme_color: '#378ADD',
+    icons: [{src:'https://kain747-eng.github.io/transport/icon.png',sizes:'192x192',type:'image/png'}]
+  };
+  var blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
+
+  // Service Worker
+  if('serviceWorker' in navigator){
+    var sw = [
+      'var C="tp-v2";',
+      'self.addEventListener("install",function(e){self.skipWaiting();});',
+      'self.addEventListener("activate",function(e){e.waitUntil(clients.claim());});',
+      'self.addEventListener("fetch",function(e){',
+      '  if(e.request.method!=="GET")return;',
+      '  e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));',
+      '});'
+    ].join('\n');
+    var swBlob = new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
+  }
+})();
+</script>
 </head>
 <body>
 
@@ -2501,6 +2887,9 @@ tr:hover td{background:var(--bg2);cursor:pointer}
     </div>
     <div class="nav" onclick="showView('kalkulator')">
       <svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4M5 12h3"/></svg>Kalkulator paliwa
+    </div>
+    <div class="nav" onclick="showView('kalendarz')">
+      <svg viewBox="0 0 16 16"><rect x="1" y="2" width="14" height="13" rx="1"/><path d="M1 6h14M5 1v2M11 1v2"/></svg>Kalendarz
     </div>
     <div style="flex:1"></div>
     <div class="sidebar-bottom" style="padding:14px 16px;border-top:1px solid var(--border)">
@@ -2596,12 +2985,12 @@ const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {
 const STATUS_MAP = {'Nowe':'b-gray','W trasie':'b-blue','Oczekuje':'b-amber','Dostarczone':'b-green','Anulowane':'b-red'};
 let currentView = 'dashboard';
 let currentUser = null;
-let orders = [], drivers = [], cars = [], docs = [], podw = [];
+let orders = [], drivers = [], cars = [], docs = [], podw = [], kalEvents = [];
 let editingId = null;
 
 // ── AUTH — proste hasło, bez Supabase auth ─────────────────
 const APP_PASSWORD = 'transport2024';
-const ANTHROPIC_KEY = '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'; // zmień na własne hasło
+ // zmień na własne hasło
 
 function checkPassword() {
   const pass = document.getElementById('login-password').value;
@@ -2654,9 +3043,10 @@ async function loadAll() {
       sb.from('flota').select('*').order('rejestracja'),
       sb.from('dokumenty').select('*').order('created_at', { ascending: false }),
       sb.from('podwykonawcy_zlecenia').select('*').order('created_at', { ascending: false }),
+      sb.from('kalendarz').select('*').order('data', { ascending: true }),
     ]);
 
-    const [z, k, f, d, pw] = await Promise.race([fetchData, timeout(8000)]);
+    const [z, k, f, d, pw, ke] = await Promise.race([fetchData, timeout(8000)]);
 
     if (z.error) throw new Error('zlecenia: ' + z.error.message);
     if (k.error) throw new Error('kierowcy: ' + k.error.message);
@@ -2669,6 +3059,7 @@ async function loadAll() {
     cars    = f.data || [];
     docs    = d.data || [];
     podw    = pw.data || [];
+    kalEvents = ke.data || [];
   } catch(e) {
     document.getElementById('main-content').innerHTML = `
       <div style="background:#FCEBEB;border:1px solid #f09595;border-radius:12px;padding:24px;margin-bottom:16px;color:#791F1F">
@@ -2728,7 +3119,7 @@ function showView(v) {
   // sync mobile action button
   const mobileActs = document.getElementById('topbar-actions-mobile');
   if (mobileActs) mobileActs.innerHTML = document.getElementById('topbar-actions').innerHTML;
-  const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne', rozliczenia:'Prowizja spedytora', kalkulator:'Kalkulator dodatku paliwowego' };
+  const titles = { dashboard:'Dashboard', zlecenia:'Zlecenia', kierowcy:'Kierowcy', flota:'Flota', dokumenty:'Dokumenty', raporty:'Raporty', podwykonawcy:'Zlecenia zewnętrzne', rozliczenia:'Prowizja spedytora', kalkulator:'Kalkulator dodatku paliwowego', kalendarz:'Kalendarz' };
   document.getElementById('view-title').textContent = titles[v] || v;
   const acts = document.getElementById('topbar-actions');
   const btns = {
@@ -2740,6 +3131,7 @@ function showView(v) {
     podwykonawcy: '<button class="btn btn-primary" onclick="openPodwModal()">+ Nowe zlecenie zewnętrzne</button>',
     raporty: '<button class="btn" onclick="exportExcelRaport()">Export Excel</button><button class="btn" onclick="exportExcelProwizja()">Export prowizji</button>',
     kalkulator: '',
+    kalendarz: '<button class="btn btn-primary" onclick="openKalModal(null, null)">+ Notatka / Wydarzenie</button>',
     rozliczenia: '',
   };
   acts.innerHTML = btns[v] || '';
@@ -2757,6 +3149,7 @@ function renderView(v) {
   else if (v === 'podwykonawcy') c.innerHTML = renderPodwykonawcy();
   else if (v === 'rozliczenia') c.innerHTML = renderRozliczenia();
   else if (v === 'kalkulator') { c.innerHTML = renderKalkulator(); setTimeout(kalkuluj, 0); }
+  else if (v === 'kalendarz') c.innerHTML = renderKalendarz();
 }
 
 // ── VIEWS ─────────────────────────────────────────────────
@@ -3375,7 +3768,86 @@ function exportPDF(id) {
     .footer{margin-top:8mm;padding-top:3mm;border-top:1px solid #ddd;font-size:7pt;color:#aaa;text-align:center}
     .btn-print{position:fixed;top:10px;right:10px;padding:9px 18px;background:#378ADD;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:bold;box-shadow:0 2px 6px rgba(0,0,0,.2)}
     @media print{.btn-print{display:none}body{padding:10mm 15mm}.header{margin:-10mm -15mm 6mm}}
-  </style></head><body>
+  </style>
+<script>
+// PWA Manifest
+const manifest = {
+  name: 'TransPort — zarządzanie flotą',
+  short_name: 'TransPort',
+  description: 'System zarządzania zleceniami transportowymi',
+  start_url: '.',
+  display: 'standalone',
+  background_color: '#f1f0eb',
+  theme_color: '#378ADD',
+  orientation: 'any',
+  icons: [
+    {
+      src: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='80' fill='%23378ADD'/><text y='360' x='256' font-size='300' text-anchor='middle' fill='white' font-family='Arial' font-weight='bold'>T</text></svg>",
+      sizes: '512x512',
+      type: 'image/svg+xml',
+      purpose: 'any maskable'
+    }
+  ]
+};
+const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+const url = URL.createObjectURL(blob);
+document.getElementById('pwa-manifest').setAttribute('href', url);
+
+// Service Worker for offline support
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'transport-v1';
+    const ASSETS = ['/transport/', '/transport/index.html'];
+    self.addEventListener('install', e => {
+      e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS).catch(()=>{})));
+      self.skipWaiting();
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))));
+      self.clients.claim();
+    });
+    self.addEventListener('fetch', e => {
+      if (e.request.method !== 'GET') return;
+      e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+    });
+  `;
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl, {scope: '/transport/'}).catch(()=>{});
+}
+</script>
+<script>
+(function(){
+  // Inline manifest
+  var manifest = {
+    name: 'TransPort',
+    short_name: 'TransPort',
+    start_url: '/transport/',
+    display: 'standalone',
+    background_color: '#f1f0eb',
+    theme_color: '#378ADD',
+    icons: [{src:'https://kain747-eng.github.io/transport/icon.png',sizes:'192x192',type:'image/png'}]
+  };
+  var blob = new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
+
+  // Service Worker
+  if('serviceWorker' in navigator){
+    var sw = [
+      'var C="tp-v2";',
+      'self.addEventListener("install",function(e){self.skipWaiting();});',
+      'self.addEventListener("activate",function(e){e.waitUntil(clients.claim());});',
+      'self.addEventListener("fetch",function(e){',
+      '  if(e.request.method!=="GET")return;',
+      '  e.respondWith(fetch(e.request).catch(function(){return caches.match(e.request);}));',
+      '});'
+    ].join('\n');
+    var swBlob = new Blob([sw],{type:'application/javascript'});
+    navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(function(){});
+  }
+})();
+</script>
+</head><body>
   <button class="btn-print" onclick="window.print()">Drukuj / Zapisz PDF</button>
   <div class="header">
     <div><div class="date">Data wydruku: ${new Date().toLocaleDateString('pl-PL')}</div><h1>ZLECENIE TRANSPORTOWE</h1></div>
@@ -4618,6 +5090,136 @@ function exportExcelProwizja() {
 
   XLSX.writeFile(wb, 'prowizja-'+miesiac+'.xlsx');
   showToast('Plik Excel prowizji pobrany');
+}
+
+// ── KALENDARZ ──────────────────────────────────────────────
+let kalYear = new Date().getFullYear();
+let kalMonth = new Date().getMonth();
+
+function renderKalendarz() {
+  var today = new Date();
+  var todayStr = today.toISOString().slice(0,10);
+  var firstDay = new Date(kalYear, kalMonth, 1);
+  var lastDay = new Date(kalYear, kalMonth+1, 0);
+  var startDow = (firstDay.getDay()+6)%7; // Monday=0
+  var daysInMonth = lastDay.getDate();
+  var miesNazwy = ['Styczen','Luty','Marzec','Kwiecien','Maj','Czerwiec','Lipiec','Sierpien','Wrzesien','Pazdziernik','Listopad','Grudzien'];
+
+  // Events for this month + nearby
+  function eventsFor(dateStr) {
+    var evs = kalEvents.filter(function(e){ return e.data === dateStr; });
+    // Also show orders
+    orders.forEach(function(o){
+      if(o.data_zaladunek === dateStr) evs.push({tytul: (o.skad||'Zaladunek'), typ:'zaladunek', _order:true, id:o.id});
+      if(o.data_dostawa === dateStr) evs.push({tytul: (o.dokad||'Dostawa'), typ:'dostawa', _order:true, id:o.id});
+    });
+    podw.forEach(function(p){
+      if(p.skad_data === dateStr) evs.push({tytul: (p.skad||'Zaladunek zew.'), typ:'zaladunek', _order:true, id:p.id});
+      if(p.dokad_data === dateStr) evs.push({tytul: (p.dokad||'Dostawa zew.'), typ:'dostawa', _order:true, id:p.id});
+    });
+    return evs;
+  }
+
+  var html = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">';
+  html += '<button class="btn" onclick="kalPrev()">&#8249; Wstecz</button>';
+  html += '<h3 style="font-size:16px;font-weight:600">'+miesNazwy[kalMonth]+' '+kalYear+'</h3>';
+  html += '<button class="btn" onclick="kalNext()">Dalej &#8250;</button>';
+  html += '</div>';
+
+  html += '<div class="kal-header">';
+  ['Pon','Wt','Sr','Czw','Pt','Sob','Nd'].forEach(function(d){
+    html += '<div class="kal-day-name">'+d+'</div>';
+  });
+  html += '</div>';
+
+  html += '<div class="kal-grid">';
+
+  // Empty cells before first day
+  for(var i=0;i<startDow;i++){
+    var prevDate = new Date(kalYear, kalMonth, -startDow+i+1);
+    html += '<div class="kal-day other-month"><div class="kal-day-num">'+prevDate.getDate()+'</div></div>';
+  }
+
+  // Days of month
+  for(var d=1;d<=daysInMonth;d++){
+    var dateStr = kalYear+'-'+String(kalMonth+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var isToday = dateStr === todayStr;
+    var evs = eventsFor(dateStr);
+    html += '<div class="kal-day'+(isToday?' today':'')+'" onclick="openKalModal(''+dateStr+'', null)">';
+    html += '<div class="kal-day-num">'+d+'</div>';
+    evs.slice(0,3).forEach(function(ev){
+      var typ = ev.typ||'notatka';
+      html += '<div class="kal-event typ-'+typ+'" onclick="event.stopPropagation();'+(ev._order?'':'openKalModal(''+dateStr+'',''+ev.id+'')')+'" title="'+ev.tytul+'">'+ev.tytul+'</div>';
+    });
+    if(evs.length>3) html += '<div style="font-size:9px;color:var(--text3)">+'+( evs.length-3)+' wiecej</div>';
+    html += '</div>';
+  }
+
+  // Empty cells after last day
+  var endDow = (lastDay.getDay()+6)%7;
+  for(var i=endDow+1;i<7;i++){
+    html += '<div class="kal-day other-month"><div class="kal-day-num">'+(i-endDow)+'</div></div>';
+  }
+
+  html += '</div>';
+  return html;
+}
+
+function kalPrev() {
+  kalMonth--;
+  if(kalMonth<0){kalMonth=11;kalYear--;}
+  renderView('kalendarz');
+}
+function kalNext() {
+  kalMonth++;
+  if(kalMonth>11){kalMonth=0;kalYear++;}
+  renderView('kalendarz');
+}
+
+function openKalModal(dateStr, eventId) {
+  var ev = eventId ? kalEvents.find(function(e){return e.id===eventId;}) : null;
+  editingId = ev ? ev.id : null;
+  document.getElementById('modal-title').textContent = ev ? 'Edytuj wydarzenie' : 'Nowe wydarzenie';
+  document.getElementById('modal-body').innerHTML =
+    '<div class="field"><label>Data</label><input type="date" id="kal-data" value="'+(ev?ev.data:dateStr||new Date().toISOString().slice(0,10))+'"></div>' +
+    '<div class="field"><label>Tytuł</label><input id="kal-tytul" value="'+(ev?ev.tytul||'':'')+'" placeholder="np. Spotkanie z klientem"></div>' +
+    '<div class="field"><label>Typ</label><select id="kal-typ">' +
+      ['notatka','zaladunek','dostawa','serwis'].map(function(t){ return '<option value="'+t+'"'+(ev&&ev.typ===t?' selected':'')+'>'+t.charAt(0).toUpperCase()+t.slice(1)+'</option>'; }).join('') +
+    '</select></div>' +
+    '<div class="field full"><label>Notatka</label><textarea id="kal-notatka" rows="4">'+(ev?ev.notatka||'':'')+'</textarea></div>';
+  document.getElementById('modal-foot').innerHTML =
+    (ev ? '<button class="btn btn-danger" onclick="deleteKalEvent()">Usuń</button>' : '') +
+    '<button class="btn" onclick="closeModal()">Anuluj</button>' +
+    '<button class="btn btn-primary" onclick="saveKalEvent()">Zapisz</button>';
+  document.getElementById('modal-overlay').style.display='flex';
+}
+
+async function saveKalEvent() {
+  var payload = {
+    data: document.getElementById('kal-data').value,
+    tytul: document.getElementById('kal-tytul').value.trim(),
+    typ: document.getElementById('kal-typ').value,
+    notatka: document.getElementById('kal-notatka').value.trim()
+  };
+  if(!payload.tytul||!payload.data){ showToast('Wypełnij datę i tytuł', true); return; }
+  if(editingId) {
+    await sb.from('kalendarz').update(payload).eq('id', editingId);
+  } else {
+    await sb.from('kalendarz').insert(payload);
+  }
+  closeModal();
+  showToast(editingId ? 'Wydarzenie zaktualizowane' : 'Wydarzenie dodane');
+  await loadAll();
+  renderView('kalendarz');
+}
+
+async function deleteKalEvent() {
+  if(!confirm('Usunąć to wydarzenie?')) return;
+  await sb.from('kalendarz').delete().eq('id', editingId);
+  closeModal();
+  showToast('Wydarzenie usunięte');
+  await loadAll();
+  renderView('kalendarz');
 }
 </script>
 </body>
