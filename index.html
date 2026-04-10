@@ -484,7 +484,8 @@ function openOrderModal(id) {
     '<div class="field" style="align-self:end"><button type="button" class="btn" style="width:100%" id="btn-calc-km">Oblicz km (Google)</button><div id="f-km-st" style="font-size:11px;margin-top:3px;color:var(--text2)"></div></div>' +
     '<div class="field"><label>Prowizja (%)</label><input type="number" id="f-prow" value="'+(o.prowizja_pct||4)+'" step="0.5" min="0" max="100"></div>' +
     '<div class="field"><label>Nr ref. klienta</label><input id="f-ref" value="'+(o.ref||'')+'" placeholder="opcjonalnie"></div>' +
-    '<div class="field full"><label>Uwagi</label><textarea id="f-uwagi">'+(o.uwagi||'')+'</textarea></div>';
+    '<div class="field full"><label>Uwagi</label><textarea id="f-uwagi">'+(o.uwagi||'')+'</textarea></div>' +
+    '<div class="field full"><label>Plik zlecenia (PDF, JPG, PNG)</label><input type="file" id="f-plik" accept=".pdf,.jpg,.jpeg,.png" style="border:none;background:transparent;padding:6px 0">'+(o.plik_url?'<div style="margin-top:6px"><a href="'+o.plik_url+'" target="_blank" style="font-size:12px;color:var(--blue-text)">📎 Aktualny plik — kliknij aby otworzyć</a></div>':'')+'</div>';
   document.getElementById('modal-foot').innerHTML =
     (id ? '<button class="btn btn-danger" onclick="deleteOrder(editingId)">Usuń</button>' : '') +
     '<button class="btn" onclick="closeModal()">Anuluj</button>' +
@@ -528,6 +529,23 @@ async function saveOrder() {
   if (ns && payload.kierowca2) { var d2=drivers.find(function(d){return d.nazwa===payload.kierowca2}); if(d2) await sb.from('kierowcy').update({status:ns}).eq('id',d2.id); }
   var nc = payload.status==='W trasie'?'W trasie':payload.status==='Dostarczone'||payload.status==='Anulowane'?'Dostępne':null;
   if (nc && payload.auto) { var carRej=payload.auto.split(' — ')[0]; var car=cars.find(function(c){return c.rejestracja===carRej}); if(car) await sb.from('flota').update({status:nc}).eq('id',car.id); }
+  // Upload file if selected
+  var plikInput = document.getElementById('f-plik');
+  if (plikInput && plikInput.files && plikInput.files[0]) {
+    var plik = plikInput.files[0];
+    var ext = plik.name.split('.').pop();
+    var savedId = editingId || (await sb.from('zlecenia').select('id').order('created_at',{ascending:false}).limit(1).single()).data?.id;
+    if (savedId) {
+      var path = 'zlecenia/' + savedId + '.' + ext;
+      var up = await sb.storage.from('zlecenia-pliki').upload(path, plik, {upsert:true});
+      if (!up.error) {
+        var urlData = sb.storage.from('zlecenia-pliki').getPublicUrl(path);
+        await sb.from('zlecenia').update({plik_url: urlData.data.publicUrl}).eq('id', savedId);
+      } else {
+        showToast('Blad uploadu: ' + up.error.message, true);
+      }
+    }
+  }
   closeModal(); showToast(editingId?'Zaktualizowano ✓':'Dodano ✓');
   await loadAll(); renderView(currentView);
 }
@@ -556,6 +574,7 @@ function showOrderDetail(id) {
   html += '<div class="detail-row"><div class="detail-label">Fracht</div><div class="detail-val">'+(+o.fracht||0).toLocaleString('pl-PL')+' '+(o.waluta||'PLN')+'</div></div>';
   html += '<div class="detail-row"><div class="detail-label">Kilometry</div><div class="detail-val">'+(o.kilometry||'-')+'</div></div>';
   if(o.uwagi) html += '<div class="detail-row full"><div class="detail-label">Uwagi</div><div class="detail-val" style="font-weight:400">'+o.uwagi+'</div></div>';
+  if(o.plik_url) html += '<div class="detail-row full" style="background:var(--green-bg)"><div class="detail-label" style="color:var(--green-text)">Plik zlecenia</div><div class="detail-val"><a href="'+o.plik_url+'" target="_blank" style="color:var(--green-text)">📎 Otwórz / pobierz plik</a></div></div>';
   html += '</div>';
   document.getElementById('modal-title').textContent = 'Zlecenie ' + (o.numer||'');
   document.getElementById('modal-body').innerHTML = html;
