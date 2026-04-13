@@ -425,9 +425,9 @@ function orderRow(o, showDostawa) {
   var platDni = parseInt(o.platnosc_dni)||0;
   var rowBg = '';
   var platBadge = '';
-  if (!o.zaplacone && o.data_dostawa && platDni > 0) {
-    var deadline = new Date(o.data_dostawa);
-    deadline.setDate(deadline.getDate() + platDni);
+  if (!o.zaplacone && o.data_wysylki && platDni > 0) {
+    var deadline = new Date(o.data_wysylki);
+    deadline.setDate(deadline.getDate() + platDni + 5);
     var now = new Date(); now.setHours(0,0,0,0);
     var diff = Math.round((deadline - now) / 86400000);
     var deadlineStr = deadline.toLocaleDateString('pl-PL');
