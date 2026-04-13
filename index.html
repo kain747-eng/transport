@@ -249,6 +249,8 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const CLAUDE_PROXY = 'https://lpvxzokrntzvpqjkudyf.supabase.co/functions/v1/claude-proxy';
 const APP_PASSWORD = 'transport2024';
 const GOOGLE_KEY = 'AIzaSyDZub9VnimP8WFzvBBzcyoDL-iCrynzG4I';
+const FAKTUROWO_API = 'f1f6acd49249923c0a5bbb1c8ccc73b4';
+const FAKTUROWO_ID = '545175';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:false,autoRefreshToken:false}});
 const STATUS_MAP = {'Nowe':'b-gray','W trasie':'b-blue','Oczekuje':'b-amber','Dostarczone':'b-green','Anulowane':'b-red'};
@@ -581,12 +583,15 @@ function showOrderDetail(id) {
   document.getElementById('modal-foot').innerHTML =
     '<button class="btn" onclick="closeModal()">Zamknij</button>' +
     '<button class="btn" id="exp-pdf-btn">Eksport PDF</button>' +
+    '<button class="btn" id="faktura-btn" style="color:var(--green-text);border-color:var(--green-text)">Wystaw fakture</button>' +
     '<button class="btn btn-primary" id="edit-order-btn">Edytuj</button>';
   setTimeout(function() {
     var copyRow = document.getElementById('copy-numer-row');
     if(copyRow) copyRow.onclick = function() { navigator.clipboard.writeText(o.numer||'').then(function(){showToast('Skopiowano ✓')}); };
     var expBtn = document.getElementById('exp-pdf-btn');
     if(expBtn) expBtn.onclick = function() { exportOrderPDF(id); };
+    var faktBtn = document.getElementById('faktura-btn');
+    if(faktBtn) faktBtn.onclick = function() { wystawFakture(id); };
     var editBtn = document.getElementById('edit-order-btn');
     if(editBtn) editBtn.onclick = function() { closeModal(); openOrderModal(id); };
   }, 0);
@@ -1529,6 +1534,55 @@ async function autoCalcKm(skadId, dokadId, kmId, statusId, dojazdId) {
   } else {
     if (stEl) { stEl.textContent = 'Nie udalo sie obliczyc'; stEl.style.color = 'var(--red-text)'; }
     showToast('Blad obliczania km', true);
+  }
+}
+
+async function wystawFakture(orderId) {
+  var o = orders.find(function(x){return x.id===orderId});
+  if (!o) return;
+  if (!o.klient) { showToast('Brak danych klienta w zleceniu', true); return; }
+
+  var today = new Date().toISOString().slice(0,10);
+  var payDate = new Date();
+  payDate.setDate(payDate.getDate() + 30);
+  var payDateStr = payDate.toISOString().slice(0,10);
+
+  var params = {
+    api_id: FAKTUROWO_API,
+    api_status: '1',
+    dokument_miejsce: 'Turek',
+    nabywca_nazwa: o.klient,
+    produkt_nazwa: 'Usluga transportowa ' + (o.skad||'') + ' - ' + (o.dokad||'') + (o.numer?' nr '+o.numer:''),
+    produkt_ilosc: '1',
+    produkt_jm: '1',
+    produkt_stawka_vat: '23',
+    produkt_wartosc_netto: (+o.fracht||0).toFixed(2),
+    waluta: o.waluta||'PLN',
+    platnosc: 'przelew',
+    platnosc_termin: payDateStr,
+    opis: 'Zlecenie nr ' + (o.numer||o.id.slice(0,8)) + ' | ' + (o.data_zaladunek||'') + ' - ' + (o.data_dostawa||''),
+    konto_id: FAKTUROWO_ID
+  };
+
+  showToast('Wystawiam fakture...');
+
+  try {
+    var resp = await fetch(CLAUDE_PROXY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
+      body: JSON.stringify({_fakturowo_proxy: params})
+    });
+    var data = await resp.json();
+    if (data.status === 'ok' || data.id || data.dokument_id) {
+      showToast('Faktura wystawiona! ID: ' + (data.id||data.dokument_id||'OK'));
+      // Save invoice ID to order
+      await sb.from('zlecenia').update({uwagi: (o.uwagi||'') + (o.uwagi?'\n':'') + 'Faktura: ' + (data.id||data.dokument_id||'wystawiona')}).eq('id', orderId);
+      await loadAll();
+    } else {
+      showToast('Odpowiedz: ' + JSON.stringify(data).slice(0,100), true);
+    }
+  } catch(e) {
+    showToast('Blad: ' + e.message, true);
   }
 }
 </script>
