@@ -421,7 +421,25 @@ function renderDashboard() {
 
 // ── ZLECENIA ──────────────────────────────────────────────
 function orderRow(o, showDostawa) {
-  var tr = '<tr data-oid="'+o.id+'" class="ord-row" style="cursor:pointer">';
+  // Oblicz dni do/po terminie płatności
+  var platDni = parseInt(o.platnosc_dni)||0;
+  var rowBg = '';
+  var platBadge = '';
+  if (!o.zaplacone && o.data_dostawa && platDni > 0) {
+    var deadline = new Date(o.data_dostawa);
+    deadline.setDate(deadline.getDate() + platDni);
+    var now = new Date(); now.setHours(0,0,0,0);
+    var diff = Math.round((deadline - now) / 86400000);
+    if (diff < 0) {
+      rowBg = 'background:var(--red-bg);';
+      platBadge = '<span class="badge b-red" title="Termin: '+deadline.toLocaleDateString(\'pl-PL\')+'">'+diff+' dni</span>';
+    } else if (diff <= 7) {
+      platBadge = '<span class="badge b-amber" title="Termin: '+deadline.toLocaleDateString(\'pl-PL\')+'">+'+diff+' dni</span>';
+    } else {
+      platBadge = '<span style="font-size:11px;color:var(--text3)" title="Termin: '+deadline.toLocaleDateString(\'pl-PL\')+'">+'+diff+' dni</span>';
+    }
+  }
+  var tr = '<tr data-oid="'+o.id+'" class="ord-row" style="cursor:pointer;'+rowBg+'">';
   tr += '<td style="font-family:monospace;font-size:11px;color:var(--text3)">'+(o.numer||o.id.slice(0,8))+'</td>';
   tr += '<td>'+(o.skad||'')+' → '+(o.dokad||'')+'</td>';
   tr += '<td>'+(o.klient||'-')+'</td>';
@@ -431,7 +449,7 @@ function orderRow(o, showDostawa) {
   tr += '<td>'+(+o.fracht||0).toLocaleString('pl-PL')+' '+(o.waluta||'PLN')+'</td>';
   tr += '<td><span class="badge '+(STATUS_MAP[o.status]||'b-gray')+'">'+(o.status||'-')+'</span></td>';
   tr += '<td style="font-size:11px;color:var(--text2)">'+(o.data_wysylki||'-')+'</td>';
-  tr += '<td><span class="badge '+(o.zaplacone?'b-green':'b-gray')+'">'+(o.zaplacone?'TAK':'NIE')+'</span></td>';
+  tr += '<td><span class="badge '+(o.zaplacone?'b-green':'b-gray')+'">'+(o.zaplacone?'TAK':'NIE')+'</span>'+(platDni?' <span style="font-size:10px;color:var(--text3)">'+platDni+'d</span>':'')+(platBadge?' '+platBadge:'')+'</td>';
   tr += '</tr>';
   return tr;
 }
@@ -486,6 +504,7 @@ function openOrderModal(id) {
     '<div class="field" style="align-self:end"><button type="button" class="btn" style="width:100%" id="btn-calc-km">Oblicz km (Google)</button><div id="f-km-st" style="font-size:11px;margin-top:3px;color:var(--text2)"></div></div>' +
     '<div class="field"><label>Prowizja (%)</label><input type="number" id="f-prow" value="'+(o.prowizja_pct||4)+'" step="0.5" min="0" max="100"></div>' +
     '<div class="field"><label>Nr ref. klienta</label><input id="f-ref" value="'+(o.ref||'')+'" placeholder="opcjonalnie"></div>' +
+    '<div class="field"><label>Termin płatności (dni)</label><input type="number" id="f-platdni" value="'+(o.platnosc_dni||30)+'" min="0" max="365"></div>' +
     '<div class="field"><label>Data wysylki faktury</label><input type="date" id="f-wysylka" value="'+(o.data_wysylki||'')+'"></div>' +
     '<div class="field" style="display:flex;align-items:center;gap:10px;padding-top:20px"><label style="margin:0"><input type="checkbox" id="f-zaplacone"'+(o.zaplacone?' checked':'')+' style="width:18px;height:18px;margin-right:8px">Zaplacone</label></div>' +
     '<div class="field full"><label>Uwagi</label><textarea id="f-uwagi">'+(o.uwagi||'')+'</textarea></div>' +
@@ -520,6 +539,7 @@ async function saveOrder() {
     kilometry: parseFloat(document.getElementById('f-km').value)||0,
     prowizja_pct: parseFloat(document.getElementById('f-prow').value)||4,
     ref: document.getElementById('f-ref').value.trim(),
+    platnosc_dni: parseInt(document.getElementById('f-platdni')?.value)||30,
     data_wysylki: document.getElementById('f-wysylka')?.value||null,
     zaplacone: document.getElementById('f-zaplacone')?.checked||false,
     dojazd: document.getElementById('f-dojazd')?.value.trim()||'',
@@ -1224,7 +1244,7 @@ function fileToBase64(file) {
 async function callClaudeWithPDF(base64, type) {
   var prompt = type==='podw'
     ? 'Przeanalizuj zlecenie transportowe. Zwróć TYLKO JSON: {"numer":"","zleceniobiorca_nazwa":"","zleceniobiorca_adres":"","zleceniobiorca_nip":"","kierowca":"","kierowca_tel":"","auto":"","skad":"","skad_adres":"","skad_data":"YYYY-MM-DD","skad_godz":"","dokad":"","dokad_adres":"","dokad_data":"YYYY-MM-DD","dokad_godz":"","fracht":0,"waluta":"EUR","platnosc_dni":30,"referencje":"","uwagi":""}'
-    : 'Przeanalizuj zlecenie transportowe. Zwróć TYLKO JSON: {"numer":"","skad":"","dokad":"","klient":"","kierowca":"","auto":"","data_zaladunek":"YYYY-MM-DD","data_dostawa":"YYYY-MM-DD","fracht":0,"waluta":"EUR","uwagi":""}';
+    : 'Przeanalizuj zlecenie transportowe. Zwróć TYLKO JSON: {"numer":"","skad":"","dokad":"","klient":"","kierowca":"","auto":"","data_zaladunek":"YYYY-MM-DD","data_dostawa":"YYYY-MM-DD","fracht":0,"waluta":"EUR","platnosc_dni":30,"uwagi":""}';;
   var resp = await fetch(CLAUDE_PROXY, {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
@@ -1255,6 +1275,7 @@ async function czytajPDFOrder() {
     sv('f-zal',d.data_zaladunek); sv('f-dos',d.data_dostawa); sv('f-uwagi',d.uwagi);
     if(d.fracht) sv('f-fracht',d.fracht);
     if(d.waluta){var ws=document.getElementById('f-waluta');if(ws)ws.value=d.waluta;}
+    if(d.platnosc_dni) sv('f-platdni',d.platnosc_dni);
     status.textContent='Wypełniono! Sprawdź i popraw.'; status.style.color='var(--green-text)';
   } catch(e) { status.textContent='Błąd: '+e.message; status.style.color='var(--red-text)'; }
   btn.textContent='Czytaj PDF'; btn.disabled=false;
