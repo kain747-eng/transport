@@ -400,7 +400,7 @@ function renderDashboard() {
   html += '</div>';
   html += '<div class="card"><div class="card-title">Ostatnie zlecenia</div>';
   if (last.length) {
-    html += '<div style="overflow-x:auto"><table><thead><tr><th>Nr</th><th>Trasa</th><th>Klient</th><th>Kierowca</th><th>Załadunek</th><th>Fracht</th><th>Status</th></tr></thead><tbody>';
+    html += '<div style="overflow-x:auto"><table><thead><tr><th>Nr</th><th>Trasa</th><th>Klient</th><th>Kierowca</th><th>Załadunek</th><th>Fracht</th><th>Status</th><th>Wysyłka dok.</th><th>Płatność</th></tr></thead><tbody>';
     last.forEach(function(o) { html += orderRow(o, false); });
     html += '</tbody></table></div>';
   } else html += '<div class="empty">Brak zleceń</div>';
@@ -438,7 +438,7 @@ function orderRow(o, showDostawa) {
 
 function renderZlecenia() {
   var html = '<div class="filter-row"><input placeholder="Szukaj..." id="s-q" oninput="filterOrders()" style="width:200px"><select id="s-st" onchange="filterOrders()"><option value="">Wszystkie statusy</option><option>Nowe</option><option>W trasie</option><option>Oczekuje</option><option>Dostarczone</option><option>Anulowane</option></select></div>';
-  html += '<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Nr</th><th>Trasa</th><th>Klient</th><th>Kierowca</th><th>Załadunek</th><th>Dostawa</th><th>Fracht</th><th>Status</th></tr></thead><tbody id="orders-tbody">';
+  html += '<div class="card" style="padding:0;overflow:hidden"><div style="overflow-x:auto"><table><thead><tr><th>Nr</th><th>Trasa</th><th>Klient</th><th>Kierowca</th><th>Załadunek</th><th>Dostawa</th><th>Fracht</th><th>Status</th><th>Wysyłka dok.</th><th>Płatność</th></tr></thead><tbody id="orders-tbody">';
   orders.forEach(function(o) { html += orderRow(o, true); });
   html += '</tbody></table></div>';
   if (!orders.length) html += '<div class="empty">Brak zleceń. Dodaj pierwsze zlecenie.</div>';
