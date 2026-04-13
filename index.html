@@ -249,8 +249,6 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const CLAUDE_PROXY = 'https://lpvxzokrntzvpqjkudyf.supabase.co/functions/v1/claude-proxy';
 const APP_PASSWORD = 'transport2024';
 const GOOGLE_KEY = 'AIzaSyDZub9VnimP8WFzvBBzcyoDL-iCrynzG4I';
-const FAKTUROWO_API = 'f1f6acd49249923c0a5bbb1c8ccc73b4';
-const FAKTUROWO_ID = '545175';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_KEY, {auth:{persistSession:false,autoRefreshToken:false}});
 const STATUS_MAP = {'Nowe':'b-gray','W trasie':'b-blue','Oczekuje':'b-amber','Dostarczone':'b-green','Anulowane':'b-red'};
@@ -432,6 +430,8 @@ function orderRow(o, showDostawa) {
   if(showDostawa) tr += '<td>'+(o.data_dostawa||'-')+'</td>';
   tr += '<td>'+(+o.fracht||0).toLocaleString('pl-PL')+' '+(o.waluta||'PLN')+'</td>';
   tr += '<td><span class="badge '+(STATUS_MAP[o.status]||'b-gray')+'">'+(o.status||'-')+'</span></td>';
+  tr += '<td style="font-size:11px;color:var(--text2)">'+(o.data_wysylki||'-')+'</td>';
+  tr += '<td><span class="badge '+(o.zaplacone?'b-green':'b-gray')+'">'+(o.zaplacone?'TAK':'NIE')+'</span></td>';
   tr += '</tr>';
   return tr;
 }
@@ -486,6 +486,8 @@ function openOrderModal(id) {
     '<div class="field" style="align-self:end"><button type="button" class="btn" style="width:100%" id="btn-calc-km">Oblicz km (Google)</button><div id="f-km-st" style="font-size:11px;margin-top:3px;color:var(--text2)"></div></div>' +
     '<div class="field"><label>Prowizja (%)</label><input type="number" id="f-prow" value="'+(o.prowizja_pct||4)+'" step="0.5" min="0" max="100"></div>' +
     '<div class="field"><label>Nr ref. klienta</label><input id="f-ref" value="'+(o.ref||'')+'" placeholder="opcjonalnie"></div>' +
+    '<div class="field"><label>Data wysylki faktury</label><input type="date" id="f-wysylka" value="'+(o.data_wysylki||'')+'"></div>' +
+    '<div class="field" style="display:flex;align-items:center;gap:10px;padding-top:20px"><label style="margin:0"><input type="checkbox" id="f-zaplacone"'+(o.zaplacone?' checked':'')+' style="width:18px;height:18px;margin-right:8px">Zaplacone</label></div>' +
     '<div class="field full"><label>Uwagi</label><textarea id="f-uwagi">'+(o.uwagi||'')+'</textarea></div>' +
     '<div class="field full"><label>Plik zlecenia (PDF, JPG, PNG)</label><input type="file" id="f-plik" accept=".pdf,.jpg,.jpeg,.png" style="border:none;background:transparent;padding:6px 0">'+(o.plik_url?'<div style="margin-top:6px"><a href="'+o.plik_url+'" target="_blank" style="font-size:12px;color:var(--blue-text)">📎 Aktualny plik — kliknij aby otworzyć</a></div>':'')+'</div>';
   document.getElementById('modal-foot').innerHTML =
@@ -518,6 +520,8 @@ async function saveOrder() {
     kilometry: parseFloat(document.getElementById('f-km').value)||0,
     prowizja_pct: parseFloat(document.getElementById('f-prow').value)||4,
     ref: document.getElementById('f-ref').value.trim(),
+    data_wysylki: document.getElementById('f-wysylka')?.value||null,
+    zaplacone: document.getElementById('f-zaplacone')?.checked||false,
     dojazd: document.getElementById('f-dojazd')?.value.trim()||'',
     uwagi: document.getElementById('f-uwagi').value.trim()
   };
@@ -583,15 +587,12 @@ function showOrderDetail(id) {
   document.getElementById('modal-foot').innerHTML =
     '<button class="btn" onclick="closeModal()">Zamknij</button>' +
     '<button class="btn" id="exp-pdf-btn">Eksport PDF</button>' +
-    '<button class="btn" id="faktura-btn" style="color:var(--green-text);border-color:var(--green-text)">Wystaw fakture</button>' +
     '<button class="btn btn-primary" id="edit-order-btn">Edytuj</button>';
   setTimeout(function() {
     var copyRow = document.getElementById('copy-numer-row');
     if(copyRow) copyRow.onclick = function() { navigator.clipboard.writeText(o.numer||'').then(function(){showToast('Skopiowano ✓')}); };
     var expBtn = document.getElementById('exp-pdf-btn');
     if(expBtn) expBtn.onclick = function() { exportOrderPDF(id); };
-    var faktBtn = document.getElementById('faktura-btn');
-    if(faktBtn) faktBtn.onclick = function() { wystawFakture(id); };
     var editBtn = document.getElementById('edit-order-btn');
     if(editBtn) editBtn.onclick = function() { closeModal(); openOrderModal(id); };
   }, 0);
@@ -1537,59 +1538,6 @@ async function autoCalcKm(skadId, dokadId, kmId, statusId, dojazdId) {
   }
 }
 
-async function wystawFakture(orderId) {
-  var o = orders.find(function(x){return x.id===orderId});
-  if (!o) return;
-  if (!o.klient) { showToast('Brak danych klienta w zleceniu', true); return; }
-
-  var today = new Date().toISOString().slice(0,10);
-  var payDate = new Date();
-  payDate.setDate(payDate.getDate() + 30);
-  var payDateStr = payDate.toISOString().slice(0,10);
-
-  var params = {
-    api_id: FAKTUROWO_API,
-    api_status: '1',
-    dokument_miejsce: 'Turek',
-    nabywca_nazwa: o.klient,
-    produkt_nazwa: 'Usluga transportowa ' + (o.skad||'') + ' - ' + (o.dokad||'') + (o.numer?' nr '+o.numer:''),
-    produkt_ilosc: '1',
-    produkt_jm: '1',
-    produkt_stawka_vat: '23',
-    produkt_wartosc_netto: (+o.fracht||0).toFixed(2),
-    waluta: o.waluta||'PLN',
-    platnosc: 'przelew',
-    platnosc_termin: payDateStr,
-    opis: 'Zlecenie nr ' + (o.numer||o.id.slice(0,8)) + ' | ' + (o.data_zaladunek||'') + ' - ' + (o.data_dostawa||''),
-    konto_id: FAKTUROWO_ID
-  };
-
-  showToast('Wystawiam fakture...');
-
-  try {
-    var resp = await fetch(CLAUDE_PROXY, {
-      method: 'POST',
-      headers: {'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
-      body: JSON.stringify({_fakturowo_proxy: params})
-    });
-    var data = await resp.json();
-    // Fakturowo returns raw text: "1\nID\n\n" where 1=success
-    var raw = data.raw || '';
-    var parts = raw.trim().split('\n');
-    if (parts[0] === '1' || data.status === 'ok' || data.id) {
-      var faktId = parts[1] || data.id || '';
-      showToast('Faktura wystawiona! ID: ' + faktId);
-      var note = 'Faktura fakturowo.pl ID: ' + faktId + ' (' + new Date().toLocaleDateString('pl-PL') + ')';
-      await sb.from('zlecenia').update({uwagi: (o.uwagi ? o.uwagi + '\n' : '') + note}).eq('id', orderId);
-      await loadAll();
-      closeModal();
-    } else {
-      showToast('Blad wystawiania faktury: ' + (raw||JSON.stringify(data)).slice(0,100), true);
-    }
-  } catch(e) {
-    showToast('Blad: ' + e.message, true);
-  }
-}
 </script>
 </body>
 </html>
