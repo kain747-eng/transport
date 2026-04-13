@@ -430,13 +430,14 @@ function orderRow(o, showDostawa) {
     deadline.setDate(deadline.getDate() + platDni);
     var now = new Date(); now.setHours(0,0,0,0);
     var diff = Math.round((deadline - now) / 86400000);
+    var deadlineStr = deadline.toLocaleDateString('pl-PL');
     if (diff < 0) {
       rowBg = 'background:var(--red-bg);';
-      platBadge = '<span class="badge b-red" title="Termin: '+deadline.toLocaleDateString(\'pl-PL\')+'">'+diff+' dni</span>';
+      platBadge = '<span class="badge b-red" title="Termin: '+deadlineStr+'">'+diff+' dni</span>';
     } else if (diff <= 7) {
-      platBadge = '<span class="badge b-amber" title="Termin: '+deadline.toLocaleDateString(\'pl-PL\')+'">+'+diff+' dni</span>';
+      platBadge = '<span class="badge b-amber" title="Termin: '+deadlineStr+'">+'+diff+' dni</span>';
     } else {
-      platBadge = '<span style="font-size:11px;color:var(--text3)" title="Termin: '+deadline.toLocaleDateString(\'pl-PL\')+'">+'+diff+' dni</span>';
+      platBadge = '<span style="font-size:11px;color:var(--text3)" title="Termin: '+deadlineStr+'">+'+diff+' dni</span>';
     }
   }
   var tr = '<tr data-oid="'+o.id+'" class="ord-row" style="cursor:pointer;'+rowBg+'">';
