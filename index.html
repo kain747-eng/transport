@@ -1573,13 +1573,18 @@ async function wystawFakture(orderId) {
       body: JSON.stringify({_fakturowo_proxy: params})
     });
     var data = await resp.json();
-    if (data.status === 'ok' || data.id || data.dokument_id) {
-      showToast('Faktura wystawiona! ID: ' + (data.id||data.dokument_id||'OK'));
-      // Save invoice ID to order
-      await sb.from('zlecenia').update({uwagi: (o.uwagi||'') + (o.uwagi?'\n':'') + 'Faktura: ' + (data.id||data.dokument_id||'wystawiona')}).eq('id', orderId);
+    // Fakturowo returns raw text: "1\nID\n\n" where 1=success
+    var raw = data.raw || '';
+    var parts = raw.trim().split('\n');
+    if (parts[0] === '1' || data.status === 'ok' || data.id) {
+      var faktId = parts[1] || data.id || '';
+      showToast('Faktura wystawiona! ID: ' + faktId);
+      var note = 'Faktura fakturowo.pl ID: ' + faktId + ' (' + new Date().toLocaleDateString('pl-PL') + ')';
+      await sb.from('zlecenia').update({uwagi: (o.uwagi ? o.uwagi + '\n' : '') + note}).eq('id', orderId);
       await loadAll();
+      closeModal();
     } else {
-      showToast('Odpowiedz: ' + JSON.stringify(data).slice(0,100), true);
+      showToast('Blad wystawiania faktury: ' + (raw||JSON.stringify(data)).slice(0,100), true);
     }
   } catch(e) {
     showToast('Blad: ' + e.message, true);
