@@ -493,6 +493,7 @@ function openOrderModal(id) {
     '<div class="field"><label>Dokąd</label><input id="f-dokad" value="'+(o.dokad||'')+'" placeholder="Miasto, adres rozładunku"></div>' +
     '<div class="field"><label>Nr zlecenia</label><input id="f-numer" value="'+(o.numer||'')+'" placeholder="auto"></div>' +
     '<div class="field"><label>Klient</label><input id="f-klient" value="'+(o.klient||'')+'" placeholder="Nazwa firmy"></div>' +
+    '<div class="field"><label>NIP klienta (auto-uzupelnienie)</label><div style="display:flex;gap:6px"><input id="f-nip-klient" placeholder="np. 5213966752" style="flex:1"><button type="button" class="btn" id="btn-gus-klient">Szukaj GUS</button></div></div>' +
     '<div class="field"><label>Status</label><select id="f-status">'+statusOpts+'</select></div>' +
     '<div class="field"><label>Kierowca 1</label><select id="f-k1">'+driverOpts+'</select></div>' +
     '<div class="field"><label>Kierowca 2</label><select id="f-k2">'+driver2Opts+'</select></div>' +
@@ -518,6 +519,8 @@ function openOrderModal(id) {
   setTimeout(function(){
     var b=document.getElementById('btn-calc-km');
     if(b) b.onclick=function(){autoCalcKm('f-skad','f-dokad','f-km','f-km-st','f-dojazd');};
+    var gusBtn=document.getElementById('btn-gus-klient');
+    if(gusBtn) gusBtn.onclick=function(){var nip=document.getElementById('f-nip-klient').value; szukajPoNIP(nip,function(nazwa,adres,nip2){var el=document.getElementById('f-klient');if(el)el.value=nazwa;});};
   },0);
 }
 
@@ -877,7 +880,7 @@ function openPodwModal(id) {
     '<div class="field"><label>Status</label><select id="pw-status">'+statusOpts+'</select></div>' +
     '<div class="field full"><label>Zleceniobiorca (nazwa)</label><input id="pw-nazwa" value="'+(p.zleceniobiorca_nazwa||'')+'" placeholder="Firma Transport Sp. z o.o."></div>' +
     '<div class="field"><label>Adres zleceniobiorcy</label><input id="pw-adres" value="'+(p.zleceniobiorca_adres||'')+'"></div>' +
-    '<div class="field"><label>NIP zleceniobiorcy</label><input id="pw-nip" value="'+(p.zleceniobiorca_nip||'')+'"></div>' +
+    '<div class="field"><label>NIP zleceniobiorcy</label><div style="display:flex;gap:6px"><input id="pw-nip" value="'+(p.zleceniobiorca_nip||'')+'" style="flex:1"><button type="button" class="btn" id="btn-gus-podw">Szukaj GUS</button></div></div>' +
     '<div class="field"><label>Kierowca</label><input id="pw-kier" value="'+(p.kierowca||'')+'" placeholder="Jan Kowalski"></div>' +
     '<div class="field"><label>Tel. kierowcy</label><input id="pw-tel" value="'+(p.kierowca_tel||'')+'"></div>' +
     '<div class="field"><label>Auto/naczepy</label><input id="pw-auto" value="'+(p.auto||'')+'"></div>' +
@@ -895,7 +898,8 @@ function openPodwModal(id) {
     '<div class="field" style="align-self:end"><button type="button" class="btn" style="width:100%" id="btn-calc-pw-km">Oblicz km (Google)</button><div id="pw-km-st" style="font-size:11px;margin-top:3px;color:var(--text2)"></div></div>' +
     '<div class="field"><label>Prowizja (%)</label><input type="number" id="pw-prow" value="'+(p.prowizja_pct||4)+'" step="0.5"></div>' +
     '<div class="field"><label>Płatność (dni)</label><input type="number" id="pw-plat" value="'+(p.platnosc_dni||30)+'"></div>' +
-    '<div class="field"><label>Referencje</label><input id="pw-ref" value="'+(p.referencje||'')+'"></div>' +
+    '<div class="field"><label>Nr ref. zlecenia (LTE)</label><input id="pw-ref" value="'+(p.referencje||'')+'" placeholder="np. LTE/001/2026"></div>' +
+    '<div class="field"><label>Nr ref. zaladunek</label><input id="pw-ref-zal" value="'+(p.referencje_zaladunek||'')+'" placeholder="nr ref. od klienta"></div>' +
     '<div class="field full"><label>Uwagi</label><textarea id="pw-uwagi">'+(p.uwagi||'')+'</textarea></div>';
   document.getElementById('modal-foot').innerHTML =
     (id ? '<button class="btn btn-danger" id="pw-del-btn">Usuń</button>' : '') +
@@ -908,6 +912,14 @@ function openPodwModal(id) {
       if (db) db.onclick = function() { deletePodw(editingId); };
       var pb = document.getElementById('pw-pdf-btn2');
       if (pb) pb.onclick = function() { closeModal(); printPodwPDF(editingId); };
+      var gPodw = document.getElementById('btn-gus-podw');
+      if (gPodw) gPodw.onclick = function() {
+        var nip = document.getElementById('pw-nip').value;
+        szukajPoNIP(nip, function(nazwa, adres) {
+          var en = document.getElementById('pw-nazwa'); if(en) en.value = nazwa;
+          var ea = document.getElementById('pw-adres'); if(ea && adres) ea.value = adres;
+        });
+      };
     }, 0);
   }
   openModal();
@@ -937,6 +949,7 @@ async function savePodw() {
     prowizja_pct: parseFloat(document.getElementById('pw-prow').value)||4,
     platnosc_dni: parseInt(document.getElementById('pw-plat').value)||30,
     referencje: document.getElementById('pw-ref').value.trim(),
+    referencje_zaladunek: document.getElementById('pw-ref-zal')?.value.trim()||'',
     uwagi: document.getElementById('pw-uwagi').value.trim()
   };
   var err;
@@ -1560,6 +1573,32 @@ async function autoCalcKm(skadId, dokadId, kmId, statusId, dojazdId) {
   }
 }
 
+
+async function szukajPoNIP(nip, callbackFn) {
+  var cleanNip = nip.replace(/[^0-9]/g,'');
+  if (cleanNip.length !== 10) { showToast('NIP musi miec 10 cyfr', true); return; }
+  showToast('Szukam w GUS...');
+  try {
+    var url = 'https://wl-api.mf.gov.pl/api/search/nip/' + cleanNip + '?date=' + new Date().toISOString().slice(0,10);
+    var resp = await fetch(CLAUDE_PROXY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
+      body: JSON.stringify({_gmaps_proxy: url})
+    });
+    var data = await resp.json();
+    if (data.result && data.result.subject) {
+      var s = data.result.subject;
+      var nazwa = s.name || '';
+      var adres = [s.workingAddress || s.residenceAddress || ''].join('');
+      callbackFn(nazwa, adres, cleanNip);
+      showToast('Dane pobrane z GUS');
+    } else {
+      showToast('Nie znaleziono w GUS', true);
+    }
+  } catch(e) {
+    showToast('Blad GUS: ' + e.message, true);
+  }
+}
 </script>
 </body>
 </html>
