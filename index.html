@@ -497,6 +497,7 @@ function openOrderModal(id) {
     '<div class="field"><label>Dokąd</label><input id="f-dokad" value="'+(o.dokad||'')+'" placeholder="Miasto, adres rozładunku"></div>' +
     '<div class="field"><label>Nr zlecenia</label><input id="f-numer" value="'+(o.numer||'')+'" placeholder="auto"></div>' +
     '<div class="field"><label>Klient</label><input id="f-klient" value="'+(o.klient||'')+'" placeholder="Nazwa firmy"></div>' +
+    '<div class="field"><label>NIP klienta → auto-uzupelnienie</label><div style="display:flex;gap:6px"><input id="f-nip-klient" placeholder="np. 5213966752" style="flex:1"><button type="button" class="btn" id="btn-gus-klient">Szukaj GUS</button></div></div>' +
     '<div class="field"><label>Status</label><select id="f-status">'+statusOpts+'</select></div>' +
     '<div class="field"><label>Kierowca 1</label><select id="f-k1">'+driverOpts+'</select></div>' +
     '<div class="field"><label>Kierowca 2</label><select id="f-k2">'+driver2Opts+'</select></div>' +
@@ -522,6 +523,14 @@ function openOrderModal(id) {
   setTimeout(function(){
     var b=document.getElementById('btn-calc-km');
     if(b) b.onclick=function(){autoCalcKm('f-skad','f-dokad','f-km','f-km-st','f-dojazd');};
+    var gus=document.getElementById('btn-gus-klient');
+    if(gus) gus.onclick=function(){
+      var nip=document.getElementById('f-nip-klient').value;
+      szukajPoNIP(nip,function(nazwa,adres){
+        var el=document.getElementById('f-klient');
+        if(el) el.value=nazwa;
+      });
+    };
   },0);
 }
 
