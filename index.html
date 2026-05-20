@@ -890,7 +890,7 @@ function openPodwModal(id) {
     '<div class="field"><label>Status</label><select id="pw-status">'+statusOpts+'</select></div>' +
     '<div class="field full"><label>Zleceniobiorca (nazwa)</label><input id="pw-nazwa" value="'+(p.zleceniobiorca_nazwa||'')+'" placeholder="Firma Transport Sp. z o.o."></div>' +
     '<div class="field"><label>Adres zleceniobiorcy</label><input id="pw-adres" value="'+(p.zleceniobiorca_adres||'')+'"></div>' +
-    '<div class="field"><label>NIP zleceniobiorcy</label><input id="pw-nip" value="'+(p.zleceniobiorca_nip||'')+'"></div>' +
+    '<div class="field"><label>NIP zleceniobiorcy</label><div style="display:flex;gap:6px"><input id="pw-nip" value="'+(p.zleceniobiorca_nip||'')+'" style="flex:1" placeholder="np. 5213966752"><button type="button" class="btn" id="btn-gus-podw">Szukaj GUS</button></div></div>' +
     '<div class="field"><label>Kierowca</label><input id="pw-kier" value="'+(p.kierowca||'')+'" placeholder="Jan Kowalski"></div>' +
     '<div class="field"><label>Tel. kierowcy</label><input id="pw-tel" value="'+(p.kierowca_tel||'')+'"></div>' +
     '<div class="field"><label>Auto/naczepy</label><input id="pw-auto" value="'+(p.auto||'')+'"></div>' +
@@ -921,6 +921,14 @@ function openPodwModal(id) {
       if (db) db.onclick = function() { deletePodw(editingId); };
       var pb = document.getElementById('pw-pdf-btn2');
       if (pb) pb.onclick = function() { closeModal(); printPodwPDF(editingId); };
+      var gPodw = document.getElementById('btn-gus-podw');
+      if (gPodw) gPodw.onclick = function() {
+        var nip = document.getElementById('pw-nip').value;
+        szukajPoNIP(nip, function(nazwa, adres) {
+          var en = document.getElementById('pw-nazwa'); if(en) en.value = nazwa;
+          var ea = document.getElementById('pw-adres'); if(ea && adres) ea.value = adres;
+        });
+      };
     }, 0);
   }
   openModal();
@@ -1575,11 +1583,12 @@ async function autoCalcKm(skadId, dokadId, kmId, statusId, dojazdId) {
 
 
 async function szukajPoNIP(nip, callbackFn) {
-  var cleanNip = nip.replace(/[^0-9]/g,'');
+  var cleanNip = (nip||'').replace(/[^0-9]/g,'');
   if (cleanNip.length !== 10) { showToast('NIP musi miec 10 cyfr', true); return; }
-  showToast('Szukam w GUS...');
+  showToast('Szukam...');
   try {
-    var url = 'https://wl-api.mf.gov.pl/api/search/nip/' + cleanNip + '?date=' + new Date().toISOString().slice(0,10);
+    var today = new Date().toISOString().slice(0,10);
+    var url = 'https://wl-api.mf.gov.pl/api/search/nip/' + cleanNip + '?date=' + today;
     var resp = await fetch(CLAUDE_PROXY, {
       method: 'POST',
       headers: {'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
@@ -1591,9 +1600,9 @@ async function szukajPoNIP(nip, callbackFn) {
       var nazwa = s.name || '';
       var adres = s.workingAddress || s.residenceAddress || '';
       callbackFn(nazwa, adres);
-      showToast('Znaleziono: ' + nazwa);
+      showToast('Znaleziono: ' + nazwa.slice(0,40));
     } else {
-      showToast('Nie znaleziono NIP w bazie', true);
+      showToast('Nie znaleziono NIP w bazie MF', true);
     }
   } catch(e) {
     showToast('Blad: ' + e.message, true);
