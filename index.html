@@ -1573,6 +1573,32 @@ async function autoCalcKm(skadId, dokadId, kmId, statusId, dojazdId) {
   }
 }
 
+
+async function szukajPoNIP(nip, callbackFn) {
+  var cleanNip = nip.replace(/[^0-9]/g,'');
+  if (cleanNip.length !== 10) { showToast('NIP musi miec 10 cyfr', true); return; }
+  showToast('Szukam w GUS...');
+  try {
+    var url = 'https://wl-api.mf.gov.pl/api/search/nip/' + cleanNip + '?date=' + new Date().toISOString().slice(0,10);
+    var resp = await fetch(CLAUDE_PROXY, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
+      body: JSON.stringify({_gmaps_proxy: url})
+    });
+    var data = await resp.json();
+    if (data.result && data.result.subject) {
+      var s = data.result.subject;
+      var nazwa = s.name || '';
+      var adres = s.workingAddress || s.residenceAddress || '';
+      callbackFn(nazwa, adres);
+      showToast('Znaleziono: ' + nazwa);
+    } else {
+      showToast('Nie znaleziono NIP w bazie', true);
+    }
+  } catch(e) {
+    showToast('Blad: ' + e.message, true);
+  }
+}
 </script>
 </body>
 </html>
