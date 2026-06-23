@@ -498,6 +498,7 @@ function openOrderModal(id) {
     '<div class="field"><label>Nr zlecenia</label><input id="f-numer" value="'+(o.numer||'')+'" placeholder="auto"></div>' +
     '<div class="field"><label>Klient</label><input id="f-klient" value="'+(o.klient||'')+'" placeholder="Nazwa firmy"></div>' +
     '<div class="field"><label>NIP klienta → auto-uzupelnienie</label><div style="display:flex;gap:6px"><input id="f-nip-klient" placeholder="np. 5213966752" style="flex:1"><button type="button" class="btn" id="btn-gus-klient">Szukaj GUS</button></div></div>' +
+    '<div class="field full"><label>Adres klienta</label><input id="f-adres-klient" value="'+(o.adres_klienta||'')+'" placeholder="Ulica, kod, miasto"></div>' +
     '<div class="field"><label>Status</label><select id="f-status">'+statusOpts+'</select></div>' +
     '<div class="field"><label>Kierowca 1</label><select id="f-k1">'+driverOpts+'</select></div>' +
     '<div class="field"><label>Kierowca 2</label><select id="f-k2">'+driver2Opts+'</select></div>' +
@@ -529,6 +530,8 @@ function openOrderModal(id) {
       szukajPoNIP(nip,function(nazwa,adres){
         var el=document.getElementById('f-klient');
         if(el) el.value=nazwa;
+        var ea=document.getElementById('f-adres-klient');
+        if(ea && adres) ea.value=adres;
       });
     };
   },0);
@@ -553,6 +556,7 @@ async function saveOrder() {
     kilometry: parseFloat(document.getElementById('f-km').value)||0,
     prowizja_pct: parseFloat(document.getElementById('f-prow').value)||4,
     ref: document.getElementById('f-ref').value.trim(),
+    adres_klienta: (document.getElementById('f-adres-klient')||{}).value||'',
     platnosc_dni: parseInt(document.getElementById('f-platdni')?.value)||30,
     data_wysylki: document.getElementById('f-wysylka')?.value||null,
     zaplacone: document.getElementById('f-zaplacone')?.checked||false,
@@ -1271,7 +1275,7 @@ async function callClaudeWithPDF(base64, type) {
     method:'POST',
     headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
     body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
+      model:'claude-sonnet-4-6',
       max_tokens:1000,
       messages:[{role:'user',content:[{type:'document',source:{type:'base64',media_type:'application/pdf',data:base64}},{type:'text',text:prompt}]}]
     })
